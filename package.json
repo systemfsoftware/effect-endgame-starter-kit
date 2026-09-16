@@ -14,7 +14,7 @@
   },
   "license": "Apache-2.0",
   "name": "starter",
-  "packageManager": "pnpm@11.21.0",
+  "packageManager": "pnpm@12.4.2",
   "private": true,
   "scripts": {
     "attw": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} attw",

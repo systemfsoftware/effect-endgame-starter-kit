@@ -5,7 +5,7 @@ Contributions are welcome. Follow these instructions to set up the development e
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) `>=24`
-- [pnpm](https://pnpm.io/) `>=11.21.0` (the `packageManager` field pins the exact version; Corepack resolves it)
+- [pnpm](https://pnpm.io/) `>=12.4.2` (the `packageManager` field pins the exact version; Corepack resolves it)
 
 ## Setup
 
