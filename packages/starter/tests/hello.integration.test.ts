@@ -1,10 +1,9 @@
-import { Gherkin, Given, it, layer, makeFeature, Then, When } from '@systemfsoftware/effect-gherkin-spec'
+import { Gherkin, Given, it, makeFeature, Then, When } from '@systemfsoftware/effect-gherkin-spec'
 import { Effect } from 'effect'
-import { expect } from 'vitest'
 
 import { hello } from '@TODO/starter'
 
-const Feature = makeFeature({ it, layer })
+const Feature = makeFeature({ it })
 
 Feature('Greeting visitors by name').body(({ scenario }) => {
   scenario(
@@ -12,9 +11,7 @@ Feature('Greeting visitors by name').body(({ scenario }) => {
     Gherkin.Do.pipe(
       Given('a visitor arrived with the name "world"')('name', () => Effect.succeed('world')),
       When('the host greets the visitor')('greeting', (s) => Effect.succeed(hello(s.name))),
-      Then('the greeting addresses the visitor by name')((s) => {
-        expect(s.greeting).toBe('hello world')
-      }),
+      Then('the greeting addresses the visitor by name')((s, expect) => expect(s.greeting).toBe('hello world')),
     ),
   )
 })
