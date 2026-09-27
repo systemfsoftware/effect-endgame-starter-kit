@@ -1,11 +1,11 @@
 import { Gherkin, Given, it, makeFeature, Then, When } from '@systemfsoftware/effect-gherkin-spec'
-import { Effect } from 'effect'
+import { Effect, Layer } from 'effect'
 
 import { hello } from '@TODO/starter'
 
 const Feature = makeFeature({ it })
 
-Feature('Greeting visitors by name').body(({ scenario }) => {
+Feature('Greeting visitors by name').withLayer(Layer.empty).body(({ scenario }) => {
   scenario(
     'A visitor who shared their name is greeted by name',
     Gherkin.Do.pipe(
