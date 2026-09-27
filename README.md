@@ -53,19 +53,19 @@ Phase ordering is guaranteed at compile time: each phase returns branded markers
 
 `starter` wires a modern, fast, and type-safe toolchain across the workspace:
 
-| Tool                      | Role & Configuration                                                                         |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| ⚡ **pnpm Workspaces**    | Strict workspace dependency management with catalog versioning (`pnpm-workspace.yaml`)       |
-| 🏎️ **Turbo**               | High-performance task pipeline with cached builds, tests, and lint runs                      |
-| 🛡️ **Effect 4**            | The standard functional effect system (`^4.0.0-rc.112`)                                      |
-| 🔍 **oxlint**             | Rust-based linter enforcing strict TypeScript rules and `@systemfsoftware/all` house presets |
-| 🎨 **dprint**             | Fast, deterministic code and markdown formatting (`dprint.json`)                             |
-| 🧪 **Vitest**             | Fast unit and integration test runner with TypeScript support                                |
-| 🔬 **Stryker**            | Mutation testing ensuring tests fail when bugs are introduced                                |
-| 📦 **tsdown**             | Fast TypeScript bundler building dual ESM and type declarations                              |
-| 📝 **Changesets**         | Automated versioning and changelog generation with npm OIDC provenance                       |
-| 🪝 **Husky & Commitlint** | Git hooks enforcing conventional commit standards                                            |
-| 🌳 **Worktrunk Scripts**  | Deno-powered git worktree lifecycle hooks for isolated agent work                            |
+| Tool                      | Role & Configuration                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------- |
+| ⚡ **pnpm Workspaces**    | Strict workspace dependency management with catalog versioning (`pnpm-workspace.yaml`) |
+| 🏎️ **Turbo**               | High-performance task pipeline with cached builds, tests, and lint runs                |
+| 🛡️ **Effect 4**            | The standard functional effect system                                                  |
+| 🔍 **oxlint**             | Rust-based linter enforcing strict TypeScript rules and the house presets              |
+| 🎨 **dprint**             | Fast, deterministic code and markdown formatting (`dprint.json`)                       |
+| 🧪 **Vitest**             | Fast unit and integration test runner with TypeScript support                          |
+| 🔬 **Stryker**            | Mutation testing ensuring tests fail when bugs are introduced                          |
+| 📦 **tsdown**             | Fast TypeScript bundler building dual ESM and type declarations                        |
+| 📝 **Changesets**         | Automated versioning and changelog generation with npm OIDC provenance                 |
+| 🪝 **Husky & Commitlint** | Git hooks enforcing conventional commit standards                                      |
+| 🌳 **Worktrunk Scripts**  | Deno-powered git worktree lifecycle hooks for isolated agent work                      |
 
 ---
 

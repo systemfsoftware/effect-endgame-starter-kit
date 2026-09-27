@@ -17,7 +17,6 @@ const config: StrykerConfig = defineConfig({
   jsonReporter: { fileName: 'reports/mutation-report.json' },
   mutate: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/*.d.ts'],
   packageManager: 'pnpm',
-  plugins: ['@systemfsoftware/stryker-test-contribution'],
   reporters: ['progress', 'html', 'json', 'progress-stream'],
   testRunner: {
     plugin: '@systemfsoftware/stryker-js-vitest-runner',

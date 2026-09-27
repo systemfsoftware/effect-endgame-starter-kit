@@ -1,9 +1,9 @@
-import all from '@systemfsoftware/all'
+import recommended from '@systemfsoftware/oxlint-config-recommended'
 import { defineConfig } from 'oxlint'
 
 // House lint surface: the aggregate preset plus the strict TS tier.
 export default defineConfig({
-  extends: [all],
+  extends: [recommended],
 
   rules: {
     'typescript/no-unnecessary-condition': 'error',

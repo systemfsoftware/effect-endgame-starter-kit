@@ -65,7 +65,7 @@ work; the derived repo finds the holes before adopters do.
 
 ### The enforcement surface (gates, presets, constitution)
 
-The house oxlint preset (`@systemfsoftware/all`, `packages/starter/oxlint.config.ts`),
+The house oxlint preset (`packages/starter/oxlint.config.ts`),
 the complexity-1 gate on decisions, mutation floors (stryker), CI at error
 severity (`pnpm check:ci`), and the vendored constitution (`repos/constitution/`).
 
@@ -83,8 +83,8 @@ interface — it makes the endgame the path of least resistance.
 
 ## Milestones
 
-- **On Effect 4 stable** — the kit's pin (`effect: ^4.0.0-rc.112`, from the
-  `pnpm-workspace.yaml` catalog) moves to the stable line and the audience
+- **On Effect 4 stable** — the kit's `effect` pin in the `pnpm-workspace.yaml`
+  catalog moves from the release candidates to the stable line and the audience
   arrives on it; the date is Effect's release schedule, not ours.
 
 ## Brand
