@@ -76,7 +76,7 @@
       ],
       "inputs": [
         "$TURBO_DEFAULT$",
-        "stryker.config.json",
+        "stryker.config.ts",
         "vitest.config.ts",
         "vitest.setup.ts",
         "reports/stryker-incremental.json",
