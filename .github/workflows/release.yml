@@ -28,7 +28,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - uses: denoland/setup-deno@v2
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v3
         with:
           runtime: node@24
           cache: true
@@ -54,7 +54,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: denoland/setup-deno@v2
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v3
         with:
           runtime: node@24
           cache: true
@@ -90,7 +90,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - uses: denoland/setup-deno@v2
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v3
         with:
           runtime: node@24
           cache: true

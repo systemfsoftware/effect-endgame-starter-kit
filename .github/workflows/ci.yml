@@ -29,7 +29,7 @@ jobs:
         run: echo "$(nix build --no-link --print-out-paths .#dprint)/bin" >> "$GITHUB_PATH"
       # pnpm/setup replaces pnpm/action-setup for pnpm v11+ and folds
       # actions/setup-node into the same step. The node version lives here now.
-      - uses: pnpm/setup@v2
+      - uses: pnpm/setup@v3
         with:
           runtime: node@24
           cache: true
