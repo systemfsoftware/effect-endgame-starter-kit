@@ -52,3 +52,18 @@ processes:
       failure_threshold: 60
     shutdown:
       timeout_seconds: 10
+
+  site:
+    command: >-
+      pnpm --filter @endgame/site exec alchemy dev --stage local --no-input
+    depends_on:
+      otel-collector:
+        condition: process_healthy
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 1337
+        path: /llms.txt
+      initial_delay_seconds: 2
+      period_seconds: 2
+      failure_threshold: 90

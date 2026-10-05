@@ -11,3 +11,6 @@ reports/
 result
 result-*
 local-stack/data/
+.alchemy/
+apps/site/src/routeTree.gen.ts
+apps/site-e2e/artifacts/

@@ -8,6 +8,21 @@
 > 🔒 One architecture, zero knobs, and mechanical gates that reject the slop agents produce when left unconstrained.
 > 🚀 Built for engineers accountable for codebases where AI writes the commits.
 
+<!-- home:start -->
+
+# Build with agents you can still trust
+
+An agent will happily hand you code that compiles, passes the tests it wrote itself, and quietly
+breaks the architecture underneath. The build is green and the codebase is no longer yours.
+
+This is the substrate that refuses that trade. Every boundary is decoded rather than asserted,
+every decision is a pure function under a complexity ceiling, and every claim a test makes is
+checked by mutation. What reaches `main` is what you would have written by hand.
+
+Point an agent at a capability and let it grow one layer at a time.
+
+<!-- home:end -->
+
 ---
 
 ## 💡 Why
