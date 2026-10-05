@@ -1,0 +1,22 @@
+target: all
+
+server:
+  http_listen_address: 127.0.0.1
+  http_listen_port: 3200
+  grpc_listen_address: 127.0.0.1
+  grpc_listen_port: 9095
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 127.0.0.1:4417
+
+storage:
+  trace:
+    backend: local
+    local:
+      path: local-stack/data/tempo/blocks
+    wal:
+      path: local-stack/data/tempo/wal

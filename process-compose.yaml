@@ -1,0 +1,48 @@
+version: "0.5"
+
+log_location: local-stack/data/process-compose.log
+
+processes:
+  otel-collector:
+    command: otelcol-contrib --config local-stack/otel-collector.yaml
+    depends_on:
+      tempo:
+        condition: process_healthy
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 13133
+        path: /
+      initial_delay_seconds: 1
+      period_seconds: 2
+      failure_threshold: 30
+
+  tempo:
+    command: tempo -config.file local-stack/tempo.yaml
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 3200
+        path: /ready
+      initial_delay_seconds: 2
+      period_seconds: 2
+      failure_threshold: 60
+
+  grafana:
+    command: >-
+      grafana server --homepath "$GRAFANA_HOME" --config local-stack/grafana.ini
+      cfg:default.paths.data="$PWD/local-stack/data/grafana"
+      cfg:default.paths.logs="$PWD/local-stack/data/grafana/logs"
+      cfg:default.paths.plugins="$PWD/local-stack/data/grafana/plugins"
+      cfg:default.paths.provisioning="$PWD/local-stack/grafana"
+    depends_on:
+      tempo:
+        condition: process_healthy
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: 3000
+        path: /api/health
+      initial_delay_seconds: 2
+      period_seconds: 2
+      failure_threshold: 60

@@ -35,8 +35,9 @@
           sandboxed = pkgs.callPackage ./nix/comment-checker-sandbox.nix {
             comment-checker = unwrapped;
           };
+          local-stack = pkgs.callPackage ./nix/local-stack.nix { };
         in {
-          inherit dprint;
+          inherit dprint local-stack;
           comment-checker = sandboxed;
           comment-checker-unwrapped = unwrapped;
           default = dprint;
