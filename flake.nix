@@ -11,7 +11,7 @@
 
   outputs = { self, nixpkgs, comment-checker }:
     let
-      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
     in
     {
@@ -55,7 +55,9 @@
         default = pkgs.mkShell {
           packages = [
             self.packages.${pkgs.stdenv.hostPlatform.system}.dprint
-            self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker-bwrap
+            (if pkgs.stdenv.hostPlatform.isLinux
+              then self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker-bwrap
+              else self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker)
             self.packages.${pkgs.stdenv.hostPlatform.system}.sandbox
             pkgs.nodejs_24
             pkgs.pnpm_11

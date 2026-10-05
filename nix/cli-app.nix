@@ -34,7 +34,7 @@ stdenv.mkDerivation (finalAttrs: {
     homepage = "https://github.com/systemfsoftware/pnpm-release-management";
     license = lib.licenses.asl20;
     mainProgram = appName;
-    platforms = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+    platforms = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
     sourceProvenance = [ lib.sourceTypes.fromSource ];
   };
 })

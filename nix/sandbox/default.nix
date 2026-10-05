@@ -1,6 +1,6 @@
-{ lib, stdenv, writeShellApplication, replaceVars, bubblewrap, socat, nodejs_24, cacert, coreutils, git, bash }:
+{ lib, stdenv, writeShellApplication, bubblewrap, socat, nodejs_24, cacert, coreutils, git, bash }:
 let
-  script = replaceVars ./sandbox.sh {
+  substitutions = {
     node = lib.getExe nodejs_24;
     egressProxy = builtins.path { path = ./egress-proxy.mjs; name = "egress-proxy.mjs"; };
     caBundle = "${cacert}/etc/ssl/certs/ca-bundle.crt";
@@ -14,5 +14,8 @@ in
 writeShellApplication {
   name = "sandbox";
   runtimeInputs = [ coreutils git ];
-  text = builtins.readFile script;
+  text = lib.replaceStrings
+    (map (name: "@${name}@") (builtins.attrNames substitutions))
+    (map toString (builtins.attrValues substitutions))
+    (builtins.readFile ./sandbox.sh);
 }

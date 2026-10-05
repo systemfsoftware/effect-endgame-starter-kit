@@ -11,10 +11,6 @@ let
       target = "aarch64-unknown-linux-gnu";
       sha256 = "sha256-jHNAcJjW+p/FE9HY0Hgc+0u+SsGZ7P9aEnhruc4QQcw=";
     };
-    x86_64-darwin = {
-      target = "x86_64-apple-darwin";
-      sha256 = "sha256-Ztui+xkkA/KFb47xQqqMsYruqcpIB6INqEl9fapOljg=";
-    };
     aarch64-darwin = {
       target = "aarch64-apple-darwin";
       sha256 = "sha256-MV02kF6hCB49Dhw5iQ8aG7DUd+SXmVkp6ZMw+7Z59ZU=";
