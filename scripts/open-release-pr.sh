@@ -39,15 +39,11 @@ trap 'rm -f "$body"' EXIT
 cat > "$body" <<'BODY'
 Consumes pending `.changeset/` intents via `pnpm version -r`.
 
-Merging runs the gate, then builds, publishes (OIDC + provenance),
-and tags the changed packages.
+Merging runs the gate, then tags the changed packages and publishes
+their authored changelogs as GitHub Releases.
 
 Review every consumed `none` intent before merging — a `none` on a
 behavior-visible change is a silent non-release.
-
-Packages not registered as npm trusted publishers fail at publish
-with an OIDC auth error; register them at https://www.npmjs.com
-against workflow `release.yml` in this repository.
 BODY
 
 gh label create release \
