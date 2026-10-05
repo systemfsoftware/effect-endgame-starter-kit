@@ -18,7 +18,7 @@ pnpm change --bump <none|patch|minor|major> --summary "<changelog entry>" [<pkg>
 - This README is NOT a changeset: the gate requires a file whose frontmatter
   parses as `"<pkg>": <none|patch|minor|major>`.
 
-Publishing uses npm OIDC trusted publishing from `.github/workflows/release.yml`.
-Register `@TODO/starter` (TODO: your package name) as a trusted publisher on npmjs.com
-pointing at this repository and that workflow filename before the first new
-version can ship. OIDC cannot debut a package npm has never seen.
+Releases are git tags and GitHub Releases from `.github/workflows/release.yml`;
+nothing is published to a registry. A version in a package manifest with no
+matching `<name>@v<version>` tag is owed: merging the Release PR tags it and
+publishes its authored changelog as a GitHub Release.

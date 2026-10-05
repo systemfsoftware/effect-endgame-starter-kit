@@ -23,25 +23,19 @@ const publicPackages = async (): Promise<Released[]> => {
     .map(({ name, version }) => ({ name, version }))
 }
 
-const isPublished = async (name: string, version: string): Promise<boolean> => {
-  const res = await fetch(`https://registry.npmjs.org/${encodeURIComponent(name)}/${version}`)
-  if (res.status === 404) return false
-  if (!res.ok) throw new Error(`registry returned ${res.status} for ${name}@${version}`)
-  return true
-}
+const tagOf = ({ name, version }: Released): string => `${name}@v${version}`
 
-export const unpublishedOf = async <T extends Released>(items: T[]): Promise<T[]> => {
-  const published = await Promise.all(items.map(({ name, version }) => isPublished(name, version)))
-  return items.filter((_, i) => !published[i])
-}
+const isTagged = async (tag: string): Promise<boolean> => (await run('git', ['tag', '--list', tag])).trim() !== ''
 
-export const loadWorkspaceCycle = async (): Promise<CycleEntry[]> =>
-  (await unpublishedOf(await publicPackages())).map(({ name, version }) => ({
-    name,
-    version,
-    tag: `${name}@v${version}`,
-    changelog: join('.changeset', 'changelogs', `${name.replace('/', '!')}@${version}.md`),
+export const loadWorkspaceCycle = async (): Promise<CycleEntry[]> => {
+  const released = await publicPackages()
+  const tagged = await Promise.all(released.map((pkg) => isTagged(tagOf(pkg))))
+  return released.filter((_, i) => !tagged[i]).map((pkg) => ({
+    ...pkg,
+    tag: tagOf(pkg),
+    changelog: join('.changeset', 'changelogs', `${pkg.name.replace('/', '!')}@${pkg.version}.md`),
   }))
+}
 
 export const loadCaptured = async (path: string): Promise<CycleEntry[]> => {
   const raw: unknown = JSON.parse(await Deno.readTextFile(path))

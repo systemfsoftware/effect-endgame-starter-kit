@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --config=scripts/deno.json --allow-read --allow-write --allow-run=git --allow-net=api.github.com,registry.npmjs.org --allow-env=GH_TOKEN,GITHUB_TOKEN,GITHUB_REPOSITORY --allow-import
+#!/usr/bin/env -S deno run --config=scripts/deno.json --allow-read --allow-write --allow-run=git --allow-net=api.github.com --allow-env=GH_TOKEN,GITHUB_TOKEN,GITHUB_REPOSITORY --allow-import
 
 import { parseArgs } from '@std/cli/parse-args'
 import { Octokit, RequestError } from 'octokit'
