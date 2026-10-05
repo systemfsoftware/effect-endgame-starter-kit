@@ -24,7 +24,7 @@ permissions:
 jobs:
   force-release:
     name: dummy changeset + release PR
-    runs-on: [self-hosted, systemfsoftware-runner, small]
+    runs-on: ubuntu-latest
     env:
       HUSKY: "0"
     steps:

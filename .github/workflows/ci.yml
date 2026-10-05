@@ -19,10 +19,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - leg: linux
-            runs-on: [self-hosted, systemfsoftware-runner, large]
+          - leg: format
+            runs-on: ubuntu-latest
+            gate: pnpm format:check
+          - leg: lint
+            runs-on: ubuntu-latest
+            gate: pnpm lint
+          - leg: typecheck
+            runs-on: ubuntu-latest
+            gate: pnpm typecheck
+          - leg: test
+            runs-on: ubuntu-latest
+            gate: pnpm test
+          - leg: dist
+            runs-on: ubuntu-latest
+            gate: pnpm gate:dist
           - leg: macos
             runs-on: macos-latest
+            gate: pnpm check:ci
     runs-on: ${{ matrix.runs-on }}
     timeout-minutes: 45
     env:
@@ -48,6 +62,5 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-dist-
             turbo-${{ runner.os }}-
-      # Root package.json `check:ci` is the one definition. Never re-enumerate its steps here.
       - name: Gate
-        run: pnpm check:ci
+        run: ${{ matrix.gate }}

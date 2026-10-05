@@ -11,7 +11,7 @@ jobs:
   commitlint:
     if: github.actor != 'dependabot[bot]'
     name: lint PR commits
-    runs-on: [self-hosted, systemfsoftware-runner, small]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
