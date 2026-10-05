@@ -1,12 +1,7 @@
 import { defineConfig, type StrykerConfig } from '@systemfsoftware/stryker-js/config'
 
 const config: StrykerConfig = defineConfig({
-  checkers: [
-    {
-      plugin: '@systemfsoftware/stryker-js-typescript-checker',
-      options: { prioritizePerformanceOverAccuracy: true },
-    },
-  ],
+  checkers: [{ plugin: '@systemfsoftware/stryker-js-typescript-checker' }],
   coverageAnalysis: 'perTest',
   disableBail: true,
   htmlReporter: { fileName: 'reports/mutation-report.html' },
