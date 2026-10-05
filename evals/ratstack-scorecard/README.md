@@ -19,7 +19,16 @@ The scorecard measures the starter against [rat-stack](https://github.com/joelho
 
 ## Running it
 
-Everything that loads third-party code runs inside the sandbox launcher from `systemfsoftware/pnpm-release-management` (`packages.<system>.sandbox`), with this directory as the sandbox project. The instrument's own flake (`flake.nix`) pins nixpkgs (pnpm 12.9.0, Node 24) and the launcher, and builds the tools' pnpm store from `pnpm-lock.yaml` as a fixed-output derivation (`tools-store`). The install is offline from that store; the sandbox gets no network at all.
+Everything that loads third-party code runs inside the sandbox launcher from `systemfsoftware/pnpm-release-management` (`packages.<system>.sandbox`).
+
+The instrument has its own flake (`flake.nix`, pinned nixpkgs and launcher). Its `scorecard` package bundles Deno, the launcher, the rat-stack source at `ratstack.pin.json`, and the offline pnpm store for the tools (`tools-store`). The family runners install the tools from that store inside the sandbox, so nothing reaches the registry at measurement time.
+
+```sh
+scorecard=$(nix build --no-link --print-out-paths ./evals/ratstack-scorecard#scorecard)
+$scorecard/bin/scorecard measure --family static --out static.json
+```
+
+The instrument's own tests run inside the launcher against the same offline store:
 
 ```sh
 cd evals/ratstack-scorecard
@@ -27,4 +36,4 @@ nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox --pnpm-store "$SANDBOX
 nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox -- pnpm vitest run'
 ```
 
-The decision modules (`src/model/*.workflow.ts`) and the orchestrator import only Deno APIs, `node:` builtins and each other, so `deno check src/` type-checks them without any third-party code.
+`src/main.ts` and everything it imports use only Deno APIs, `node:` builtins and each other, so `DENO_NO_PACKAGE_JSON=1 deno check src/` type-checks the orchestrator and the decision core without third-party code. The Node scripts in `src/tools/` are the only code that loads npm packages, and they only ever run inside the launcher.

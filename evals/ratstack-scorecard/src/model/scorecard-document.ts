@@ -1,5 +1,6 @@
 import type {
   DocumentProvenance,
+  Family,
   Flag,
   JudgedRow,
   MainBaseline,
@@ -27,6 +28,13 @@ export interface SideCell {
 export interface RowFlag {
   readonly id: RowId
   readonly flag: Flag
+}
+
+export interface FamilyResult {
+  readonly family: Family
+  readonly wallMs: number
+  readonly cells: readonly SideCell[]
+  readonly flags: readonly RowFlag[]
 }
 
 export type CellsByRow = Readonly<Record<RowId, Readonly<Partial<Record<Side, MeasuredCell>>>>>

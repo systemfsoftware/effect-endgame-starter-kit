@@ -68,6 +68,7 @@ export interface CellProvenance {
   readonly measuredAt: string
   readonly tools: Readonly<Record<string, string>>
   readonly liveCommit?: string
+  readonly detail?: Readonly<Record<string, number | string>>
 }
 
 export interface MeasuredCell {
