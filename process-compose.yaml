@@ -67,3 +67,5 @@ processes:
       initial_delay_seconds: 2
       period_seconds: 2
       failure_threshold: 90
+    shutdown:
+      timeout_seconds: 10
