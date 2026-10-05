@@ -4,6 +4,7 @@ import { HttpEffect, HttpServerRequest } from 'effect/http'
 import { HtmlPort } from './front-door/html-port.service'
 import { servePageCell } from './front-door/serve-page.cell'
 
+export { frontDoorTaxonomy, ServePage } from './front-door/FrontDoorTaxonomy'
 export { HtmlPort } from './front-door/html-port.service'
 
 const ServerRequest = HttpServerRequest.HttpServerRequest

@@ -25,6 +25,7 @@ catalog:
   "@systemfsoftware/stryker-js": 15.0.1
   "@systemfsoftware/stryker-js-typescript-checker": 8.1.1
   "@systemfsoftware/stryker-js-vitest-runner": 8.0.3
+  "@systemfsoftware/trace-spec": 1.0.1
   "@systemfsoftware/trace-taxonomy": 1.0.0
   "@systemfsoftware/tsconfig": 2.0.1
   "@systemfsoftware/vitest": 2.0.0
@@ -98,3 +99,5 @@ overrides:
 packages:
   - apps/*
   - packages/*
+patchedDependencies:
+  alchemy@2.0.0-beta.80: patches/alchemy@2.0.0-beta.80.patch

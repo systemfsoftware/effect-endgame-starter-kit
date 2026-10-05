@@ -30,6 +30,17 @@ export const ServePageDecision = S.Union([
   ServeMarkdownNotFound,
 ])
 
+type ServePageDecisionTag = S.Schema.Type<typeof ServePageDecision>['_tag']
+
+const decisionTags = {
+  ServeMarkdownPage: 'ServeMarkdownPage',
+  ServeHtmlPage: 'ServeHtmlPage',
+  ServeLlmsTxt: 'ServeLlmsTxt',
+  ServeMarkdownNotFound: 'ServeMarkdownNotFound',
+} as const satisfies { readonly [K in ServePageDecisionTag]: K }
+
+export const ServePageDecisionTagSchema = S.Literals(Object.values(decisionTags))
+
 export class ServePageCommand extends S.Class<ServePageCommand>('ServePageCommand')({
   path: PathRoute,
   accept: Accept,
