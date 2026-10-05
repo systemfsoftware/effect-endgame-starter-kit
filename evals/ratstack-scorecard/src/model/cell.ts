@@ -65,6 +65,7 @@ export interface CellProvenance {
   readonly measuredAt: string
   readonly tools: Readonly<Record<string, string>>
   readonly liveCommit?: string
+  readonly detail?: Readonly<Record<string, number | string>>
 }
 
 export interface MeasuredCell {
@@ -83,6 +84,29 @@ export interface Row {
   readonly starter: MeasuredCell
   readonly verdict: Verdict
   readonly flags: readonly Flag[]
+}
+
+export interface DefinedRow {
+  readonly definition: RowDefinition
+  readonly hash: string
+}
+
+export interface SideCell {
+  readonly id: string
+  readonly side: Side
+  readonly measured: MeasuredCell
+}
+
+export interface RowFlag {
+  readonly id: string
+  readonly flag: Flag
+}
+
+export interface FamilyResult {
+  readonly family: Family
+  readonly wallMs: number
+  readonly cells: readonly SideCell[]
+  readonly flags: readonly RowFlag[]
 }
 
 export type RowOutcome =

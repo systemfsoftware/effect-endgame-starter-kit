@@ -38,7 +38,11 @@
         "runner": { "type": "string", "minLength": 1 },
         "measuredAt": { "type": "string", "minLength": 1 },
         "tools": { "type": "object", "additionalProperties": { "type": "string" } },
-        "liveCommit": { "$ref": "#/definitions/sha" }
+        "liveCommit": { "$ref": "#/definitions/sha" },
+        "detail": {
+          "type": "object",
+          "additionalProperties": { "anyOf": [{ "type": "number" }, { "type": "string" }] }
+        }
       }
     },
     "citation": {

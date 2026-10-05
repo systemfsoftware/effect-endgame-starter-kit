@@ -1,31 +1,16 @@
 import type {
+  DefinedRow,
   DocumentProvenance,
-  Flag,
   MainBaseline,
   MeasuredCell,
   Row,
-  RowDefinition,
+  RowFlag,
   ScorecardDocument,
   Side,
+  SideCell,
 } from './cell.ts'
 import { compareWithMain } from './compare-with-main.workflow.ts'
 import { judgeRow } from './judge-row.workflow.ts'
-
-export interface DefinedRow {
-  readonly definition: RowDefinition
-  readonly hash: string
-}
-
-export interface SideCell {
-  readonly id: string
-  readonly side: Side
-  readonly measured: MeasuredCell
-}
-
-export interface RowFlag {
-  readonly id: string
-  readonly flag: Flag
-}
 
 export type CellsByRow = Readonly<Record<string, Readonly<Partial<Record<Side, MeasuredCell>>>>>
 

@@ -76,7 +76,8 @@ export const cellProvenance = (side: Side): fc.Arbitrary<CellProvenance> =>
     runner: text,
     measuredAt: fc.date({ noInvalidDate: true }).map((d) => d.toISOString()),
     tools: fc.dictionary(fc.string({ minLength: 1, maxLength: 20 }), fc.string({ maxLength: 20 })),
-  })
+    detail: fc.dictionary(fc.string({ minLength: 1, maxLength: 20 }), fc.oneof(fc.string({ maxLength: 40 }), value)),
+  }, { requiredKeys: ['side', 'commit', 'instrumentHash', 'nixpkgsRev', 'runner', 'measuredAt', 'tools'] })
 
 export const measuredCell = (row: RowDefinition, side: Side): fc.Arbitrary<MeasuredCell> =>
   fc.record({ cell: cell(row), provenance: cellProvenance(side) })

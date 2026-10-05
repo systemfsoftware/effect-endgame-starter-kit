@@ -1,0 +1,78 @@
+---
+lockfileVersion: "9.0"
+
+importers:
+  .:
+    configDependencies: {}
+    packageManagerDependencies:
+      pnpm:
+        specifier: 12.4.2
+        version: 12.4.2
+
+packages:
+  "@pnpm/exe.linux-x64@12.4.2":
+    resolution: { integrity: sha512-EEEE }
+    cpu: [x64]
+    os: [linux]
+
+  pnpm@12.4.2:
+    resolution: { integrity: sha512-FFFF }
+    hasBin: true
+
+snapshots:
+  "@pnpm/exe.linux-x64@12.4.2":
+    optional: true
+
+  pnpm@12.4.2:
+    optionalDependencies:
+      "@pnpm/exe.linux-x64": 12.4.2
+
+---
+lockfileVersion: "9.0"
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+catalogs:
+  default:
+    effect:
+      specifier: ^4.0.0
+      version: 4.0.0
+
+importers:
+  .:
+    dependencies:
+      effect:
+        specifier: "catalog:"
+        version: 4.0.0
+    devDependencies:
+      "@effect/vitest":
+        specifier: 4.0.0
+        version: 4.0.0(effect@4.0.0)(vitest@5.0.3)
+      vitest:
+        specifier: 5.0.3
+        version: 5.0.3
+
+packages:
+  "@effect/vitest@4.0.0":
+    resolution: { integrity: sha512-BBBB }
+    peerDependencies:
+      effect: ^4.0.0
+      vitest: ^5.0.0
+
+  effect@4.0.0:
+    resolution: { integrity: sha512-CCCC }
+
+  vitest@5.0.3:
+    resolution: { integrity: sha512-DDDD }
+
+snapshots:
+  "@effect/vitest@4.0.0(effect@4.0.0)(vitest@5.0.3)":
+    dependencies:
+      effect: 4.0.0
+      vitest: 5.0.3
+
+  effect@4.0.0: {}
+
+  vitest@5.0.3: {}

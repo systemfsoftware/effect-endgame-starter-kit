@@ -13,6 +13,7 @@
     let
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
+      pin = builtins.fromJSON (builtins.readFile ./ratstack.pin.json);
     in
     {
       packages = forEachSystem (pkgs:
@@ -24,11 +25,34 @@
             src = self;
             pname = "ratstack-scorecard";
             pnpm = pkgs.pnpm_12;
-            hash = "sha256-TylxLEQflTlKx6QDk9mFlBOEInUvvBBeOVFUYCURmYo=";
+            hash = "sha256-6AG6SAB7vZR3kLGU7ujHxBwBqD+cSrwKeTl0qLyz9ko=";
           }).pnpm-store;
+          ratstack-src = pkgs.fetchFromGitHub {
+            inherit (pin) owner repo;
+            rev = pin.commit;
+            hash = pin.narHash;
+          };
+          scorecard = pkgs.writeShellApplication {
+            name = "scorecard";
+            runtimeInputs = [ pkgs.deno pkgs.git ];
+            text = ''
+              export SCORECARD_INSTRUMENT=${self}
+              export SCORECARD_SANDBOX=${sandbox}/bin/sandbox
+              export SCORECARD_TOOLS_STORE=${tools-store}
+              export SCORECARD_RATSTACK_SRC=${ratstack-src}
+              export SCORECARD_TOOL_PATH=${pkgs.lib.makeBinPath [ pkgs.nodejs_24 pkgs.pnpm_12 pkgs.coreutils ]}
+              export SCORECARD_NODE_VERSION=${pkgs.nodejs_24.version}
+              export SCORECARD_PNPM_VERSION=${pkgs.pnpm_12.version}
+              export DENO_NO_PACKAGE_JSON=1
+              exec deno run --no-config --allow-read --allow-write --allow-env --allow-sys=hostname \
+                --allow-run=git,${sandbox}/bin/sandbox \
+                ${self}/src/main.ts "$@"
+            '';
+          };
         in
         {
-          inherit sandbox tools-store;
+          inherit sandbox tools-store ratstack-src scorecard;
+          default = scorecard;
         });
 
       devShells = forEachSystem (pkgs:
