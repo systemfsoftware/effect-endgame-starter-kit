@@ -1,0 +1,69 @@
+{
+  "family": "static",
+  "wallMs": 3000,
+  "flags": [],
+  "definitionHashes": [
+    {
+      "id": "M23",
+      "hash": "h-m23"
+    },
+    {
+      "id": "M28",
+      "hash": "h-m28"
+    }
+  ],
+  "cells": [
+    {
+      "id": "M23",
+      "side": "ratstack",
+      "measured": {
+        "cell": {
+          "_tag": "Measured",
+          "runs": [
+            219,
+            219,
+            219
+          ]
+        },
+        "provenance": {
+          "side": "ratstack",
+          "commit": "54d356037c994f89698760a4727be71d0005a087",
+          "instrumentHash": "1111111111111111111111111111111111111111",
+          "nixpkgsRev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+          "runner": "GitHub Actions 1",
+          "measuredAt": "2026-10-05T22:00:00.000Z",
+          "tools": {
+            "oxc-parser": "0.152.0",
+            "yaml": "2.9.1"
+          }
+        }
+      }
+    },
+    {
+      "id": "M28",
+      "side": "ratstack",
+      "measured": {
+        "cell": {
+          "_tag": "Measured",
+          "runs": [
+            957,
+            957,
+            957
+          ]
+        },
+        "provenance": {
+          "side": "ratstack",
+          "commit": "54d356037c994f89698760a4727be71d0005a087",
+          "instrumentHash": "1111111111111111111111111111111111111111",
+          "nixpkgsRev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+          "runner": "GitHub Actions 1",
+          "measuredAt": "2026-10-05T22:00:00.000Z",
+          "tools": {
+            "oxc-parser": "0.152.0",
+            "yaml": "2.9.1"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -107,6 +107,7 @@ export interface FamilyResult {
   readonly wallMs: number
   readonly cells: readonly SideCell[]
   readonly flags: readonly RowFlag[]
+  readonly definitionHashes: readonly { readonly id: string; readonly hash: string }[]
 }
 
 export type RowOutcome =

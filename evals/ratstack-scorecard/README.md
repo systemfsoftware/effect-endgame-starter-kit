@@ -37,3 +37,14 @@ nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox -- pnpm vitest run'
 ```
 
 `src/main.ts` and everything it imports use only Deno APIs, `node:` builtins and each other, so `DENO_NO_PACKAGE_JSON=1 deno check src/` type-checks the orchestrator and the decision core without third-party code. The Node scripts in `src/tools/` are the only code that loads npm packages, and they only ever run inside the launcher.
+
+## In CI
+
+`.github/workflows/scorecard.yml` runs on every PR to `main`, every push to `main`, daily, and on demand. All jobs run on GitHub-hosted runners (`ubuntu-latest`): the self-hosted fleet excludes public repositories by design.
+
+- **plan** prints the matrix: one entry per built family, with its timeout and the rat-stack cache key (rat-stack commit, instrument tree hash, nixpkgs rev).
+- **measure** runs one family per job. The rat-stack side is restored from the cache when the key matches and measured otherwise; only `main`, the schedule and manual runs save it. The starter side is measured every run. Each job uploads `family-<name>`.
+- **aggregate** joins the families, compares them with the latest successful `main` run's `scorecard` artifact (`scorecard latest-main-run`; none yet means a first baseline), writes the Markdown table to the job summary, uploads `scorecard.json`, and fails when the ratchet fails.
+- **pin** (not on PRs) compares `ratstack.pin.json` with rat-stack `main`. When rat-stack has moved it opens or updates the `scorecard/pin-rat-stack` PR through the pin-bump GitHub App (`vars.SCORECARD_APP_ID`, `secrets.SCORECARD_APP_PRIVATE_KEY`; contents and pull requests write only). That PR changes only the pin; Kiro merges it.
+
+`actionlint` is in the dev shell: `nix develop ./evals/ratstack-scorecard --command actionlint .github/workflows/scorecard.yml`.

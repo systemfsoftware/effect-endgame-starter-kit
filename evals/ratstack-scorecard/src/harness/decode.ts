@@ -1,41 +1,74 @@
-export const at = (value: unknown, key: string): unknown =>
-  typeof value === 'object' && value !== null && key in value
-    ? Object.getOwnPropertyDescriptor(value, key)?.value
-    : undefined
+export type Decoder<T> = (value: unknown, path: string) => T
 
-const pathOf = (value: unknown, path: readonly string[]): unknown => path.reduce(at, value)
-
-const refuse = (what: string, path: readonly string[], expected: string): never => {
-  throw new Error(`${what}: expected ${expected} at ${path.join('.') || '<root>'}`)
+export class DecodeError extends Error {
+  constructor(readonly path: string, readonly expected: string, readonly found: unknown) {
+    super(`expected ${expected} at ${path || '<root>'}, found ${JSON.stringify(found)?.slice(0, 80)}`)
+  }
 }
 
-export const stringAt = (value: unknown, path: readonly string[], what: string): string => {
-  const found = pathOf(value, path)
-  return typeof found === 'string' ? found : refuse(what, path, 'a string')
+const fail = (path: string, expected: string, found: unknown): never => {
+  throw new DecodeError(path, expected, found)
 }
 
-export const numberAt = (value: unknown, path: readonly string[], what: string): number => {
-  const found = pathOf(value, path)
-  return typeof found === 'number' ? found : refuse(what, path, 'a number')
+const isObject = (value: unknown): value is object =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const fieldOf = (value: object, key: string): unknown => Object.getOwnPropertyDescriptor(value, key)?.value
+
+export const string: Decoder<string> = (value, path) =>
+  typeof value === 'string' ? value : fail(path, 'a string', value)
+
+export const number: Decoder<number> = (value, path) =>
+  typeof value === 'number' && Number.isFinite(value) ? value : fail(path, 'a finite number', value)
+
+export const literal = <const L extends string | number>(expected: L): Decoder<L> => (value, path) =>
+  value === expected ? expected : fail(path, JSON.stringify(expected), value)
+
+export const oneOf = <const L extends string>(options: readonly L[]): Decoder<L> => (value, path) =>
+  options.find((option) => option === value) ?? fail(path, `one of ${options.join(', ')}`, value)
+
+export const array = <T>(item: Decoder<T>): Decoder<readonly T[]> => (value, path) =>
+  Array.isArray(value) ? value.map((entry, index) => item(entry, `${path}[${index}]`)) : fail(path, 'an array', value)
+
+export const tuple2 = <A, B>(first: Decoder<A>, second: Decoder<B>): Decoder<readonly [A, B]> => (value, path) =>
+  Array.isArray(value) && value.length === 2
+    ? [first(value[0], `${path}[0]`), second(value[1], `${path}[1]`)]
+    : fail(path, 'a pair', value)
+
+export const record = <T>(entry: Decoder<T>): Decoder<Readonly<Record<string, T>>> => (value, path) =>
+  isObject(value)
+    ? Object.fromEntries(Object.entries(value).map(([key, item]) => [key, entry(item, `${path}.${key}`)]))
+    : fail(path, 'an object', value)
+
+type Fields = Readonly<Record<string, Decoder<unknown>>>
+type Decoded<F extends Fields> = { readonly [K in keyof F]: F[K] extends Decoder<infer T> ? T : never }
+
+export const struct = <F extends Fields>(fields: F): Decoder<Decoded<F>> => (value, path) =>
+  isObject(value)
+    ? Object.fromEntries(
+      Object.entries(fields).map(([key, decode]) => [key, decode(fieldOf(value, key), `${path}.${key}`)]),
+    ) as Decoded<F>
+    : fail(path, 'an object', value)
+
+export const optional = <T>(decode: Decoder<T>): Decoder<T | undefined> => (value, path) =>
+  value === undefined ? undefined : decode(value, path)
+
+export const union = <T>(...options: readonly Decoder<T>[]): Decoder<T> => (value, path) => {
+  const errors: string[] = []
+  for (const option of options) {
+    try {
+      return option(value, path)
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error))
+    }
+  }
+  return fail(path, `one of ${options.length} shapes (${errors.join('; ')})`, value)
 }
 
-export const arrayAt = (value: unknown, path: readonly string[], what: string): readonly unknown[] => {
-  const found = pathOf(value, path)
-  return Array.isArray(found) ? found : refuse(what, path, 'an array')
-}
-
-export const entriesAt = (
-  value: unknown,
-  path: readonly string[],
-  what: string,
-): readonly (readonly [string, unknown])[] => {
-  const found = pathOf(value, path)
-  return typeof found === 'object' && found !== null && !Array.isArray(found)
-    ? Object.entries(found)
-    : refuse(what, path, 'an object')
-}
-
-export const optionalEntriesAt = (value: unknown, path: readonly string[]): readonly (readonly [string, unknown])[] => {
-  const found = pathOf(value, path)
-  return typeof found === 'object' && found !== null && !Array.isArray(found) ? Object.entries(found) : []
+export const decodeJson = <T>(decode: Decoder<T>, text: string, what: string): T => {
+  try {
+    return decode(JSON.parse(text), what)
+  } catch (error) {
+    throw new Error(`${what}: ${error instanceof Error ? error.message : String(error)}`)
+  }
 }

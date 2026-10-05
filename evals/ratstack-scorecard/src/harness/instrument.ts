@@ -1,6 +1,7 @@
 import { dirname, join } from 'node:path'
-import type { CellProvenance, Side } from '../model/cell.ts'
-import { optionalEntriesAt, stringAt } from './decode.ts'
+import { rowDefinitions } from '../metrics/registry.ts'
+import type { CellProvenance, Family, Side } from '../model/cell.ts'
+import { decodeJson, type Decoder, record, string, struct } from './decode.ts'
 import { type Launcher, runSandboxed } from './sandbox.ts'
 
 export interface Pin {
@@ -43,19 +44,14 @@ export const git = async (cwd: string, args: readonly string[]): Promise<Uint8Ar
 const gitText = async (cwd: string, args: readonly string[]): Promise<string> =>
   decoder.decode(await git(cwd, args)).trim()
 
-const readJson = async (path: string): Promise<unknown> => JSON.parse(await Deno.readTextFile(path))
+const readJson = async <T>(decode: Decoder<T>, path: string): Promise<T> =>
+  decodeJson(decode, await Deno.readTextFile(path), path)
 
-const nixpkgsRevOf = (lock: unknown): string => stringAt(lock, ['nodes', 'nixpkgs', 'locked', 'rev'], 'flake.lock')
+const flakeLock = struct({ nodes: struct({ nixpkgs: struct({ locked: struct({ rev: string }) }) }) })
 
-const pinOf = (pin: unknown): Pin => ({
-  owner: stringAt(pin, ['owner'], 'ratstack.pin.json'),
-  repo: stringAt(pin, ['repo'], 'ratstack.pin.json'),
-  commit: stringAt(pin, ['commit'], 'ratstack.pin.json'),
-  narHash: stringAt(pin, ['narHash'], 'ratstack.pin.json'),
-})
+const pinFile = struct({ owner: string, repo: string, commit: string, narHash: string })
 
-const dependencyVersions = (manifest: unknown): Record<string, string> =>
-  Object.fromEntries(optionalEntriesAt(manifest, ['dependencies']).map(([name, version]) => [name, String(version)]))
+const manifest = struct({ dependencies: record(string) })
 
 export const loadInstrument = async (checkoutArg: string | undefined): Promise<Instrument> => {
   const dir = required('SCORECARD_INSTRUMENT')
@@ -66,13 +62,13 @@ export const loadInstrument = async (checkoutArg: string | undefined): Promise<I
     toolsStore: required('SCORECARD_TOOLS_STORE'),
     ratstackSrc: required('SCORECARD_RATSTACK_SRC'),
     checkout,
-    pin: pinOf(await readJson(join(dir, 'ratstack.pin.json'))),
+    pin: await readJson(pinFile, join(dir, 'ratstack.pin.json')),
     instrumentHash: await gitText(checkout, ['rev-parse', 'HEAD:evals/ratstack-scorecard']),
-    nixpkgsRev: nixpkgsRevOf(await readJson(join(dir, 'flake.lock'))),
+    nixpkgsRev: (await readJson(flakeLock, join(dir, 'flake.lock'))).nodes.nixpkgs.locked.rev,
     runner: Deno.env.get('RUNNER_NAME') ?? Deno.hostname(),
     starterCommit: await gitText(checkout, ['rev-parse', 'HEAD']),
     toolVersions: {
-      ...dependencyVersions(await readJson(join(dir, 'package.json'))),
+      ...(await readJson(manifest, join(dir, 'package.json'))).dependencies,
       node: required('SCORECARD_NODE_VERSION'),
       pnpm: required('SCORECARD_PNPM_VERSION'),
       deno: Deno.version.deno,
@@ -94,6 +90,36 @@ export const provenanceFor = (
   tools: instrument.toolVersions,
   detail,
 })
+
+const definitionInputs = (family: Family): readonly string[] => [
+  `src/families/${family}.ts`,
+  'src/sides',
+  'src/tools',
+  'src/harness',
+  'flake.lock',
+  'pnpm-lock.yaml',
+]
+
+const sha256 = async (text: string): Promise<string> =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('')
+
+export const definitionHashesFor = async (
+  instrument: Instrument,
+  family: Family,
+): Promise<readonly { readonly id: string; readonly hash: string }[]> => {
+  const trees = await Promise.all(
+    definitionInputs(family).map(async (path) =>
+      `${path}=${await gitText(instrument.checkout, ['rev-parse', `HEAD:evals/ratstack-scorecard/${path}`])}`
+    ),
+  )
+  return await Promise.all(
+    rowDefinitions
+      .filter((row) => row.family === family)
+      .map(async (row) => ({ id: row.id, hash: await sha256(JSON.stringify({ row, trees })) })),
+  )
+}
 
 const copyTracked = async (from: string, to: string, files: readonly string[]): Promise<void> => {
   for (const file of files) {
