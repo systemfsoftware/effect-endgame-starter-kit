@@ -4,9 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       package:
-        description: "Package to force release for (TODO: your package name)"
+        description: "Package to force release for"
         required: true
-        default: "@TODO/starter"
         type: string
       bump:
         description: "Release bump (patch, minor, major)"
@@ -25,7 +24,7 @@ permissions:
 jobs:
   force-release:
     name: dummy changeset + release PR
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, systemfsoftware-runner, small]
     env:
       HUSKY: "0"
     steps:

@@ -11,7 +11,7 @@ jobs:
   require-changeset:
     if: github.head_ref != 'changeset-release/main'
     name: a publishable-package change needs a changeset
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, systemfsoftware-runner, small]
     steps:
       - uses: actions/checkout@v7
         with:

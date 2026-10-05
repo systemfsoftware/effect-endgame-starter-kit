@@ -15,7 +15,7 @@ permissions:
 jobs:
   plan:
     name: plan · derive phase
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, systemfsoftware-runner, small]
     permissions:
       contents: read
     outputs:
@@ -43,7 +43,7 @@ jobs:
     if: needs.plan.outputs.phase == 'version'
     needs: [plan]
     name: version · open release PR
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, systemfsoftware-runner, small]
     permissions:
       contents: write
       pull-requests: write
@@ -81,7 +81,7 @@ jobs:
       id-token: write
     name: publish · oidc · tag
     needs: [plan]
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, systemfsoftware-runner, medium]
     env:
       HUSKY: "0"
     steps:

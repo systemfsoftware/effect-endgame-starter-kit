@@ -1,0 +1,7 @@
+self-hosted-runner:
+  labels:
+    - systemfsoftware-runner
+    - small
+    - medium
+    - large
+    - xlarge

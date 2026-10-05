@@ -25,6 +25,12 @@ Workspace roots: `packages/` holds libraries, `apps/` holds publishable
 applications — both are workspace globs in `pnpm-workspace.yaml`. Turbo declares
 `dist/**` as each package's build output; `pnpm gate:dist` runs that build.
 
+## CI
+
+- Every Linux job runs on `[self-hosted, systemfsoftware-runner, <size>]`; each job's size is its `runs-on` in `.github/workflows/`. Gate: review of the workflow diff.
+- Exception: the macOS `check:ci` leg runs on GitHub-hosted `macos-latest`, because the fleet has no macOS and adopters develop on it. Move it to the fleet when the fleet gains macOS.
+- Fork PRs run on the fleet only after a maintainer approves the run (the repository's Actions setting).
+
 ## End of Session
 
 Commit changes using conventional commits (`<type>(<scope>): <subject>`). Ensure the working tree is clean and `pnpm check:ci` passes.

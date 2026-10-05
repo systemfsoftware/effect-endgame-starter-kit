@@ -14,10 +14,16 @@ concurrency:
 
 jobs:
   check:
+    name: check (${{ matrix.leg }})
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+        include:
+          - leg: linux
+            runs-on: [self-hosted, systemfsoftware-runner, large]
+          - leg: macos
+            runs-on: macos-latest
+    runs-on: ${{ matrix.runs-on }}
     timeout-minutes: 45
     env:
       CI: "true"
