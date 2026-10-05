@@ -1,5 +1,6 @@
 {
-  "$schema": "https://v2-10-1.turborepo.dev/schema.json",
+  "$schema": "https://v2-11-7.turborepo.dev/schema.json",
+  "agentGuidance": false,
   "globalPassThroughEnv": [
     "XDG_CACHE_HOME"
   ],
