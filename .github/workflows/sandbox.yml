@@ -1,0 +1,52 @@
+name: Sandbox
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  proofs:
+    name: sandbox proofs · ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+
+      - name: Allow unprivileged user namespaces
+        if: runner.os == 'Linux'
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+
+      - name: Boundary proofs
+        run: nix build .#sandbox-proofs && ./result/bin/sandbox-proofs
+
+      - name: Install through the sandbox, offline from the Nix pnpm store
+        run: nix develop --command sandbox -- pnpm install
+
+      - name: Build through the sandbox, no network
+        run: nix develop --command sandbox -- pnpm build
+
+      - name: Test through the sandbox, no network
+        run: nix develop --command sandbox -- pnpm --filter "./packages/*" test
+
+  reproducible:
+    name: tarballs rebuild bit-for-bit
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - run: nix build .#workspace-tarballs
+      - run: nix build --rebuild .#workspace-tarballs

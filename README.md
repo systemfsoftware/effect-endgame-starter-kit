@@ -232,6 +232,96 @@ agree on what this cycle owns.
 `.release-tools`, build it with pnpm, and run its `dist/main.js` bundles
 against the caller's workspace.
 
+## Distribution through Nix
+
+A repository ships its public workspace packages as flake outputs. Nothing goes
+to a registry. One call in `flake.nix`:
+
+```nix
+packages = forEachSystem (pkgs:
+  pnpm-release-management.lib.mkPnpmWorkspacePackages {
+    inherit pkgs;
+    src = self;
+    hash = "sha256-…"; # third-party dependencies, keyed by pnpm-lock.yaml
+  });
+```
+
+For every member of `pnpm-workspace.yaml` that is not `private`, this gives
+`packages.<system>.<name>`: the member's `pnpm pack` tarball, with the scope
+dropped from the name. It also gives `packages.<system>.workspace-tarballs`:
+every tarball plus an `index.json` of `{ name, file }`.
+
+- Third-party dependencies enter only through nixpkgs' `fetchPnpmDeps`
+  (`fetcherVersion = 4`): a fixed-output derivation pinned by `hash`. A changed
+  lockfile changes the hash, and the build fails until it is updated. The build
+  itself never reaches a registry.
+- Install runs with `--ignore-scripts` in the Nix sandbox. The members build
+  with their `build` script (`buildScript` overrides it), then `pnpm pack`
+  writes each tarball and turns every `workspace:` range into the exact version.
+- The tarballs rebuild bit-for-bit. CI proves it with
+  `nix build --rebuild .#workspace-tarballs`. A declaration file that prints an
+  inferred union breaks this, because TypeScript 7 orders union members
+  differently from run to run (microsoft/TypeScript#64589). Annotate such an
+  export with a named type.
+- `pnpm` defaults to `pkgs.pnpm_12`. The root `packageManager` must pin exactly
+  that version, or evaluation fails: one pnpm resolves everywhere.
+- `packages.<system>.pnpm-store` is the same fixed-output dependency set,
+  unpacked into a store directory pnpm can install from offline.
+
+A consumer takes the flake as an input pinned by `flake.lock`. A pull
+request's head revision is a snapshot, and a release tag is a stable version.
+It builds the tarballs it needs and depends on them with `file:` paths, so each
+tarball's integrity lands in the consumer's `pnpm-lock.yaml`.
+
+## Sandbox
+
+`packages.<system>.sandbox` runs dependency code with nothing it was not given:
+
+```bash
+sandbox -- pnpm install
+sandbox -- pnpm build
+sandbox -- pnpm test
+sandbox --allow-host api.cloudflare.com --pass-env CLOUDFLARE_API_TOKEN -- pnpm deploy
+```
+
+pnpm never reaches a registry from the sandbox. `--pnpm-store` (the dev shell
+sets `SANDBOX_PNPM_STORE` to `packages.<system>.pnpm-store`) points pnpm at the
+Nix-built store. The sandbox then runs pnpm with `offline`, `frozen-lockfile`,
+`ignore-scripts` and `trust-lockfile`; the fixed-output fetch already checked
+the lockfile. Each invocation gets a private copy of the store's index database
+that is discarded at exit, so the Nix store stays read-only. `$HOME` is a fresh
+tmpfs every time, so nothing a dependency plants survives. Tool caches that
+should persist (turbo, vite, `tsbuildinfo`) belong in the project's gitignored
+`.cache/`; the sandbox sets `XDG_CACHE_HOME` to it.
+
+| Boundary    | Inside the sandbox                                                                                                      |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| filesystem  | the project directory read-write, `/nix/store` read-only, an empty `$HOME`, a private `/tmp`; no other home directories |
+| environment | cleared, then `PATH`, `TERM`, locale, `TZ`, `CI` and colour settings, plus each `--pass-env`                            |
+| network     | loopback only; each `--allow-host` opens HTTPS to that host through an allow-list proxy                                 |
+| processes   | own PID, IPC and UTS namespaces, no capabilities, killed with its parent, no controlling terminal                       |
+
+On Linux it is bubblewrap (`--unshare-all`, `--cap-drop ALL`, `--die-with-parent`,
+`--new-session`). On macOS it is `sandbox-exec` with a deny-by-default
+profile. Egress goes through a CONNECT proxy outside the sandbox that tunnels
+only to declared `host[:port]` (default 443; `*.example.com` matches
+subdomains). Inside, `HTTPS_PROXY` points at it and `NODE_USE_ENV_PROXY=1` makes
+Node's `fetch` use it. There is no unsandboxed mode.
+
+`packages.<system>.sandbox-proofs` is the gate. Each refusal proof first prints
+from inside the same sandbox, so a sandbox that fails to start fails the proof
+instead of passing it. The proofs: reading `~/.ssh` and `~/.config` fails,
+writing outside the project fails, agent sockets and secrets do not cross the
+cleared environment, an undeclared connection fails, a declared host is
+reachable while every other host is refused, and a loopback dev server still
+answers. CI runs them on Linux and macOS. It then installs, builds and tests
+this repository as three separate sandbox invocations with no network at all.
+
+bubblewrap needs unprivileged user namespaces and a mountable `/proc`. Ubuntu
+24.04 needs `sysctl kernel.apparmor_restrict_unprivileged_userns=0`. A
+container needs `/proc` unmasked (`--security-opt unmask=/proc/*` under
+podman). Without them the sandbox refuses to start.
+
 ## Install, build, test, package
 
 Enter the dev shell (`direnv allow`, or `nix develop`) for node, pnpm and

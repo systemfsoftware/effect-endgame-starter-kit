@@ -25,7 +25,7 @@
     "type": "git",
     "url": "git+https://github.com/systemfsoftware/pnpm-release-management.git"
   },
-  "packageManager": "pnpm@11.21.0",
+  "packageManager": "pnpm@11.25.0",
   "private": true,
   "scripts": {
     "build": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} build",

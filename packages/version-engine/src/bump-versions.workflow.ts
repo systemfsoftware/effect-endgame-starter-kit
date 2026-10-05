@@ -103,7 +103,11 @@ const bumpCaseOf = (command: BumpCommand): BumpCase => {
   })
 }
 
-export const bumpVersions = Workflow.make(
+export const bumpVersions: Workflow.Workflow<
+  BumpCommand,
+  VersionDecision,
+  VersionUnknownPackage | VersionIntentMalformed
+> = Workflow.make(
   BumpCommand,
   (
     command,

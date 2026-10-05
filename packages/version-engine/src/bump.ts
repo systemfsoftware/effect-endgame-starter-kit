@@ -190,7 +190,12 @@ const write = (
   })
 }
 
-export const bumpCell = Cell.layer({
+export const bumpCell: Cell.Cell<
+  BumpInput,
+  VersionDecision,
+  IntentRefusal | MemberRefusal | VersionRefusal | ChangelogRefusal | CommandRefusal,
+  ChangesetStore | WorkspaceStore | SurfaceStore | ChangelogStore | ProcessPort
+> = Cell.layer({
   read,
   decide: bumpVersions,
   write,

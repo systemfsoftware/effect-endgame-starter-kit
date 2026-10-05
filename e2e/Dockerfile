@@ -27,7 +27,7 @@ ARG EMULATE_VERSION=0.11.1
 RUN npm install -g --no-fund --no-audit "emulate@${EMULATE_VERSION}" \
   && npm cache clean --force
 
-ARG PNPM_VERSION=11.21.0
+ARG PNPM_VERSION=11.25.0
 RUN corepack enable && corepack prepare "pnpm@${PNPM_VERSION}" --activate
 
 RUN mkdir -p /e2e \

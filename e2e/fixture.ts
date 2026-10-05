@@ -26,7 +26,7 @@ const ROOT_MANIFEST = `{
   "name": "@e2e/root",
   "private": true,
   "version": "1.0.0",
-  "packageManager": "pnpm@11.21.0"
+  "packageManager": "pnpm@11.25.0"
 }
 `
 

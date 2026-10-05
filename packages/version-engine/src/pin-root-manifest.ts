@@ -110,7 +110,12 @@ const write = (
   )
 }
 
-export const pinRootManifestCell = Cell.layer({
+export const pinRootManifestCell: Cell.Cell<
+  PinRootManifestInput,
+  PinDecision,
+  MemberRefusal | PinManifestInvalid | S.SchemaError | PinRefusal | VersionRefusal,
+  WorkspaceStore | SurfaceStore
+> = Cell.layer({
   read,
   decide: pinRootManifest,
   write,

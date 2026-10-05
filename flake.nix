@@ -15,23 +15,36 @@
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
     in
     {
+      lib.mkPnpmWorkspacePackages = import ./nix/lib/pnpm-workspace-packages.nix;
+
       packages = forEachSystem (pkgs:
         let
           dprint = pkgs.callPackage ./nix/dprint.nix { };
           cc = comment-checker.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker;
           comment-checker-bwrap = pkgs.callPackage ./nix/comment-checker-bwrap.nix { comment-checker = cc; };
           denort = pkgs.callPackage ./nix/denort.nix { };
+          sandbox = pkgs.callPackage ./nix/sandbox { };
           cliApp = appName:
             pkgs.callPackage ./nix/cli-app.nix {
               inherit (pkgs) pnpm_11 nodejs_24 deno;
+              inherit (workspace.workspace-tarballs) pnpmDeps;
               inherit denort;
               src = self;
               inherit appName;
             };
-        in {
+          workspace = self.lib.mkPnpmWorkspacePackages {
+            inherit pkgs;
+            src = self;
+            pname = "pnpm-release-management";
+            pnpm = pkgs.pnpm_11;
+            hash = "sha256-ERG1u8aeAfedUjRC8akD1UerrdEwFRZXCgVi4j6MHt4=";
+          };
+        in workspace // {
           inherit dprint comment-checker-bwrap;
           comment-checker = cc;
           default = dprint;
+          inherit sandbox;
+          sandbox-proofs = pkgs.callPackage ./nix/sandbox/proofs.nix { inherit sandbox; };
           changeset-management = cliApp "changeset-management";
           version-management = cliApp "version-management";
           github-release-management = cliApp "github-release-management";
@@ -43,10 +56,12 @@
           packages = [
             self.packages.${pkgs.stdenv.hostPlatform.system}.dprint
             self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker-bwrap
+            self.packages.${pkgs.stdenv.hostPlatform.system}.sandbox
             pkgs.nodejs_24
-            pkgs.pnpm
+            pkgs.pnpm_11
             pkgs.deno
           ];
+          SANDBOX_PNPM_STORE = self.packages.${pkgs.stdenv.hostPlatform.system}.pnpm-store;
         };
       });
     };
