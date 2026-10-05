@@ -1,5 +1,6 @@
 import { dirname, join } from 'node:path'
-import type { CellProvenance, Side } from '../model/cell.ts'
+import { rowDefinitions } from '../metrics/registry.ts'
+import type { CellProvenance, Family, RowId, Side } from '../model/cell.ts'
 import { type JsonValue, optionalEntriesAt, parseJson, stringAt } from './decode.ts'
 import { type Launcher, runSandboxed } from './sandbox.ts'
 
@@ -105,6 +106,36 @@ export const provenanceFor = (
   tools: instrument.toolVersions,
   detail,
 })
+
+const definitionInputs = (family: Family): readonly string[] => [
+  `src/families/${family}.ts`,
+  'src/sides',
+  'src/tools',
+  'src/harness',
+  'flake.lock',
+  'pnpm-lock.yaml',
+]
+
+const sha256 = async (text: string): Promise<string> =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('')
+
+export const definitionHashesFor = async (
+  instrument: Instrument,
+  family: Family,
+): Promise<readonly { readonly id: RowId; readonly hash: string }[]> => {
+  const trees = await Promise.all(
+    definitionInputs(family).map(async (path) =>
+      `${path}=${await gitText(instrument.checkout, ['rev-parse', `HEAD:evals/ratstack-scorecard/${path}`])}`
+    ),
+  )
+  return await Promise.all(
+    rowDefinitions
+      .filter((row) => row.family === family)
+      .map(async (row) => ({ id: row.id, hash: await sha256(JSON.stringify({ row, trees })) })),
+  )
+}
 
 const entriesIn = async (dir: string): Promise<readonly Deno.DirEntry[]> => {
   const entries: Deno.DirEntry[] = []

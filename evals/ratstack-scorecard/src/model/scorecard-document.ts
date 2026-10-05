@@ -38,6 +38,7 @@ export interface FamilyResult {
   readonly wallMs: number
   readonly cells: readonly SideCell[]
   readonly flags: readonly RowFlag[]
+  readonly definitionHashes: readonly { readonly id: RowId; readonly hash: string }[]
 }
 
 export type CellsByRow = Readonly<Record<RowId, Readonly<Partial<Record<Side, MeasuredCell>>>>>

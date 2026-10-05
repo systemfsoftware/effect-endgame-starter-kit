@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { arrayAt, numberAt, parseJson, stringAt } from '../harness/decode.ts'
 import {
+  definitionHashesFor,
   type Instrument,
   materializeRatstack,
   materializeStarter,
@@ -192,5 +193,11 @@ export const measureStatic = async (
       },
     )
   }
-  return { family: 'static', wallMs: Math.round(performance.now() - started), cells, flags: [] }
+  return {
+    family: 'static',
+    wallMs: Math.round(performance.now() - started),
+    cells,
+    flags: [],
+    definitionHashes: await definitionHashesFor(instrument, 'static'),
+  }
 }
