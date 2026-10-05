@@ -19,6 +19,7 @@ export interface FetchedPage {
   readonly status: number
   readonly contentType: string | null
   readonly vary: string | null
+  readonly rayId: string | null
   readonly body: string
 }
 
@@ -44,6 +45,7 @@ export const fetchSite = (site: SiteRequest): Effect.Effect<FetchedPage, never, 
       status: response.status,
       contentType: response.headers['content-type'] ?? null,
       vary: response.headers['vary'] ?? null,
+      rayId: response.headers['cf-ray'] ?? null,
       body: yield* Effect.orDie(response.text),
     }
   })
