@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "exclude": ["node_modules/", "**/*.test.ts", "**/*.arbitrary.ts", "vitest.config.ts"],
+  "lock": false
+}

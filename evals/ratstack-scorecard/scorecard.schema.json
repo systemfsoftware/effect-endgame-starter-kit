@@ -1,0 +1,303 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/systemfsoftware/effect-endgame-starter-kit/evals/ratstack-scorecard/scorecard.schema.json",
+  "title": "rat-stack scorecard",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "provenance", "rows", "ratchet"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "provenance": { "$ref": "#/definitions/documentProvenance" },
+    "rows": { "type": "array", "items": { "$ref": "#/definitions/row" } },
+    "ratchet": { "$ref": "#/definitions/ratchet" }
+  },
+  "definitions": {
+    "sha": { "type": "string", "minLength": 1 },
+    "documentProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "ratstackCommit", "instrumentHash", "nixpkgsRev", "runner", "generatedAt"],
+      "properties": {
+        "commit": { "$ref": "#/definitions/sha" },
+        "ratstackCommit": { "$ref": "#/definitions/sha" },
+        "instrumentHash": { "$ref": "#/definitions/sha" },
+        "nixpkgsRev": { "$ref": "#/definitions/sha" },
+        "runner": { "type": "string", "minLength": 1 },
+        "generatedAt": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cellProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["side", "commit", "instrumentHash", "nixpkgsRev", "runner", "measuredAt", "tools"],
+      "properties": {
+        "side": { "enum": ["ratstack", "starter"] },
+        "commit": { "$ref": "#/definitions/sha" },
+        "instrumentHash": { "$ref": "#/definitions/sha" },
+        "nixpkgsRev": { "$ref": "#/definitions/sha" },
+        "runner": { "type": "string", "minLength": 1 },
+        "measuredAt": { "type": "string", "minLength": 1 },
+        "tools": { "type": "object", "additionalProperties": { "type": "string" } },
+        "liveCommit": { "$ref": "#/definitions/sha" }
+      }
+    },
+    "citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "lines", "text"],
+      "properties": {
+        "file": { "type": "string", "minLength": 1 },
+        "lines": {
+          "type": "array",
+          "items": [{ "type": "integer", "minimum": 1 }, { "type": "integer", "minimum": 1 }],
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "text": { "type": "string", "minLength": 1 }
+      }
+    },
+    "cell": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "runs"],
+          "properties": {
+            "_tag": { "const": "Measured" },
+            "runs": { "type": "array", "items": { "type": "number" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "reason"],
+          "properties": { "_tag": { "const": "Absent" }, "reason": { "type": "string" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "sha"],
+          "properties": { "_tag": { "const": "NoDeployment" }, "sha": { "$ref": "#/definitions/sha" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "citation", "check"],
+          "properties": {
+            "_tag": { "const": "Unsupported" },
+            "citation": { "$ref": "#/definitions/citation" },
+            "check": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["_tag"],
+                  "properties": { "_tag": { "const": "Verified" } }
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["_tag", "found"],
+                  "properties": { "_tag": { "const": "Contradicted" }, "found": { "type": "string" } }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "error"],
+          "properties": { "_tag": { "const": "Unmeasurable" }, "error": { "type": "string" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "name"],
+          "properties": { "_tag": { "const": "NoSecret" }, "name": { "type": "string" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "error"],
+          "properties": { "_tag": { "const": "InstrumentError" }, "error": { "type": "string" } }
+        }
+      ]
+    },
+    "measuredCell": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cell", "provenance"],
+      "properties": {
+        "cell": { "$ref": "#/definitions/cell" },
+        "provenance": { "$ref": "#/definitions/cellProvenance" }
+      }
+    },
+    "verdict": {
+      "oneOf": [
+        { "$ref": "#/definitions/bareTag/Beaten" },
+        { "$ref": "#/definitions/bareTag/NotBeaten" },
+        { "$ref": "#/definitions/bareTag/Tie" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "error"],
+          "properties": { "_tag": { "const": "InstrumentError" }, "error": { "type": "string" } }
+        }
+      ]
+    },
+    "bareTag": {
+      "Beaten": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["_tag"],
+        "properties": { "_tag": { "const": "Beaten" } }
+      },
+      "NotBeaten": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["_tag"],
+        "properties": { "_tag": { "const": "NotBeaten" } }
+      },
+      "Tie": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["_tag"],
+        "properties": { "_tag": { "const": "Tie" } }
+      }
+    },
+    "flag": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "live", "pin"],
+          "properties": {
+            "_tag": { "const": "LiveDiffersFromPin" },
+            "live": { "$ref": "#/definitions/sha" },
+            "pin": { "$ref": "#/definitions/sha" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "primary", "crossCheck"],
+          "properties": {
+            "_tag": { "const": "ScannersDisagree" },
+            "primary": { "type": "number" },
+            "crossCheck": { "type": "number" }
+          }
+        }
+      ]
+    },
+    "rowDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "metric", "bin", "label", "unit", "direction", "kind", "runs", "family"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^M[0-9]+(\\.[a-z0-9-]+)?$" },
+        "metric": { "type": "string", "pattern": "^M[0-9]+$" },
+        "bin": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "unit": { "type": "string", "minLength": 1 },
+        "direction": { "enum": ["lower", "higher"] },
+        "kind": { "enum": ["count", "measurement"] },
+        "runs": { "type": "integer", "minimum": 1 },
+        "family": { "enum": ["static", "cold-path", "gate-mutation", "running-stack", "agent-surfaces", "networked"] }
+      }
+    },
+    "row": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["definition", "definitionHash", "ratstack", "starter", "verdict", "flags"],
+      "properties": {
+        "definition": { "$ref": "#/definitions/rowDefinition" },
+        "definitionHash": { "$ref": "#/definitions/sha" },
+        "ratstack": { "$ref": "#/definitions/measuredCell" },
+        "starter": { "$ref": "#/definitions/measuredCell" },
+        "verdict": { "$ref": "#/definitions/verdict" },
+        "flags": { "type": "array", "items": { "$ref": "#/definitions/flag" } }
+      }
+    },
+    "cellTag": {
+      "enum": ["Measured", "Absent", "NoDeployment", "Unsupported", "Unmeasurable", "NoSecret", "InstrumentError"]
+    },
+    "outcome": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "id"],
+          "properties": { "_tag": { "enum": ["Held", "New", "ReBaselined"] }, "id": { "type": "string" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "id", "cause"],
+          "properties": {
+            "_tag": { "const": "Neutral" },
+            "id": { "type": "string" },
+            "cause": { "$ref": "#/definitions/cellTag" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "id", "error"],
+          "properties": {
+            "_tag": { "const": "InstrumentError" },
+            "id": { "type": "string" },
+            "error": { "type": "string" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "id", "ratstack", "starter"],
+          "properties": {
+            "_tag": { "const": "LostBeaten" },
+            "id": { "type": "string" },
+            "ratstack": { "$ref": "#/definitions/cellTag" },
+            "starter": { "$ref": "#/definitions/cellTag" }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "id", "main", "pr"],
+          "properties": {
+            "_tag": { "const": "Regressed" },
+            "id": { "type": "string" },
+            "main": { "type": "string" },
+            "pr": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "ratchet": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "outcomes", "failures"],
+          "properties": {
+            "_tag": { "const": "FirstBaseline" },
+            "outcomes": { "type": "array", "items": { "$ref": "#/definitions/outcome" } },
+            "failures": { "type": "array", "items": { "$ref": "#/definitions/outcome" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "mainCommit", "outcomes", "failures"],
+          "properties": {
+            "_tag": { "const": "Compared" },
+            "mainCommit": { "$ref": "#/definitions/sha" },
+            "outcomes": { "type": "array", "items": { "$ref": "#/definitions/outcome" } },
+            "failures": { "type": "array", "items": { "$ref": "#/definitions/outcome" } }
+          }
+        }
+      ]
+    }
+  }
+}
