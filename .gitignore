@@ -10,3 +10,4 @@ reports/
 .direnv/
 result
 result-*
+local-stack/data/
