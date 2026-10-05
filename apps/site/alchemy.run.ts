@@ -4,10 +4,25 @@ import * as Effect from 'effect/Effect'
 
 import { siteWorker } from './site-worker.ts'
 
-export const Site = Cloudflare.Website.Vite('Site', {
-  main: siteWorker.main,
-  compatibility: { date: siteWorker.compatibilityDate, flags: [...siteWorker.compatibilityFlags] },
-})
+export const isCloudStage = (stage: string): boolean => stage === 'prod' || /^pr-\d+$/.test(stage)
+
+export const Site = Cloudflare.Website.Vite(
+  'Site',
+  Effect.gen(function*() {
+    const stage = yield* Alchemy.Stage
+    return {
+      main: siteWorker.main,
+      compatibility: { date: siteWorker.compatibilityDate, flags: [...siteWorker.compatibilityFlags] },
+      observability: {
+        enabled: true,
+        headSamplingRate: 1,
+        logs: { enabled: true, invocationLogs: true, headSamplingRate: 1, persist: true },
+        traces: { enabled: true, headSamplingRate: 1, persist: true },
+      },
+      ...(isCloudStage(stage) ? {} : { env: { OTLP_BASE_URL: siteWorker.localOtlpBaseUrl } }),
+    }
+  }),
+)
 
 export default Alchemy.Stack(
   'Endgame',

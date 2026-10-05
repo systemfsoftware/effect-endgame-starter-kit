@@ -26,6 +26,7 @@
     "@systemfsoftware/stryker-js": "catalog:",
     "@systemfsoftware/stryker-js-typescript-checker": "catalog:",
     "@systemfsoftware/stryker-js-vitest-runner": "catalog:",
+    "@systemfsoftware/trace-spec": "catalog:",
     "@systemfsoftware/tsconfig": "catalog:",
     "@systemfsoftware/vitest": "catalog:",
     "@tanstack/router-cli": "catalog:",

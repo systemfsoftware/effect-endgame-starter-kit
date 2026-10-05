@@ -1,0 +1,22 @@
+# alchemy@2.0.0-beta.80 ships no public subpath for its per-event Cloudflare tracer.
+# Its `./Cloudflare/*` exports pattern maps to `./lib/Cloudflare/<rest>/index.js` and, being the
+# more specific pattern, shadows `./*`; `alchemy/Cloudflare/Workers/CloudflareTracer` therefore
+# resolves to a missing `lib/Cloudflare/Workers/CloudflareTracer/index.js`. This patch adds only
+# the missing `exports` entry — no code change. beta.81 has the same map; delete this patch in the
+# Dependabot PR of the alchemy release that fixes the subpath.
+diff --git a/package.json b/package.json
+index d17896cbf07f74360df9e0744b1e929583474c69..a710993a61bc770180ce45b365b42959398b5de8 100644
+--- a/package.json
++++ b/package.json
+@@ -167,6 +167,11 @@
+       "bun": "./src/Cloudflare/Workers/RpcWebSocketClient.ts",
+       "default": "./lib/Cloudflare/Workers/RpcWebSocketClient.js"
+     },
++    "./Cloudflare/Workers/CloudflareTracer": {
++      "types": "./lib/Cloudflare/Workers/CloudflareTracer.d.ts",
++      "bun": "./src/Cloudflare/Workers/CloudflareTracer.ts",
++      "default": "./lib/Cloudflare/Workers/CloudflareTracer.js"
++    },
+     "./Cloudflare/*": {
+       "types": "./lib/Cloudflare/*/index.d.ts",
+       "bun": "./src/Cloudflare/*/index.ts",

@@ -10,7 +10,7 @@ export const SITE_DEV_PORT = 1337
 
 const alchemyInjectsItsCloudflarePlugin = (): boolean => process.env['ALCHEMY_CLOUDFLARE_VITE_INJECTED'] === '1'
 
-const workerdPlugins = (main: string) =>
+const workerdPlugins = (main: string, vars: Readonly<Record<string, string>>) =>
   alchemyInjectsItsCloudflarePlugin()
     ? []
     : [
@@ -21,12 +21,13 @@ const workerdPlugins = (main: string) =>
           main,
           compatibility_date: siteWorker.compatibilityDate,
           compatibility_flags: [...siteWorker.compatibilityFlags],
+          vars: { ...vars },
         },
       }),
     ]
 
-export const sitePlugins = (main: string) => [
-  ...workerdPlugins(main),
+export const sitePlugins = (main: string, vars: Readonly<Record<string, string>> = {}) => [
+  ...workerdPlugins(main, vars),
   readmeOpening(),
   tanstackStart(),
   viteReact(),
