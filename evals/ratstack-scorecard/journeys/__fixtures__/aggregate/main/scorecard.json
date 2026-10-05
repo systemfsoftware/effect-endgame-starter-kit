@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "commit": "3333333333333333333333333333333333333333",
+    "ratstackCommit": "54d356037c994f89698760a4727be71d0005a087",
+    "instrumentHash": "1111111111111111111111111111111111111111",
+    "nixpkgsRev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+    "runner": "GitHub Actions 1",
+    "generatedAt": "2026-10-05T21:00:00.000Z"
+  },
+  "rows": [
+    {
+      "definition": {
+        "id": "M23",
+        "metric": "M23",
+        "bin": "fence: debt ledger",
+        "label": "Suppression directives in tracked source",
+        "unit": "directives",
+        "direction": "lower",
+        "kind": "count",
+        "runs": 3,
+        "family": "static"
+      },
+      "definitionHash": "h-m23",
+      "ratstack": {
+        "cell": {
+          "_tag": "Measured",
+          "runs": [
+            219,
+            219,
+            219
+          ]
+        },
+        "provenance": {
+          "side": "ratstack",
+          "commit": "54d356037c994f89698760a4727be71d0005a087",
+          "instrumentHash": "1111111111111111111111111111111111111111",
+          "nixpkgsRev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+          "runner": "GitHub Actions 1",
+          "measuredAt": "2026-10-05T22:00:00.000Z",
+          "tools": {
+            "oxc-parser": "0.152.0",
+            "yaml": "2.9.1"
+          }
+        }
+      },
+      "starter": {
+        "cell": {
+          "_tag": "Measured",
+          "runs": [
+            0,
+            0,
+            0
+          ]
+        },
+        "provenance": {
+          "side": "starter",
+          "commit": "3333333333333333333333333333333333333333",
+          "instrumentHash": "1111111111111111111111111111111111111111",
+          "nixpkgsRev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+          "runner": "GitHub Actions 1",
+          "measuredAt": "2026-10-05T22:00:00.000Z",
+          "tools": {
+            "oxc-parser": "0.152.0",
+            "yaml": "2.9.1"
+          }
+        }
+      },
+      "verdict": {
+        "_tag": "Beaten"
+      },
+      "flags": []
+    },
+    {
+      "definition": {
+        "id": "M28",
+        "metric": "M28",
+        "bin": "install",
+        "label": "Distinct name@version packages in the side's lockfile",
+        "unit": "packages",
+        "direction": "lower",
+        "kind": "count",
+        "runs": 3,
+        "family": "static"
+      },
+      "definitionHash": "h-m28",
+      "ratstack": {
+        "cell": {
+          "_tag": "Measured",
+          "runs": [
+            957,
+            957,
+            957
+          ]
+        },
+        "provenance": {
+          "side": "ratstack",
+          "commit": "54d356037c994f89698760a4727be71d0005a087",
+          "instrumentHash": "1111111111111111111111111111111111111111",
+          "nixpkgsRev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+          "runner": "GitHub Actions 1",
+          "measuredAt": "2026-10-05T22:00:00.000Z",
+          "tools": {
+            "oxc-parser": "0.152.0",
+            "yaml": "2.9.1"
+          }
+        }
+      },
+      "starter": {
+        "cell": {
+          "_tag": "Measured",
+          "runs": [
+            392,
+            392,
+            392
+          ]
+        },
+        "provenance": {
+          "side": "starter",
+          "commit": "3333333333333333333333333333333333333333",
+          "instrumentHash": "1111111111111111111111111111111111111111",
+          "nixpkgsRev": "4975466d324710c576dc11ad614684e6bd8cad8e",
+          "runner": "GitHub Actions 1",
+          "measuredAt": "2026-10-05T22:00:00.000Z",
+          "tools": {
+            "oxc-parser": "0.152.0",
+            "yaml": "2.9.1"
+          }
+        }
+      },
+      "verdict": {
+        "_tag": "Beaten"
+      },
+      "flags": []
+    }
+  ],
+  "ratchet": {
+    "_tag": "FirstBaseline",
+    "outcomes": [
+      {
+        "_tag": "New",
+        "id": "M23"
+      },
+      {
+        "_tag": "New",
+        "id": "M28"
+      }
+    ],
+    "failures": []
+  }
+}

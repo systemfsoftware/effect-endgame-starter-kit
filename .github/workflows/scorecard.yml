@@ -1,0 +1,169 @@
+name: Scorecard
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: scorecard-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  SCORECARD_FLAKE: ./evals/ratstack-scorecard
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - id: plan
+        name: Families and rat-stack cache keys
+        run: |
+          scorecard="$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")"
+          matrix="$("$scorecard/bin/scorecard" plan)"
+          echo "$matrix" | jq .
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  measure:
+    name: measure (${{ matrix.family }})
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.timeoutMinutes }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Allow the launcher's unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Build the instrument
+        run: echo "SCORECARD=$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")/bin/scorecard" >> "$GITHUB_ENV"
+      - id: ratstack-cache
+        name: Restore the rat-stack side
+        uses: actions/cache/restore@v6
+        with:
+          path: scorecard-out/ratstack-${{ matrix.family }}.json
+          key: ${{ matrix.cacheKey }}
+      - name: Measure the rat-stack side
+        if: steps.ratstack-cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p scorecard-out
+          "$SCORECARD" measure --family "${{ matrix.family }}" --side ratstack --out "scorecard-out/ratstack-${{ matrix.family }}.json"
+      - name: Save the rat-stack side for later runs
+        if: steps.ratstack-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request'
+        uses: actions/cache/save@v6
+        with:
+          path: scorecard-out/ratstack-${{ matrix.family }}.json
+          key: ${{ matrix.cacheKey }}
+      - name: Measure the starter side
+        run: |
+          mkdir -p scorecard-out
+          "$SCORECARD" measure --family "${{ matrix.family }}" --side starter --out "scorecard-out/starter-${{ matrix.family }}.json"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: family-${{ matrix.family }}
+          path: scorecard-out/
+          if-no-files-found: error
+
+  aggregate:
+    needs: [plan, measure]
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Build the instrument
+        run: echo "SCORECARD=$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")/bin/scorecard" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: family-*
+          merge-multiple: true
+          path: families
+      - id: main
+        name: Find the latest scorecard on main
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: echo "run=$("$SCORECARD" latest-main-run)" >> "$GITHUB_OUTPUT"
+      - name: Download main's scorecard
+        if: steps.main.outputs.run != ''
+        uses: actions/download-artifact@v8
+        with:
+          name: scorecard
+          run-id: ${{ steps.main.outputs.run }}
+          github-token: ${{ github.token }}
+          path: main
+      - name: Judge, ratchet and publish
+        run: |
+          main_args=()
+          if [ -f main/scorecard.json ]; then main_args=(--main main/scorecard.json); fi
+          status=0
+          "$SCORECARD" aggregate --families families "${main_args[@]}" --out scorecard.json --summary summary.md || status=$?
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+      - uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: scorecard
+          path: scorecard.json
+          if-no-files-found: error
+
+  pin:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Build the instrument
+        run: echo "SCORECARD=$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")/bin/scorecard" >> "$GITHUB_ENV"
+      - id: check
+        name: Compare the pin with rat-stack main
+        run: |
+          plan="$("$SCORECARD" pin check)"
+          echo "$plan" | jq .
+          echo "tag=$(jq -r ._tag <<<"$plan")" >> "$GITHUB_OUTPUT"
+          echo "to=$(jq -r '.to // empty' <<<"$plan")" >> "$GITHUB_OUTPUT"
+          echo "Pin: $(jq -r 'if ._tag == "PinCurrent" then "pin current at \(.commit)" else "rat-stack moved \(.from) -> \(.to)" end' <<<"$plan")" >> "$GITHUB_STEP_SUMMARY"
+      - id: token
+        if: steps.check.outputs.tag == 'PinMoved'
+        name: Pin-bump app token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ vars.SCORECARD_APP_ID }}
+          private-key: ${{ secrets.SCORECARD_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+      - name: Open or update the pin-bump PR
+        if: steps.check.outputs.tag == 'PinMoved'
+        env:
+          GH_TOKEN: ${{ steps.token.outputs.token }}
+          TO: ${{ steps.check.outputs.to }}
+        run: |
+          nar_hash="$(nix flake prefetch --json "github:joelhooks/rat-stack/$TO" | jq -r .hash)"
+          "$SCORECARD" pin write --commit "$TO" --nar-hash "$nar_hash"
+          branch="scorecard/pin-rat-stack"
+          git config user.name "scorecard-pin[bot]"
+          git config user.email "scorecard-pin[bot]@users.noreply.github.com"
+          git switch -c "$branch"
+          git commit -m "chore(deps): pin rat-stack to ${TO:0:7} for the scorecard" -- evals/ratstack-scorecard/ratstack.pin.json
+          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$branch"
+          if [ -z "$(gh pr list --head "$branch" --json number --jq '.[0].number')" ]; then
+            gh pr create --base main --head "$branch" \
+              --title "chore(deps): pin rat-stack to ${TO:0:7} for the scorecard" \
+              --body "rat-stack \`main\` moved to \`$TO\`. This PR moves \`evals/ratstack-scorecard/ratstack.pin.json\` only; its scorecard run measures the new rat-stack. Kiro merges."
+          fi

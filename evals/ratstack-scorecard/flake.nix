@@ -50,7 +50,7 @@
               export SCORECARD_PNPM_VERSION=${pkgs.pnpm_12.version}
               export DENO_NO_PACKAGE_JSON=1
               exec deno run --no-config --allow-read --allow-write --allow-env --allow-sys=hostname \
-                --allow-run=git,${sandbox}/bin/sandbox \
+                --allow-net=api.github.com --allow-run=git,${sandbox}/bin/sandbox \
                 ${self}/src/main.ts "$@"
             '';
           };
@@ -63,7 +63,7 @@
       devShells = forEachSystem (pkgs:
         let system = pkgs.stdenv.hostPlatform.system; in {
           default = pkgs.mkShell {
-            packages = [ pkgs.nodejs_24 pkgs.pnpm_12 pkgs.deno self.packages.${system}.sandbox ];
+            packages = [ pkgs.nodejs_24 pkgs.pnpm_12 pkgs.deno pkgs.actionlint self.packages.${system}.sandbox ];
             SANDBOX_PNPM_STORE = self.packages.${system}.tools-store;
           };
         });

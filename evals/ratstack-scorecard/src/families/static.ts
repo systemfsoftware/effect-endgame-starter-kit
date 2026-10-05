@@ -1,6 +1,7 @@
 import { join } from 'node:path'
-import { arrayAt, numberAt, stringAt } from '../harness/decode.ts'
+import { array, decodeJson, number, string, struct } from '../harness/decode.ts'
 import {
+  definitionHashesFor,
   type Instrument,
   materializeRatstack,
   materializeStarter,
@@ -18,6 +19,12 @@ import type { SideAdapter } from '../sides/side-adapter.ts'
 import { starter } from '../sides/starter.ts'
 
 const runs = 3
+
+const extracted = struct({ files: array(struct({ path: string, comments: array(string), errors: number })) })
+
+const lockfileDocuments = struct({
+  documents: array(struct({ lockfileVersion: string, packages: array(string), errors: number })),
+})
 
 interface Subject {
   readonly adapter: SideAdapter
@@ -77,15 +84,14 @@ const countDirectives = async (
     if (result.code !== 0) {
       return instrumentError(`extract-comments exited ${result.code}: ${result.stderr.slice(-2000)}`)
     }
-    const parsed = JSON.parse(await Deno.readTextFile(output))
-    const files = arrayAt(parsed, ['files'], 'extract-comments output')
-    const comments = files.flatMap((file) => arrayAt(file, ['comments'], 'extract-comments file').map(String))
+    const { files } = decodeJson(extracted, await Deno.readTextFile(output), 'extract-comments output')
+    const comments = files.flatMap((file) => file.comments)
     const tally = tallyDirectives(comments)
     totals.push(totalDirectives(tally))
     detail = {
       ...tally,
       filesCounted: counted.length,
-      parseErrors: files.reduce<number>((sum, file) => sum + numberAt(file, ['errors'], 'extract-comments file'), 0),
+      parseErrors: files.reduce((sum, file) => sum + file.errors, 0),
       ...Object.fromEntries(excluded.map((v) => [`excluded:${v.root}`, `${v.files} files: ${v.reason}`])),
     }
   }
@@ -105,13 +111,13 @@ const countPackages = async (
     const output = join(work, `lockfile-${subject.adapter.side}-${run}.json`)
     const result = await node(instrument, work, tools, ['src/tools/parse-lockfile.mjs', lockfile, output])
     if (result.code !== 0) return instrumentError(`parse-lockfile exited ${result.code}: ${result.stderr.slice(-2000)}`)
-    const documents = arrayAt(JSON.parse(await Deno.readTextFile(output)), ['documents'], 'parse-lockfile output')
-    const keys = documents.flatMap((doc) => arrayAt(doc, ['packages'], 'lockfile document').map(String))
+    const { documents } = decodeJson(lockfileDocuments, await Deno.readTextFile(output), 'parse-lockfile output')
+    const keys = documents.flatMap((doc) => doc.packages)
     counts.push(distinctPackages(keys).length)
     detail = {
       lockfile: subject.adapter.lockfile,
       documents: documents.length,
-      lockfileVersions: documents.map((doc) => stringAt(doc, ['lockfileVersion'], 'lockfile document')).join(', '),
+      lockfileVersions: documents.map((doc) => doc.lockfileVersion).join(', '),
     }
   }
   return { cell: { _tag: 'Measured', runs: counts }, detail }
@@ -138,5 +144,11 @@ export const measureStatic = async (
       },
     )
   }
-  return { family: 'static', wallMs: Math.round(performance.now() - started), cells, flags: [] }
+  return {
+    family: 'static',
+    wallMs: Math.round(performance.now() - started),
+    cells,
+    flags: [],
+    definitionHashes: await definitionHashesFor(instrument, 'static'),
+  }
 }
