@@ -67,3 +67,28 @@ jobs:
             turbo-${{ runner.os }}-
       - name: Gate
         run: ${{ matrix.gate }}
+
+  stack:
+    name: stack
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Local stack journeys
+        run: nix develop --command pnpm stack:ci
+      - if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: stack-artifacts
+          path: |
+            apps/site-e2e/artifacts/
+            local-stack/data/process-compose.log
+          if-no-files-found: ignore

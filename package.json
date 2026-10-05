@@ -24,6 +24,7 @@
     "attw": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} attw",
     "build": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} build",
     "dev": "./bin/local-stack up",
+    "stack:ci": "./bin/local-stack up -D -t=false || exit 1; s=0; timeout 300 ./bin/local-stack project is-ready --wait || s=1; [ $s = 0 ] && { SITE_URL=http://localhost:1337 pnpm --filter @endgame/site-e2e test:local || s=1; }; ./bin/local-stack down; exit $s",
     "check:ci": "s=0; pnpm format:check || s=1; TURBO_CONCURRENCY=${TURBO_CONCURRENCY:-100%} pnpm gate:tasks || s=1; pnpm gate:dist || s=1; [ \"$(uname)\" = Linux ] && { pnpm check:ci-run || s=1; }; exit $s",
     "check:ci-run": "./bin/check-local-stack",
     "clean": "turbo clean",

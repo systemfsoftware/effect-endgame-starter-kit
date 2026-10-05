@@ -51,6 +51,8 @@
           packages = [
             self.packages.${pkgs.stdenv.hostPlatform.system}.dprint
             self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker
+            self.packages.${pkgs.stdenv.hostPlatform.system}.local-stack
+            pkgs.actionlint
             pkgs.nodejs_24
             pkgs.deno
           ];
