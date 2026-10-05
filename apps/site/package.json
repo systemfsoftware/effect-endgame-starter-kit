@@ -1,0 +1,58 @@
+{
+  "author": "TODO <todo@example.com>",
+  "description": "The one Worker: the starter's home page as Markdown or HTML",
+  "dependencies": {
+    "@systemfsoftware/effect-cell-types": "catalog:",
+    "@systemfsoftware/trace-taxonomy": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "effect": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@alchemy.run/frontend-frameworks": "catalog:",
+    "@babel/core": "catalog:",
+    "@cloudflare/workers-types": "catalog:",
+    "@effect/platform-node": "catalog:",
+    "@mdx-js/mdx": "catalog:",
+    "@rolldown/plugin-babel": "catalog:",
+    "@systemfsoftware/effect-gherkin-spec": "catalog:",
+    "@systemfsoftware/effect-schema-law": "catalog:",
+    "@systemfsoftware/effect-schema-vite": "catalog:",
+    "@systemfsoftware/oxlint-config-recommended": "catalog:",
+    "@systemfsoftware/stryker-ignorer-effect-schema-declarations": "catalog:",
+    "@systemfsoftware/stryker-js": "catalog:",
+    "@systemfsoftware/stryker-js-typescript-checker": "catalog:",
+    "@systemfsoftware/stryker-js-vitest-runner": "catalog:",
+    "@systemfsoftware/tsconfig": "catalog:",
+    "@systemfsoftware/vitest": "catalog:",
+    "@tanstack/router-cli": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "alchemy": "catalog:",
+    "babel-plugin-react-compiler": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "exports": {
+    ".": { "@systemfsoftware/source": "./src/mod.ts", "default": "./src/mod.ts" }
+  },
+  "license": "Apache-2.0",
+  "name": "@endgame/site",
+  "private": true,
+  "scripts": {
+    "build": "tsr generate && vite build",
+    "generate": "tsr generate",
+    "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
+    "mutation": "stryker run",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsr generate && tsc --noEmit --incremental && tsc -p tsconfig.node.json --noEmit"
+  },
+  "type": "module",
+  "version": "0.0.0"
+}
