@@ -6,7 +6,10 @@ import * as S from 'effect/Schema'
 
 const LlmsTxtTypeId: unique symbol = Symbol.for('endgame/site/LlmsTxtDecision')
 
-export const LlmsPage = S.Struct({ title: S.String, path: S.String })
+export const LlmsPage = S.Struct({
+  title: S.String.pipe(S.check(S.isPattern(/^[^[\]\r\n]+$/))),
+  path: S.String.pipe(S.check(S.isPattern(/^\/[^\s()]*$/))),
+})
 export type LlmsPage = S.Schema.Type<typeof LlmsPage>
 
 export class LlmsTxtWithPages extends S.TaggedClass<LlmsTxtWithPages>()('LlmsTxtWithPages', { document: S.String }) {
@@ -22,7 +25,7 @@ export class LlmsTxtWithoutPages extends S.TaggedClass<LlmsTxtWithoutPages>()('L
 export const LlmsTxtDecision = S.Union([LlmsTxtWithPages, LlmsTxtWithoutPages])
 
 export class LlmsTxtCommand extends S.Class<LlmsTxtCommand>('LlmsTxtCommand')({
-  origin: S.String,
+  origin: S.String.pipe(S.check(S.isPattern(/^https?:\/\/[^\s/()]+$/))),
   pages: S.Array(LlmsPage),
 }) {
   static readonly [Workflow.InstrumentationBrand]: { readonly origin: 'app.front_door.origin' } = {
