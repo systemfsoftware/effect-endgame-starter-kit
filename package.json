@@ -28,6 +28,8 @@
     "check:ci": "s=0; pnpm format:check || s=1; TURBO_CONCURRENCY=${TURBO_CONCURRENCY:-100%} pnpm gate:tasks || s=1; pnpm gate:dist || s=1; [ \"$(uname)\" = Linux ] && { pnpm check:ci-run || s=1; }; exit $s",
     "check:ci-run": "./bin/check-local-stack",
     "clean": "turbo clean",
+    "cloud:deploy": "pnpm --filter @endgame/site exec alchemy deploy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes",
+    "cloud:destroy": "pnpm --filter @endgame/site exec alchemy destroy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes",
     "format": "./bin/dprint fmt",
     "format:check": "./bin/dprint check",
     "gate:dist": "turbo --concurrency=${TURBO_CONCURRENCY:-100%} build",
