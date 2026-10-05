@@ -1,10 +1,15 @@
 {
-  // The one repo-wide unstable-API opt-in, exactly `effect/http` (Kiro ruling, 2026-10-05).
-  // Effect 4.0.1 ships HTTP only under the unstable marker; effecttsgo/unstable-api-usage
-  // (new in @effect/tsgo 0.48.1) errors on it, and global-fetch-in-effect bans the fetch
-  // alternative. Drop this when @systemfsoftware/tsconfig carries the same opt-in.
+  // The one repo-wide unstable-API opt-in, exactly `effect/http` and `effect/observability`
+  // (Kiro rulings, 2026-10-05). effecttsgo/unstable-api-usage (new in @effect/tsgo 0.48.1)
+  // errors on both. Effect 4.0.1 ships HTTP only under the unstable marker, and
+  // global-fetch-in-effect bans the fetch alternative. It ships its OTLP exporter only under
+  // the same marker, and the Effect-native exporter keeps raw OpenTelemetry SDK wiring out.
+  // Drop this when @systemfsoftware/tsconfig carries the same opt-in.
   "extends": "@systemfsoftware/tsconfig/bundler/dom",
   "compilerOptions": {
-    "plugins": [{ "name": "@effect/language-service", "allowedUnstableApis": ["effect/http"] }]
+    "plugins": [{
+      "name": "@effect/language-service",
+      "allowedUnstableApis": ["effect/http", "effect/observability"]
+    }]
   }
 }
