@@ -11,7 +11,9 @@ import { RecordCspReport } from './front-door/FrontDoorTaxonomy'
 import { HtmlPort } from './front-door/html-port.service'
 import { recordCspViolationCell } from './front-door/record-csp-violation.cell'
 import {
+  boundedCspAttributeText,
   CspReportBody,
+  CspReportFailed,
   CspReportOutcome,
   CspReportRefused,
   CspReportTooLarge,
@@ -60,7 +62,7 @@ const readBoundedBody = (
 
 const decodeReport = (text: string): Effect.Effect<CspReportBody, CspReportRefused> =>
   S.decodeEffect(CspReportBody.pipe(S.toCodecJson, S.fromJsonString))(text).pipe(
-    Effect.mapError(() => new CspReportRefused()),
+    Effect.mapError((error) => new CspReportRefused({ reason: error.message })),
   )
 
 const cappedViolations = (body: CspReportBody) => {
@@ -75,6 +77,11 @@ const recordViolations = (body: CspReportBody): Effect.Effect<{ readonly dropped
     Effect.as({ dropped }),
   )
 }
+
+const failedOutcomeOf = (detail: string): CspReportOutcome => ({
+  _tag: 'Failed',
+  reason: new CspReportFailed({ reason: detail }).message,
+})
 
 const reportOutcome = (request: HttpServerRequest.HttpServerRequest): Effect.Effect<CspReportOutcome> => {
   const declared = declaredLengthOf(request)
@@ -96,12 +103,11 @@ const reportOutcome = (request: HttpServerRequest.HttpServerRequest): Effect.Eff
           _tag: 'Refused',
           reason: error.message,
         }),
-      HttpServerError: (error): Effect.Effect<CspReportOutcome> =>
-        Effect.succeed({
-          _tag: 'Refused',
-          reason: error.message,
-        }),
+      HttpServerError: (error): Effect.Effect<CspReportOutcome> => Effect.succeed(failedOutcomeOf(error.message)),
     }),
+    Effect.catchDefect((defect): Effect.Effect<CspReportOutcome> =>
+      Effect.succeed(failedOutcomeOf(defect instanceof Error ? defect.message : 'an unexpected defect'))
+    ),
   )
 }
 
@@ -111,8 +117,18 @@ const reportAttributesOf = (outcome: CspReportOutcome): Record<string, string | 
       dropped === 0
         ? { 'app.csp.report.outcome': 'accepted' }
         : { 'app.csp.report.outcome': 'accepted', 'app.csp.report.dropped': dropped }),
-    Match.tag('TooLarge', (): Record<string, string | number> => ({ 'app.csp.report.outcome': 'too-large' })),
-    Match.tag('Refused', (): Record<string, string | number> => ({ 'app.csp.report.outcome': 'refused' })),
+    Match.tag('TooLarge', ({ reason }) => ({
+      'app.csp.report.outcome': 'too-large',
+      'app.csp.report.reason': boundedCspAttributeText(reason),
+    })),
+    Match.tag('Refused', ({ reason }) => ({
+      'app.csp.report.outcome': 'refused',
+      'app.csp.report.reason': boundedCspAttributeText(reason),
+    })),
+    Match.tag('Failed', ({ reason }) => ({
+      'app.csp.report.outcome': 'failed',
+      'app.csp.report.reason': boundedCspAttributeText(reason),
+    })),
     Match.exhaustive,
   )
 
@@ -121,6 +137,7 @@ const reportResponse = (outcome: CspReportOutcome): HttpServerResponse.HttpServe
     Match.tag('Accepted', () => HttpServerResponse.empty()),
     Match.tag('TooLarge', ({ reason }) => plainTextResponse(reason, 413)),
     Match.tag('Refused', ({ reason }) => plainTextResponse(reason, 400)),
+    Match.tag('Failed', ({ reason }) => plainTextResponse(reason, 500)),
     Match.exhaustive,
   )
 

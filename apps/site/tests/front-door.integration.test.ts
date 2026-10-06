@@ -96,6 +96,22 @@ const postReport = (body: string) =>
     return response.status
   })
 
+const erroredBody = (): ReadableStream<Uint8Array> =>
+  new ReadableStream<Uint8Array>({ start: (controller) => controller.error(new Error('body unavailable')) })
+
+const postReportFromStream = (body: ReadableStream<Uint8Array>) =>
+  Effect.gen(function*() {
+    const h = yield* handler()
+    const init = {
+      method: 'POST' as const,
+      headers: { 'content-type': 'application/csp-report' },
+      body,
+      duplex: 'half' as const,
+    }
+    const response = yield* Effect.promise(() => h(new Request('https://site.example/csp-report', init)))
+    return { status: response.status, body: yield* Effect.promise(() => response.text()) }
+  })
+
 const Feature = makeFeature({ it })
 
 Feature('Reading the site as an agent').withLayer(HtmlPortDouble).body(({ scenario }) => {
@@ -263,6 +279,16 @@ Feature('Reading the site as an agent').withLayer(HtmlPortDouble).body(({ scenar
         })),
       Then('the body at the cap is accepted and the one over it is refused for size')((s, expect) =>
         expect(s.responses).toEqual({ atCap: 204, overCap: 413 })
+      ),
+    ),
+  )
+
+  scenario(
+    'A report whose body cannot be read is answered with an internal error',
+    Gherkin.Do.pipe(
+      When('a browser posts a report whose body stream fails')('response', () => postReportFromStream(erroredBody())),
+      Then('the front door answers 500 carrying the failure reason')((s, expect) =>
+        expect(s.response).toMatchObject({ status: 500, body: expect.stringContaining('could not be recorded') })
       ),
     ),
   )

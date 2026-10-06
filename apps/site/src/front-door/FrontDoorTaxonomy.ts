@@ -29,7 +29,8 @@ export const RecordCspReport = Span.declare({
   id: 'front_door.record_csp_report',
   name: 'front_door.record_csp_report',
   attrs: S.Struct({
-    'app.csp.report.outcome': S.Literals(['accepted', 'too-large', 'refused']),
+    'app.csp.report.outcome': S.Literals(['accepted', 'too-large', 'refused', 'failed']),
+    'app.csp.report.reason': S.optionalKey(CspAttributeText),
     'app.csp.report.dropped': S.optionalKey(S.Finite),
   }),
 })
