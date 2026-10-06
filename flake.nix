@@ -43,7 +43,10 @@
           sandboxed = pkgs.callPackage ./nix/comment-checker-sandbox.nix {
             comment-checker = unwrapped;
           };
-          local-stack = pkgs.callPackage ./nix/local-stack.nix { };
+          isLinux = pkgs.stdenv.hostPlatform.isLinux;
+          heavy-job-image = pkgs.callPackage ./nix/heavy-job-image.nix { };
+          heavy-job = pkgs.callPackage ./nix/heavy-job.nix { image = heavy-job-image; };
+          local-stack = pkgs.callPackage ./nix/local-stack.nix (pkgs.lib.optionalAttrs isLinux { inherit heavy-job; });
           sfs-deps = systemfsoftware.packages.${system}.workspace-tarballs;
           pnpm-store = pkgs.callPackage ./nix/pnpm-store.nix {
             inherit (importPnpmLock.legacyPackages.${system}) importPnpmLock;
@@ -61,11 +64,17 @@
           sandbox-source = pkgs.applyPatches {
             name = "sandbox-source";
             src = "${pnpm-release-management}/nix/sandbox";
-            patches = [ ./nix/patches/sandbox-linked-worktree-git.patch ];
+            patches = [
+              ./nix/patches/sandbox-linked-worktree-git.patch
+              ./nix/patches/sandbox-unprivileged-uid.patch
+            ];
           };
           sandbox = pkgs.callPackage "${sandbox-source}/default.nix" { };
         in {
           inherit dprint local-stack sfs-deps sandbox pnpm-store;
+        } // pkgs.lib.optionalAttrs isLinux {
+          inherit heavy-job heavy-job-image;
+        } // {
           sandbox-proofs = pkgs.callPackage "${sandbox-source}/proofs.nix" { inherit sandbox; };
           comment-checker = sandboxed;
           comment-checker-unwrapped = unwrapped;
@@ -101,7 +110,7 @@
             pkgs.nodejs_24
             pkgs.pnpm_12
             pkgs.deno
-          ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ playwrightBrowsersAnchor ];
+          ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ playwrightBrowsersAnchor own.heavy-job ];
           SANDBOX_PNPM_STORE = own.pnpm-store;
           shellHook = ''
             root="$(git rev-parse --show-toplevel)"

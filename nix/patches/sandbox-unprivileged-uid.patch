@@ -1,0 +1,19 @@
+# A root invoker runs as uid and gid 65534 inside the sandbox. bwrap maps the invoker's uid to
+# itself, and since Linux 5.12 a nested user namespace may map a parent uid 0 only with CAP_SETFCAP,
+# which `--cap-drop ALL` removes. On a root host podman in the sandbox therefore stopped with
+# `cannot write uid_map: operation not permitted`. Capabilities, binds, environment and network are
+# unchanged, and a non-root invoker (a CI runner) keeps its own uid.
+#
+# Debt ledger: delete this patch, and its entry in flake.nix, in the PR that repins
+# pnpm-release-management to a rev whose nix/sandbox carries it (release-tooling owns the launcher).
+diff -r a/sandbox.sh b/sandbox.sh
+--- a/sandbox.sh	2026-10-06 19:32:07.806751857 +0000
++++ b/sandbox.sh	2026-10-06 19:32:17.280293240 +0000
+@@ -262,6 +262,7 @@
+       --tmpfs /home --dir /home/sandbox
+       --perms 0111 --tmpfs /nix/store
+     )
++    if [ "$(id -u)" -eq 0 ]; then args+=(--uid 65534 --gid 65534); fi
+     for entry in "${closure[@]}"; do args+=(--ro-bind "$entry" "$entry"); done
+     for path in /usr /bin /lib /lib64 /sbin /run/current-system/sw \
+       /etc/passwd /etc/group /etc/hosts /etc/nsswitch.conf /etc/localtime; do

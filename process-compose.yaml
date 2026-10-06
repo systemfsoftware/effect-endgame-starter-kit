@@ -69,3 +69,12 @@ processes:
       failure_threshold: 90
     shutdown:
       timeout_seconds: 10
+
+  heavy-job:
+    command: heavy-job local-stack/heavy-job reach-worker.mjs
+    disabled: true
+    depends_on:
+      site:
+        condition: process_healthy
+    availability:
+      restart: "no"

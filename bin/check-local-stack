@@ -5,12 +5,14 @@
 #
 # It re-enters through the sandbox, whose unshared network and cleared
 # environment are the denial, proves the internet is unreachable, waits for
-# every readiness probe, asserts Grafana never reached for a plugin, stops the
-# stack and checks every port is free. local-stack/data is scratch: the check
-# clears it so the plugin assertion reads a fresh run, and clears it again when
-# the stack stops cleanly. `pnpm check:ci` runs it as `check:ci-run`.
+# every readiness probe, asserts Grafana never reached for a plugin, runs one
+# job in the heavy-job service (its image under podman, no network, one socket
+# to the Worker), stops the stack and checks every port is free.
+# local-stack/data is scratch: the check clears it so the plugin assertion reads
+# a fresh run, and clears it again when the stack stops cleanly. `pnpm check:ci`
+# runs it as `check:ci-run`.
 #
-# Needs Linux, curl and the sandbox launcher (the dev shell provides both).
+# Needs Linux, curl, jq and the sandbox launcher (the dev shell provides them).
 set -uo pipefail
 
 readonly self="$(readlink -f "${BASH_SOURCE[0]}")"
@@ -30,6 +32,7 @@ readonly listens=(--listen 1337 --listen 3000 --listen 3200 --listen 4317 --list
 readonly plugin_install='Installing plugin|plugin\.installer|Downloaded and extracted'
 readonly ready_budget=180
 readonly free_budget=30
+readonly heavy_job_budget=120
 
 fail() { printf 'check-local-stack: %s\n' "$*" >&2; exit 1; }
 note() { printf 'check-local-stack: %s\n' "$*"; }
@@ -60,6 +63,33 @@ assert_no_plugin_install() {
     printf 'check-local-stack: Grafana reached for a plugin with the network denied:\n%s\n' "$matches" >&2
     exit 1
   fi
+}
+
+heavy_job_state() { # status and exit code of the heavy-job process, e.g. "Completed 0"
+  timeout 20 ./bin/local-stack process get heavy-job --output json 2>/dev/null |
+    jq -r '(if type == "array" then .[0] else . end) | "\(.status) \(.exit_code)"'
+}
+
+run_heavy_job() {
+  local digest state
+  digest=$(heavy-job --digest) || fail 'the heavy-job runner is not on PATH'
+  timeout 20 ./bin/local-stack process start heavy-job >/dev/null || {
+    stack_logs
+    fail 'process-compose did not start the heavy-job service'
+  }
+  local deadline=$((SECONDS + heavy_job_budget))
+  until state=$(heavy_job_state) && [ "${state%% *}" = Completed ]; do
+    if [ "$SECONDS" -ge "$deadline" ]; then
+      stack_logs
+      fail "the heavy-job service did not finish its job (last state: ${state:-unknown})"
+    fi
+    sleep 1
+  done
+  if [ "${state##* }" != 0 ]; then
+    stack_logs
+    fail "the heavy-job service's job exited ${state##* }"
+  fi
+  note "the heavy-job service ran image $digest with no network; its job reached the Worker through its one socket"
 }
 
 release_stack() {
@@ -102,6 +132,7 @@ run_inside_launcher() {
   done
   assert_no_plugin_install
   note 'every readiness probe answered and Grafana stayed offline'
+  run_heavy_job
   timeout 150 ./bin/local-stack down || {
     stack_logs
     fail 'the stack did not stop cleanly'
