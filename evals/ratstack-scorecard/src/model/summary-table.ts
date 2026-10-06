@@ -44,7 +44,7 @@ const showOutcome = (outcome: RowOutcome): string =>
   matchOutcome(outcome, {
     Held: () => 'held',
     New: () => 'new',
-    ReBaselined: () => 're-baselined',
+    ReBaselined: (o) => `re-baselined (definition \`${short(o.mainHash)}\` → \`${short(o.prHash)}\`)`,
     Neutral: (o) => `neutral (${o.cause})`,
     InstrumentError: (o) => `**failed**: ${o.error}`,
     LostBeaten: (o) => `**failed**: no longer beaten (rat-stack ${o.ratstack}, starter ${o.starter})`,
@@ -56,6 +56,29 @@ const outcomesOf = (doc: ScorecardDocument): readonly RowOutcome[] =>
 
 const failuresOf = (doc: ScorecardDocument): readonly RowOutcome[] =>
   matchRatchet(doc.ratchet, { FirstBaseline: (r) => r.failures, Compared: (r) => r.failures })
+
+const rebaselinedOf = (outcome: RowOutcome): readonly { id: string; mainHash: string; prHash: string }[] =>
+  matchOutcome(outcome, {
+    Held: () => [],
+    New: () => [],
+    ReBaselined: (o) => [o],
+    Neutral: () => [],
+    InstrumentError: () => [],
+    LostBeaten: () => [],
+    Regressed: () => [],
+  })
+
+const drift = (outcomes: readonly RowOutcome[]): readonly string[] => {
+  const rebaselined = outcomes.flatMap(rebaselinedOf)
+  return [
+    ...rebaselined.slice(0, 1).flatMap(() => [
+      `**Definition drift:** ${rebaselined.length} rows re-baselined; their ratchet starts over from this run.`,
+      '',
+    ]),
+    ...rebaselined.map((o) => `- ${o.id}: \`${o.mainHash}\` on \`main\`, \`${o.prHash}\` here`),
+    ...rebaselined.slice(0, 1).map(() => ''),
+  ]
+}
 
 const ratchetLine = (doc: ScorecardDocument): string =>
   matchRatchet(doc.ratchet, {
@@ -91,6 +114,7 @@ export const renderSummary = (doc: ScorecardDocument): string =>
     '',
     ...failuresOf(doc).map((failure) => `- ${failure.id}: ${cellText(showOutcome(failure))}`),
     '',
+    ...drift(outcomesOf(doc)),
     `Beaten: ${doc.rows.filter((row) => row.verdict._tag === 'Beaten').length} of ${doc.rows.length} rows.`,
     '',
     '| Row | Bin | Metric | rat-stack | starter | Verdict | Ratchet | Flags |',

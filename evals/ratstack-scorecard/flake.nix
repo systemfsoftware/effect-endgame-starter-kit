@@ -30,7 +30,7 @@
             src = self;
             pname = "ratstack-scorecard";
             pnpm = pkgs.pnpm_12;
-            hash = toolsStoreHash.${system};
+            hash = "sha256-9/W9Q1CNzoBbRBhd+qdu7TfR8xk/7mjoiEOkOLwSRpU=";
           }).pnpm-store;
           ratstack-src = pkgs.fetchFromGitHub {
             inherit (pin) owner repo;
@@ -50,7 +50,7 @@
               export SCORECARD_PNPM_VERSION=${pkgs.pnpm_12.version}
               export DENO_NO_PACKAGE_JSON=1
               exec deno run --no-config --allow-read --allow-write --allow-env --allow-sys=hostname \
-                --allow-net=api.github.com --allow-run=git,${pkgs.deno}/bin/deno,${sandbox}/bin/sandbox \
+                --allow-run=git,${pkgs.deno}/bin/deno,${sandbox}/bin/sandbox \
                 ${self}/src/main.ts "$@"
             '';
           };

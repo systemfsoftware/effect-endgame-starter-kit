@@ -2,22 +2,19 @@ import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 import { checkImports } from './check-imports.ts'
 import { measureStatic } from './families/static.ts'
-import { array, decodeJson, number, string, struct } from './harness/decode.ts'
-import { git, type Instrument, loadInstrument } from './harness/instrument.ts'
-import { cellsByRow, familyResult, scorecardDocument } from './harness/scorecard-codec.ts'
+import { type Instrument, loadInstrument } from './harness/instrument.ts'
+import { runSandboxed } from './harness/sandbox.ts'
 import { runJourneys } from './journeys.ts'
-import { familyTimeoutMinutes, rowDefinitions } from './metrics/registry.ts'
+import { familyTimeoutMinutes } from './metrics/registry.ts'
 import { ratstackCacheKey } from './model/cache-key.ts'
-import type { Family, FamilyResult, MainBaseline, Side } from './model/cell.ts'
-import { planPinBump } from './model/plan-pin-bump.workflow.ts'
-import { assembleScorecard } from './model/scorecard-document.ts'
-import { renderSummary } from './model/summary-table.ts'
+import type { Family, FamilyResult, Side } from './model/cell.ts'
 
 const usage = [
   'usage:',
   '  scorecard plan',
   '  scorecard measure --family <family> [--side ratstack|starter] [--out <file>] [--checkout <dir>]',
   '  scorecard aggregate --families <dir> [--main <scorecard.json>] --out <scorecard.json> --summary <file>',
+  '  scorecard cache-check --file <family.json>',
   '  scorecard latest-main-run',
   '  scorecard pin check',
   '  scorecard pin write --commit <sha> --nar-hash <hash> [--checkout <dir>]',
@@ -101,86 +98,52 @@ const check = async (args: readonly string[]): Promise<void> => {
   Deno.exit(await runJourneys(instrument, root))
 }
 
-const readFamilyResults = async (dir: string): Promise<readonly FamilyResult[]> => {
-  const results: FamilyResult[] = []
-  for await (const entry of Deno.readDir(dir)) {
-    if (!entry.isFile || !entry.name.endsWith('.json')) continue
-    const path = join(dir, entry.name)
-    results.push(decodeJson(familyResult, await Deno.readTextFile(path), path))
-  }
-  return results
-}
-
-const mainBaseline = async (path: string | undefined): Promise<MainBaseline> => {
-  if (path === undefined) return { _tag: 'Missing' }
-  const doc = decodeJson(scorecardDocument, await Deno.readTextFile(path), path)
-  return { _tag: 'Found', commit: doc.provenance.commit, rows: doc.rows }
+const decide = async (
+  instrument: Instrument,
+  args: readonly string[],
+  options: { readonly github: boolean },
+): Promise<number> => {
+  const root = join(instrument.checkout, 'evals/ratstack-scorecard')
+  const install = await runSandboxed(instrument.launcher, {
+    project: instrument.checkout,
+    cwd: root,
+    command: ['pnpm', 'install', '--frozen-lockfile'],
+    pnpmStore: instrument.toolsStore,
+    deadlineMs: 10 * 60_000,
+  })
+  if (install.code !== 0) fail(`installing the decide step's dependencies failed:\n${install.stderr}`)
+  const token = Deno.env.get('GITHUB_TOKEN')
+  const result = await runSandboxed(instrument.launcher, {
+    project: instrument.checkout,
+    cwd: Deno.cwd(),
+    command: ['node', join(root, 'decide/main.ts'), ...args],
+    ...(options.github ? { allowHosts: ['api.github.com'] } : {}),
+    ...(options.github && token !== undefined ? { env: { GITHUB_TOKEN: token } } : {}),
+    deadlineMs: 5 * 60_000,
+  })
+  await Deno.stdout.write(new TextEncoder().encode(result.stdout))
+  await Deno.stderr.write(new TextEncoder().encode(result.stderr))
+  return result.code
 }
 
 const aggregate = async (args: readonly string[]): Promise<void> => {
-  const { values } = parseArgs({
-    args: [...args],
-    options: {
-      families: { type: 'string' },
-      main: { type: 'string' },
-      out: { type: 'string' },
-      summary: { type: 'string' },
-    },
-    strict: true,
-  })
-  const results = await readFamilyResults(values.families ?? fail('--families is required'))
-  const cells = results.flatMap((result) => result.cells)
-  const hashes = results.flatMap((result) => result.definitionHashes)
-  const provenanceOf = (side: Side) => cells.find((cell) => cell.side === side)?.measured.provenance
-  const starter = provenanceOf('starter')
-  const ratstack = provenanceOf('ratstack')
-  const any = starter ?? ratstack ?? fail(`no family results with cells in ${values.families}`)
-  const doc = assembleScorecard({
-    rows: rowDefinitions
-      .filter((definition) => implementedFamilies.includes(definition.family))
-      .map((definition) => ({
-        definition,
-        hash: hashes.find((hash) => hash.id === definition.id)?.hash ?? `no ${definition.family} result`,
-      })),
-    cells: cellsByRow(cells),
-    flags: results.flatMap((result) => result.flags),
-    provenance: {
-      commit: starter?.commit ?? Deno.env.get('GITHUB_SHA') ?? 'unknown',
-      ratstackCommit: ratstack?.commit ?? 'unknown',
-      instrumentHash: any.instrumentHash,
-      nixpkgsRev: any.nixpkgsRev,
-      runner: any.runner,
-      generatedAt: new Date().toISOString(),
-    },
-    main: await mainBaseline(values.main),
-  })
-  await writeOut(values.out ?? fail('--out is required'), `${JSON.stringify(doc, null, 2)}\n`)
-  await writeOut(values.summary ?? fail('--summary is required'), renderSummary(doc))
-  const failures = doc.ratchet.failures
-  if (failures.length > 0) {
-    console.error(`scorecard: ${failures.length} failing rows: ${failures.map((failure) => failure.id).join(', ')}`)
-    Deno.exit(1)
-  }
+  const instrument = await loadInstrument(undefined)
+  const commit = ['--commit', Deno.env.get('GITHUB_SHA') ?? instrument.starterCommit]
+  Deno.exit(
+    await decide(instrument, ['aggregate', '--implemented', implementedFamilies.join(','), ...commit, ...args], {
+      github: false,
+    }),
+  )
 }
 
-const workflowRuns = struct({ workflow_runs: array(struct({ id: number, head_sha: string })) })
+const cacheCheck = async (args: readonly string[]): Promise<void> =>
+  Deno.exit(await decide(await loadInstrument(undefined), ['cache-check', ...args], { github: false }))
 
 const latestMainRun = async (): Promise<void> => {
-  const api = Deno.env.get('GITHUB_API_URL') ?? 'https://api.github.com'
   const repository = Deno.env.get('GITHUB_REPOSITORY') ?? fail('GITHUB_REPOSITORY is unset')
-  const token = Deno.env.get('GITHUB_TOKEN') ?? fail('GITHUB_TOKEN is unset')
-  const response = await fetch(
-    `${api}/repos/${repository}/actions/workflows/scorecard.yml/runs?branch=main&event=push&status=success&per_page=1`,
-    { headers: { authorization: `Bearer ${token}`, accept: 'application/vnd.github+json' } },
+  Deno.exit(
+    await decide(await loadInstrument(undefined), ['latest-main-run', '--repository', repository], { github: true }),
   )
-  if (response.status === 404) {
-    await response.body?.cancel()
-    await writeOut(undefined, '\n')
-    return
-  }
-  if (!response.ok) fail(`listing scorecard runs failed: ${response.status} ${await response.text()}`)
-  const { workflow_runs } = decodeJson(workflowRuns, await response.text(), 'GitHub workflow runs')
-  await writeOut(undefined, `${workflow_runs.map((run) => run.id).join('')}\n`)
 }
 
 const pinCommand = async (args: readonly string[]): Promise<void> => {
@@ -192,16 +155,10 @@ const pinCommand = async (args: readonly string[]): Promise<void> => {
   })
   const instrument = await loadInstrument(values.checkout)
   if (action === 'check') {
-    const remote = new TextDecoder().decode(
-      await git(instrument.checkout, [
-        'ls-remote',
-        `https://github.com/${instrument.pin.owner}/${instrument.pin.repo}`,
-        'refs/heads/main',
-      ]),
+    const { owner, repo, commit } = instrument.pin
+    Deno.exit(
+      await decide(instrument, ['pin-check', '--owner', owner, '--repo', repo, '--pinned', commit], { github: true }),
     )
-    const remoteHead = string(remote.split(/\s/u)[0], 'ls-remote refs/heads/main')
-    await writeOut(undefined, `${JSON.stringify(planPinBump({ pinned: instrument.pin.commit, remoteHead }))}\n`)
-    return
   }
   if (action === 'write') {
     const pin = {
@@ -220,6 +177,7 @@ const commands: Readonly<Record<string, (args: readonly string[]) => Promise<voi
   'plan': () => plan(),
   'measure': measure,
   'aggregate': aggregate,
+  'cache-check': cacheCheck,
   'latest-main-run': () => latestMainRun(),
   'pin': pinCommand,
   'journeys': journeys,

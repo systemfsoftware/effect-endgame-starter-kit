@@ -98,8 +98,14 @@ interface Aggregate {
   readonly main: string | null
 }
 
-const produceAggregate = async (root: string, entry: JourneyEntry, spec: Aggregate): Promise<LauncherRecord> => {
-  const out = await Deno.makeTempDir({ prefix: `journey-${entry.id}-` })
+const produceAggregate = async (
+  instrument: Instrument,
+  root: string,
+  entry: JourneyEntry,
+  spec: Aggregate,
+): Promise<LauncherRecord> => {
+  await Deno.mkdir(join(root, '.cache'), { recursive: true })
+  const out = await Deno.makeTempDir({ dir: join(root, '.cache'), prefix: `journey-${entry.id}-` })
   const started = performance.now()
   try {
     const argv = [
@@ -113,8 +119,18 @@ const produceAggregate = async (root: string, entry: JourneyEntry, spec: Aggrega
       join(out, 'summary.md'),
     ]
     const run = await new Deno.Command(Deno.execPath(), {
-      args: ['run', '--no-config', '--allow-read', '--allow-write', '--allow-env', join(root, 'src/main.ts'), ...argv],
-      env: { DENO_NO_PACKAGE_JSON: '1' },
+      args: [
+        'run',
+        '--no-config',
+        '--allow-read',
+        '--allow-write',
+        '--allow-env',
+        '--allow-sys=hostname',
+        `--allow-run=git,${instrument.launcher.executable}`,
+        join(root, 'src/main.ts'),
+        ...argv,
+      ],
+      env: { ...Deno.env.toObject(), DENO_NO_PACKAGE_JSON: '1' },
       stdout: 'piped',
       stderr: 'piped',
     }).output()
@@ -181,7 +197,7 @@ const produceStatic = async (
 
 const produce = async (instrument: Instrument, root: string, entry: JourneyEntry): Promise<LauncherRecord> => {
   const record = entry.produce.kind === 'aggregate'
-    ? await produceAggregate(root, entry, entry.produce)
+    ? await produceAggregate(instrument, root, entry, entry.produce)
     : await produceStatic(instrument, root, entry, entry.produce)
   return { ...record, inputHash: await inputHashOf(root, entry.inputs, instrument.launcher.executable) }
 }

@@ -1,4 +1,4 @@
-import Ajv from 'ajv'
+import { Ajv } from 'ajv'
 import { describe, expect, test } from 'vitest'
 import schema from '../scorecard.schema.json' with { type: 'json' }
 import { launcherRun } from './launcher-run.ts'

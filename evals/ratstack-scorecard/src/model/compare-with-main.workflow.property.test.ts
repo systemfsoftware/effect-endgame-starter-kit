@@ -48,7 +48,9 @@ describe('compareWithMain', () => {
       rows: [pr],
       main: { _tag: 'Found', commit, rows: [{ ...main, verdict: { _tag: 'Beaten' } }] },
     })
-    return ratchet.failures.length === 0 && ratchet.outcomes[0]!._tag === 'ReBaselined'
+    return ratchet.failures.length === 0 &&
+      JSON.stringify(ratchet.outcomes) ===
+        JSON.stringify([{ _tag: 'ReBaselined', id: main.definition.id, mainHash: main.definitionHash, prHash: hash }])
   })
 
   test.prop([

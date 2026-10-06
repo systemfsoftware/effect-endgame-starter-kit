@@ -39,7 +39,8 @@
       },
       "inputs": [
         "journeys/__fixtures__/aggregate",
-        "src"
+        "src",
+        "decide"
       ]
     },
     {
@@ -51,7 +52,8 @@
       },
       "inputs": [
         "journeys/__fixtures__/aggregate",
-        "src"
+        "src",
+        "decide"
       ]
     }
   ]
