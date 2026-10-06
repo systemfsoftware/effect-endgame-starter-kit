@@ -5,7 +5,9 @@
 # It starts the stack the way an agent or a CI job does — stdout is not a TTY
 # and TERM is unset — inside an unprivileged network namespace, waits for every
 # readiness probe, asserts Grafana never reaches for a plugin, stops the stack
-# and checks every port is free. `pnpm check:ci` runs it as `check:ci-run`.
+# and checks every port is free. local-stack/data is scratch: the check clears
+# it so the plugin assertion reads a fresh run, and clears it again when the
+# stack stops cleanly. `pnpm check:ci` runs it as `check:ci-run`.
 #
 # Needs Linux, curl, iproute2 (`ip`) and either `unshare -rn` or bwrap.
 set -uo pipefail
@@ -21,6 +23,7 @@ readonly compose_log="$data/process-compose.log"
 # (otlp grpc, otlp http, health) and process-compose's own API.
 readonly ports=(3000 3200 4317 4318 4417 8080 9095 13133)
 readonly probes=(http://127.0.0.1:13133/ http://127.0.0.1:3200/ready http://127.0.0.1:3000/api/health)
+readonly plugin_install='Installing plugin|plugin\.installer|Downloaded and extracted'
 readonly ready_budget=180
 readonly free_budget=30
 
@@ -45,6 +48,24 @@ stack_logs() {
   tail -n 25 "$compose_log" 2>/dev/null || true
 }
 
+assert_no_plugin_install() {
+  local matches
+  matches=$(grep -RhoE "($plugin_install)" --include='*.log' "$data" 2>/dev/null | sort -u || true)
+  if [ -n "$matches" ]; then
+    stack_logs
+    printf 'check-local-stack: Grafana reached for a plugin with the network denied:\n%s\n' "$matches" >&2
+    exit 1
+  fi
+}
+
+stop_started_stack() {
+  if [ -n "${stack_pid:-}" ]; then
+    kill "$stack_pid" 2>/dev/null || true
+    wait "$stack_pid" 2>/dev/null || true
+    stack_pid=
+  fi
+}
+
 run_under_denied_network() {
   ip link set lo up || fail 'could not raise the namespace loopback'
   if curl -m 5 -sS -o /dev/null https://grafana.com; then
@@ -54,10 +75,12 @@ run_under_denied_network() {
   rm -rf "$data"
   mkdir -p "$data"
   timeout 300 env -u TERM ./bin/local-stack up >"$up_log" 2>&1 </dev/null &
-  local up_pid=$!
+  stack_pid=$!
+  # Never leave a half-started stack behind when an assertion below fails.
+  trap stop_started_stack EXIT
   local deadline=$((SECONDS + ready_budget))
   until timeout 20 ./bin/local-stack project is-ready >/dev/null 2>&1; do
-    if ! kill -0 "$up_pid" 2>/dev/null; then
+    if ! kill -0 "$stack_pid" 2>/dev/null; then
       stack_logs
       fail '`pnpm dev` exited before the stack was ready'
     fi
@@ -74,12 +97,13 @@ run_under_denied_network() {
       fail "readiness probe $probe failed after the project reported ready"
     fi
   done
-  note 'every readiness probe answered with the network denied'
+  assert_no_plugin_install
+  note 'every readiness probe answered and Grafana stayed offline'
   timeout 150 ./bin/local-stack down || {
     stack_logs
     fail 'the stack did not stop cleanly'
   }
-  wait "$up_pid" 2>/dev/null || true
+  stop_started_stack
   local free_deadline=$((SECONDS + free_budget))
   while listening; do
     if [ "$SECONDS" -ge "$free_deadline" ]; then
