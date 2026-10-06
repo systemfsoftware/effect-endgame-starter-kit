@@ -127,9 +127,12 @@ Your copy deploys to your own Cloudflare account; the template holds no credenti
 pnpm run deploy                         # stage prod
 ALCHEMY_STAGE=pr-12 pnpm run deploy     # a preview stage
 ALCHEMY_STAGE=pr-12 pnpm run destroy
+SITE_URL=https://<your-site> pnpm journeys:deployed
 ```
 
 `pnpm run deploy`, not `pnpm deploy`: the bare form is pnpm's own built-in command.
+
+In your copy, with the two secrets set as repository secrets (and `SITE_DOMAIN` as a repository variable), every same-repo pull request gets a preview with its URL in a comment, and `main` deploys production once the release gate passes. The template itself never deploys.
 
 ---
 
