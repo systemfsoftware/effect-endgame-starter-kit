@@ -8,6 +8,7 @@ allowBuilds:
 catalog:
   "@alchemy.run/frontend-frameworks": 2.0.0-beta.80
   "@babel/core": 8.0.6
+  "@cloudflare/vite-plugin": 1.62.5
   "@cloudflare/workers-types": 5.20261005.1
   "@commitlint/cli": 21.2.3
   "@commitlint/config-conventional": 21.2.3
@@ -40,6 +41,7 @@ catalog:
   effect: 4.0.1
   husky: 9.1.7
   lint-staged: 17.6.0
+  miniflare: 5.20261001.0-alpha
   oxlint: 1.82.0
   oxlint-tsgolint: 7.0.2001
   react: 19.3.0
@@ -50,6 +52,7 @@ catalog:
   typescript: 7.0.2
   vite: 8.3.2
   vitest: 5.0.3
+  wrangler: 4.147.0
 catalogMode: prefer
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
@@ -57,7 +60,6 @@ minimumReleaseAgeExclude:
   - "@effect/*"
   - effect-agent
   - "@effect-agent/*"
-  - "@cloudflare/workers-types@5.20261005.1"
   - "@systemfsoftware/effect-cell-types@12.0.0"
   - "@systemfsoftware/effect-gherkin-spec@7.0.1"
   - "@systemfsoftware/effect-schema-discovery@2.0.0"
@@ -88,13 +90,6 @@ minimumReleaseAgeExclude:
   - "@systemfsoftware/trace-taxonomy@1.0.0"
   - "@systemfsoftware/tsconfig@2.0.1"
   - "@systemfsoftware/vitest@2.0.0"
-  - "@vitejs/plugin-react@6.1.2"
-  - workerd@1.20261005.1
-  - "@cloudflare/workerd-darwin-64@1.20261005.1"
-  - "@cloudflare/workerd-darwin-arm64@1.20261005.1"
-  - "@cloudflare/workerd-linux-64@1.20261005.1"
-  - "@cloudflare/workerd-linux-arm64@1.20261005.1"
-  - "@cloudflare/workerd-windows-64@1.20261005.1"
 overrides:
   workerd: 1.20261005.1
 packages:
