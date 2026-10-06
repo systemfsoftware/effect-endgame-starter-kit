@@ -1,26 +1,6 @@
 import { Function } from 'effect'
 import fc from 'fast-check'
-import type {
-  Cell,
-  CellProvenance,
-  DocumentProvenance,
-  Flag,
-  MeasuredCell,
-  MetricId,
-  Row,
-  RowDefinition,
-  RowId,
-  Side,
-} from './cell.ts'
-import type { AssembleInput } from './scorecard-document.ts'
-
-interface CellEntry {
-  readonly id: RowId
-  readonly side: Side
-  readonly measured: MeasuredCell
-}
-
-const belongs = (entry: CellEntry | undefined, id: RowId): entry is CellEntry => entry !== undefined && entry.id === id
+import type { Cell, CellProvenance, Flag, MeasuredCell, MetricId, Row, RowDefinition, RowId, Side } from './cell.ts'
 
 export const sha = fc.stringMatching(/^[0-9a-f]{40}$/)
 const text = fc.string({ minLength: 1, maxLength: 400 })
@@ -103,15 +83,6 @@ export const measuredCell: {
     fc.record({ cell: cell(row), provenance: cellProvenance(side) }),
 )
 
-export const documentProvenance: fc.Arbitrary<DocumentProvenance> = fc.record({
-  commit: sha,
-  ratstackCommit: sha,
-  instrumentHash: sha,
-  nixpkgsRev: sha,
-  runner: text,
-  generatedAt: fc.date({ noInvalidDate: true }).map((d) => d.toISOString()),
-})
-
 const flag: fc.Arbitrary<Flag> = fc.oneof(
   fc.record({ _tag: fc.constant('LiveDiffersFromPin' as const), live: sha, pin: sha }),
   fc.record({ _tag: fc.constant('ScannersDisagree' as const), primary: value, crossCheck: value }),
@@ -127,38 +98,3 @@ export const row = (overrides: Partial<RowDefinition> = {}): fc.Arbitrary<Row> =
       flags: fc.array(flag, { maxLength: 2 }),
     })
   )
-
-const uniqueDefinitions = fc.uniqueArray(definition(), { selector: (d) => d.id, maxLength: 64 })
-
-export const assembleInput: fc.Arbitrary<AssembleInput> = uniqueDefinitions.chain((definitions) =>
-  fc.record({
-    rows: fc.tuple(...definitions.map((d) => sha.map((hash) => ({ definition: d, hash })))),
-    cells: fc.tuple(
-      ...definitions.flatMap((d) =>
-        (['ratstack', 'starter'] as const).map((side) =>
-          fc.option(measuredCell(d, side).map((measured) => ({ id: d.id, side, measured })), { nil: undefined })
-        )
-      ),
-    ).map((cells) =>
-      Object.fromEntries(
-        definitions.map((d) => [
-          d.id,
-          Object.fromEntries(cells.filter((c) => belongs(c, d.id)).map((c) => [c.side, c.measured])),
-        ]),
-      )
-    ),
-    flags: fc.tuple(
-      ...definitions.map((d) => fc.array(flag, { maxLength: 2 }).map((fs) => fs.map((f) => ({ id: d.id, flag: f })))),
-    )
-      .map((groups) => groups.flat()),
-    provenance: documentProvenance,
-    main: fc.oneof(
-      fc.constant({ _tag: 'Missing' as const }),
-      fc.record({
-        _tag: fc.constant('Found' as const),
-        commit: sha,
-        rows: fc.array(row(), { maxLength: 8 }),
-      }),
-    ),
-  })
-)

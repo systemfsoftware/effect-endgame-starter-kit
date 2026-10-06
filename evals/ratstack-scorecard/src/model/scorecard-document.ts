@@ -1,3 +1,4 @@
+import { Match, Result } from 'effect'
 import type {
   DocumentProvenance,
   Family,
@@ -10,8 +11,9 @@ import type {
   RowId,
   ScorecardDocument,
   Side,
+  Verdict,
 } from './cell.ts'
-import { compareWithMain } from './compare-with-main.workflow.ts'
+import { CompareWithMain, compareWithMain } from './compare-with-main.workflow.ts'
 import { verdictOf } from './verdict.ts'
 
 export interface DefinedRow {
@@ -82,12 +84,26 @@ const rowOf = (input: AssembleInput, defined: DefinedRow): Row => {
 
 const judged = (row: Row): JudgedRow => ({ ...row, verdict: verdictOf(row) })
 
+const mainRows = (main: MainBaseline): readonly Row[] =>
+  Match.value(main).pipe(
+    Match.tag('Missing', () => []),
+    Match.tag('Found', (found) => found.rows),
+    Match.exhaustive,
+  )
+
+const verdictsOf = (rows: readonly Row[]): Record<string, Verdict> =>
+  Object.fromEntries(rows.map((row) => [row.definition.id, verdictOf(row)]))
+
 export const assembleScorecard = (input: AssembleInput): ScorecardDocument => {
   const rows = input.rows.map((defined) => rowOf(input, defined))
+  const verdicts = verdictsOf(rows)
+  const mainVerdicts = verdictsOf(mainRows(input.main))
   return {
     schemaVersion: 1,
     provenance: input.provenance,
     rows: rows.map(judged),
-    ratchet: compareWithMain({ rows, main: input.main }),
+    ratchet: Result.getOrThrow(
+      compareWithMain(new CompareWithMain({ rows, main: input.main, verdicts, mainVerdicts })),
+    ),
   }
 }
