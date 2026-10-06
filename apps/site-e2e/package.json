@@ -2,6 +2,7 @@
   "author": "TODO <todo@example.com>",
   "description": "Seam-only journeys against the running site Worker",
   "devDependencies": {
+    "@distilled.cloud/cloudflare": "catalog:",
     "@systemfsoftware/effect-gherkin-spec": "catalog:",
     "@systemfsoftware/oxlint-config-recommended": "catalog:",
     "@systemfsoftware/tsconfig": "catalog:",
