@@ -53,6 +53,9 @@ export const struct = <F extends Fields>(fields: F): Decoder<Decoded<F>> => (val
 export const optional = <T>(decode: Decoder<T>): Decoder<T | undefined> => (value, path) =>
   value === undefined ? undefined : decode(value, path)
 
+export const nullable = <T>(decode: Decoder<T>): Decoder<T | null> => (value, path) =>
+  value === null ? null : decode(value, path)
+
 export const union = <T>(...options: readonly Decoder<T>[]): Decoder<T> => (value, path) => {
   const errors: string[] = []
   for (const option of options) {

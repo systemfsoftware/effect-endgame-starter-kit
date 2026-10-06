@@ -4,7 +4,7 @@ import { checkImports } from './check-imports.ts'
 import { measureStatic } from './families/static.ts'
 import { array, decodeJson, number, string, struct } from './harness/decode.ts'
 import { git, type Instrument, loadInstrument } from './harness/instrument.ts'
-import { familyResult, scorecardDocument } from './harness/scorecard-codec.ts'
+import { cellsByRow, familyResult, scorecardDocument } from './harness/scorecard-codec.ts'
 import { runJourneys } from './journeys.ts'
 import { familyTimeoutMinutes, rowDefinitions } from './metrics/registry.ts'
 import { ratstackCacheKey } from './model/cache-key.ts'
@@ -142,7 +142,7 @@ const aggregate = async (args: readonly string[]): Promise<void> => {
         definition,
         hash: hashes.find((hash) => hash.id === definition.id)?.hash ?? `no ${definition.family} result`,
       })),
-    cells,
+    cells: cellsByRow(cells),
     flags: results.flatMap((result) => result.flags),
     provenance: {
       commit: starter?.commit ?? Deno.env.get('GITHUB_SHA') ?? 'unknown',
