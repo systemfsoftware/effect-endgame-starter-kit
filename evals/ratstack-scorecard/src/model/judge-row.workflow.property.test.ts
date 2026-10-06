@@ -2,7 +2,7 @@ import { fc, test } from '@fast-check/vitest'
 import { describe } from 'vitest'
 import type { Cell, RowDefinition } from './cell.ts'
 import { judgeRow } from './judge-row.workflow.ts'
-import { cell, definition, runsFor } from './scorecard.arbitrary.ts'
+import { cell, definition, runsFor, sha } from './scorecard.arbitrary.ts'
 
 const measured = (runs: readonly number[]): Cell => ({ _tag: 'Measured', runs })
 
@@ -18,6 +18,13 @@ const verifiedCitation: Cell = {
 
 const withRuns = (overrides: Partial<RowDefinition> = {}) =>
   definition(overrides).chain((d) => fc.tuple(fc.constant(d), runsFor(d)))
+
+const missingStarter = fc.oneof(
+  fc.string().map((reason): Cell => ({ _tag: 'Absent', reason })),
+  sha.map((s): Cell => ({ _tag: 'NoDeployment', sha: s })),
+  fc.string().map((error): Cell => ({ _tag: 'Unmeasurable', error })),
+  fc.string().map((name): Cell => ({ _tag: 'NoSecret', name })),
+)
 
 describe('judgeRow', () => {
   test.prop([withRuns(), fc.double({ min: 1e-3, max: 1e3, noNaN: true })])(
@@ -105,5 +112,13 @@ describe('judgeRow', () => {
         ratstack: { ...verifiedCitation, check: { _tag: 'Contradicted', found } },
         starter,
       })._tag === 'InstrumentError',
+  )
+
+  test.prop([definition().chain((d) => fc.tuple(fc.constant(d), cell(d), runsFor(d))), missingStarter])(
+    'a missing starter value is never beaten whatever a non-error rat-stack cell shows',
+    ([d, ratstack, runs], starter) => {
+      fc.pre(judgeRow({ definition: d, ratstack, starter: measured(runs) })._tag !== 'InstrumentError')
+      return judgeRow({ definition: d, ratstack, starter })._tag === 'NotBeaten'
+    },
   )
 })
