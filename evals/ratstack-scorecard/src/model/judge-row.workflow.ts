@@ -1,5 +1,5 @@
 import type { Cell, Citation, Kind, RowDefinition, Verdict } from './cell.ts'
-import { firstRule, matchCell, matchCheck, matchKind } from './dispatch.ts'
+import { firstRule, matchCell, matchCheck, matchKind, matchSupport } from './dispatch.ts'
 import { smallerIsBetter } from './runs.ts'
 
 export interface JudgeRowInput {
@@ -65,6 +65,21 @@ const againstStarter = (
     InstrumentError: (cell) => instrumentError(`starter: ${cell.error}`),
   })
 
+const meetsBar = (definition: RowDefinition, bar: number, runs: readonly number[]): boolean =>
+  Math.max(...smallerIsBetter(definition.direction, runs)) <= Math.min(...smallerIsBetter(definition.direction, [bar]))
+
+const againstBar = (input: JudgeRowInput): Verdict =>
+  matchSupport(input.definition.ratstackSupport, {
+    Required: () =>
+      instrumentError(`rat-stack is unsupported on ${input.definition.id}, which requires a rat-stack measurement`),
+    MayBeUnsupported: ({ bar }) =>
+      againstStarter(input, {
+        measured: (runs) =>
+          firstRule<Verdict>([[meetsBar(input.definition, bar, runs), () => beaten]], () => notBeaten),
+        unsupported: tie,
+      }),
+  })
+
 const againstNothing = (input: JudgeRowInput): Verdict =>
   againstStarter(input, { measured: () => notBeaten, unsupported: notBeaten })
 
@@ -78,7 +93,7 @@ export const judgeRow = (input: JudgeRowInput): Verdict =>
         })),
     Unsupported: (ratstack) =>
       matchCheck(ratstack.check, {
-        Verified: () => againstStarter(input, { measured: () => beaten, unsupported: tie }),
+        Verified: () => againstBar(input),
         Contradicted: (check) => contradicted(ratstack.citation, check.found),
       }),
     Absent: () => againstNothing(input),

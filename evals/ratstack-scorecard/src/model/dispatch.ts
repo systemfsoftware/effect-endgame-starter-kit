@@ -1,4 +1,15 @@
-import type { Cell, CitationCheck, Direction, Flag, Kind, MainBaseline, Ratchet, RowOutcome, Verdict } from './cell.ts'
+import type {
+  Cell,
+  CitationCheck,
+  Direction,
+  Flag,
+  Kind,
+  MainBaseline,
+  Ratchet,
+  RatstackSupport,
+  RowOutcome,
+  Verdict,
+} from './cell.ts'
 
 type ByTag<T extends { readonly _tag: string }> = { [V in T as V['_tag']]: V }
 export type Cases<M, R> = { readonly [K in keyof M]: (value: M[K]) => R }
@@ -25,6 +36,9 @@ export const matchBaseline = <R>(baseline: MainBaseline, cases: Cases<ByTag<Main
 
 export const matchFlag = <R>(flag: Flag, cases: Cases<ByTag<Flag>, R>): R =>
   dispatch<ByTag<Flag>, Flag['_tag'], R>(flag._tag, flag, cases)
+
+export const matchSupport = <R>(support: RatstackSupport, cases: Cases<ByTag<RatstackSupport>, R>): R =>
+  dispatch<ByTag<RatstackSupport>, RatstackSupport['_tag'], R>(support._tag, support, cases)
 
 export const matchDirection = <R>(direction: Direction, cases: { readonly [K in Direction]: () => R }): R =>
   cases[direction]()

@@ -27,9 +27,11 @@ export interface RowFlag {
   readonly flag: Flag
 }
 
+export type CellsByRow = Readonly<Record<string, Readonly<Partial<Record<Side, MeasuredCell>>>>>
+
 export interface AssembleInput {
   readonly rows: readonly DefinedRow[]
-  readonly cells: readonly SideCell[]
+  readonly cells: CellsByRow
   readonly flags: readonly RowFlag[]
   readonly provenance: DocumentProvenance
   readonly main: MainBaseline
@@ -49,10 +51,7 @@ const missingCell = (provenance: DocumentProvenance, id: string, side: Side): Me
 })
 
 const cellFor = (input: AssembleInput, id: string, side: Side): MeasuredCell =>
-  input.cells
-    .filter((cell) => cell.id === id)
-    .filter((cell) => cell.side === side)
-    .reduce((_, cell) => cell.measured, missingCell(input.provenance, id, side))
+  input.cells[id]?.[side] ?? missingCell(input.provenance, id, side)
 
 const rowOf = (input: AssembleInput, defined: DefinedRow): Row => {
   const ratstack = cellFor(input, defined.definition.id, 'ratstack')

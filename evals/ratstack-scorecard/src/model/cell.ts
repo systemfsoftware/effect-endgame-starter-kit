@@ -20,7 +20,12 @@ export interface RowDefinition {
   readonly kind: Kind
   readonly runs: number
   readonly family: Family
+  readonly ratstackSupport: RatstackSupport
 }
+
+export type RatstackSupport =
+  | { readonly _tag: 'Required' }
+  | { readonly _tag: 'MayBeUnsupported'; readonly bar: number }
 
 export interface Citation {
   readonly file: string
