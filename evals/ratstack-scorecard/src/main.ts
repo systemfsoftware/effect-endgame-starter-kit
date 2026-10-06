@@ -4,6 +4,7 @@ import { measureStatic } from './families/static.ts'
 import { decide, type DecideWork, prepareDecide } from './harness/decide.ts'
 import { runCheck } from './harness/gates.ts'
 import { type Instrument, loadInstrument, walkFiles } from './harness/instrument.ts'
+import { runSandboxed } from './harness/sandbox.ts'
 import { runJourneys } from './journeys.ts'
 import { ratstackCacheKey } from './model/cache-key.ts'
 import type { Family, Side } from './model/cell.ts'
@@ -14,6 +15,7 @@ const usage = [
   '  scorecard ci [--checkout <dir>] --cache <dir> --out <dir> [--main <scorecard.json>] [--title <text>]',
   '  scorecard measure --family <family> [--side ratstack|starter] [--out <file>] [--checkout <dir>]',
   '  scorecard aggregate --families <dir> [--main <scorecard.json>] --out <scorecard.json> --summary <file>',
+  '  scorecard mutation [--dry-run]',
   '  scorecard journeys [--checkout <dir>]',
   '  scorecard check [--checkout <dir>]   (import-graph rules, then journeys)',
 ].join('\n')
@@ -334,10 +336,44 @@ const ci = async (args: readonly string[]): Promise<void> => {
   Deno.exit(code)
 }
 
+const mutationCommand = ['pnpm', 'exec', 'stryker', 'run'] as const
+
+const mutationStep = async (
+  instrument: Instrument,
+  root: string,
+  command: readonly string[],
+  deadlineMs: number,
+): Promise<void> => {
+  const result = await runSandboxed(instrument.launcher, {
+    project: root,
+    cwd: root,
+    command,
+    pnpmStore: instrument.toolsStore,
+    deadlineMs,
+  })
+  await Deno.stdout.write(new TextEncoder().encode(result.stdout))
+  await Deno.stderr.write(new TextEncoder().encode(result.stderr))
+  if (result.code !== 0) Deno.exit(result.code)
+}
+
+const mutation = async (args: readonly string[]): Promise<void> => {
+  const { values } = parseArgs({
+    args: [...args],
+    options: { 'dry-run': { type: 'boolean' } },
+    strict: true,
+  })
+  if (values['dry-run'] === true) return await writeOut(undefined, `${mutationCommand.join(' ')}\n`)
+  const instrument = await loadInstrument(undefined)
+  const root = join(instrument.checkout, 'evals/ratstack-scorecard')
+  await mutationStep(instrument, root, ['pnpm', 'install', '--frozen-lockfile'], 15 * 60_000)
+  await mutationStep(instrument, root, mutationCommand, 30 * 60_000)
+}
+
 const commands: Readonly<Record<string, (args: readonly string[]) => Promise<void>>> = {
   'ci': ci,
   'measure': measure,
   'aggregate': aggregate,
+  'mutation': mutation,
   'journeys': journeys,
   'check': check,
 }

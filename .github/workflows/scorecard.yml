@@ -91,6 +91,22 @@ jobs:
           path: .scorecard-cache
           key: scorecard-ratstack-${{ github.run_id }}
 
+  mutation:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Allow the launcher's unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Build the instrument
+        run: echo "SCORECARD=$(nix build --no-link --print-out-paths ./evals/ratstack-scorecard#scorecard)/bin/scorecard" >> "$GITHUB_ENV"
+      - name: Mutate the decisions
+        run: '"$SCORECARD" mutation'
+
   instrument-preview:
     name: instrument preview (informational)
     needs: scorecard
