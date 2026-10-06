@@ -60,7 +60,7 @@
               mkdir -p "$out/packages" "$out/.sfs-deps"
               cp ${sfs-deps}/*.tgz "$out/.sfs-deps/"
             '';
-            hash = "sha256-coha4HuDKh3eiVuLQLnAypzVxNeS1nLe0fHaszmvmsk=";
+            hash = "sha256-cap5A3jr/lRE+/TJiZw9zfATyD3mKUx7ueNY9pze54g=";
           };
         in {
           inherit dprint local-stack sfs-deps;
@@ -90,9 +90,10 @@
           ];
           SANDBOX_PNPM_STORE = own.pnpm-store;
           shellHook = ''
-            sfs_deps="$(git rev-parse --show-toplevel)/.sfs-deps"
-            rm -rf "$sfs_deps"
-            cp -r --no-preserve=mode ${own.sfs-deps} "$sfs_deps"
+            root="$(git rev-parse --show-toplevel)"
+            git config core.hooksPath .husky
+            rm -rf "$root/.sfs-deps"
+            cp -r --no-preserve=mode ${own.sfs-deps} "$root/.sfs-deps"
           '';
           env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers.override {
