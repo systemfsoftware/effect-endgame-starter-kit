@@ -62,11 +62,16 @@
             '';
             hash = "sha256-cap5A3jr/lRE+/TJiZw9zfATyD3mKUx7ueNY9pze54g=";
           };
+          sandbox-source = pkgs.applyPatches {
+            name = "sandbox-source";
+            src = "${pnpm-release-management}/nix/sandbox";
+            patches = [ ./nix/patches/sandbox-linked-worktree-git.patch ];
+          };
+          sandbox = pkgs.callPackage "${sandbox-source}/default.nix" { };
         in {
-          inherit dprint local-stack sfs-deps;
+          inherit dprint local-stack sfs-deps sandbox;
           inherit (workspace) pnpm-store;
-          sandbox = pnpm-release-management.packages.${system}.sandbox;
-          sandbox-proofs = pnpm-release-management.packages.${system}.sandbox-proofs;
+          sandbox-proofs = pkgs.callPackage "${sandbox-source}/proofs.nix" { inherit sandbox; };
           comment-checker = sandboxed;
           comment-checker-unwrapped = unwrapped;
           default = dprint;
