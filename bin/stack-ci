@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Start the local stack, run the e2e journeys against it, then stop it.
+# On failure it first writes local-stack/data/stack-report.md: every
+# process's state and the tail of its log, so a red run names the process
+# that never became ready and why.
+set -uo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
+
+readonly log=local-stack/data/process-compose.log
+readonly report=local-stack/data/stack-report.md
+
+process_names() {
+  awk '/^processes:/ { inside = 1; next } inside && /^  [a-z0-9-]+:$/ { sub(":$", ""); print $1 }' process-compose.yaml
+}
+
+write_report() {
+  {
+    echo '# Local stack report'
+    echo
+    echo '## Process states'
+    echo
+    echo '```'
+    ./bin/local-stack process list -o wide 2>/dev/null || echo 'process-compose server unreachable'
+    echo '```'
+    for name in $(process_names); do
+      echo
+      echo "## ${name}: last 40 log lines"
+      echo
+      echo '```'
+      jq -r --arg name "$name" 'select(.process == $name) | .message' "$log" 2>/dev/null | tail -n 40
+      echo '```'
+    done
+  } >"$report"
+  cat "$report"
+}
+
+status=0
+./bin/local-stack up -D -t=false --keep-project || status=1
+[ "$status" = 0 ] && { timeout 300 ./bin/local-stack project is-ready --wait || status=1; }
+[ "$status" = 0 ] && { SITE_URL=http://localhost:1337 pnpm --filter @endgame/site-e2e test:local || status=1; }
+[ "$status" = 0 ] || write_report
+./bin/local-stack down
+exit "$status"

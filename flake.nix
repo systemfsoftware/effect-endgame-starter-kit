@@ -53,6 +53,7 @@
             self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker
             self.packages.${pkgs.stdenv.hostPlatform.system}.local-stack
             pkgs.actionlint
+            pkgs.jq
             pkgs.nodejs_24
             pkgs.deno
           ];
