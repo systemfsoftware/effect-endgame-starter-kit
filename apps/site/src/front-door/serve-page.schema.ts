@@ -16,6 +16,14 @@ export class PageFailure extends S.TaggedError<PageFailure>()('PageFailure', { d
   }
 }
 
+export class RequestUrlUnparseable extends S.TaggedError<RequestUrlUnparseable>()('RequestUrlUnparseable', {
+  url: S.String,
+}) {
+  override get message(): string {
+    return `the request URL ${this.url} could not be parsed`
+  }
+}
+
 export interface RouteSpec {
   readonly path: `/${string}`
   readonly llms: { readonly title: string } | null
