@@ -185,7 +185,10 @@ const runDeploy = Effect.fn(function*(options: {
         [handle.exitCode, Stream.mkString(Stream.decodeText(handle.all))],
         { concurrency: 2 },
       )
-      return { exitCode, output }
+      if (exitCode !== ChildProcessSpawner.ExitCode(0)) {
+        return yield* Effect.die(new Error(`alchemy deploy exited ${exitCode}:\n${output.slice(-6000)}`))
+      }
+      return output
     }),
   ).pipe(Effect.timeout(DEPLOY_TIMEOUT))
 })
@@ -208,9 +211,6 @@ const readLog = Effect.fn(function*(logPath: string, output: string) {
 
 const countPatches = (lines: ReadonlyArray<ApiLogLine>): number =>
   lines.filter((line) => line.method === 'PATCH' && line.path.endsWith('/script-settings')).length
-
-const normalize = (path: string): string =>
-  path.replace(ACCOUNT_ID, 'ACCOUNT').replace(/endgame-site-[a-z0-9-]+/g, 'SCRIPT')
 
 const DeployHarness = NodeChildProcessSpawner.layer.pipe(
   Layer.provideMerge(NodeHttpServer.layerTest.pipe(Layer.orDie)),
@@ -249,34 +249,26 @@ Feature('Redeploying the site does not re-send the Workers Issues setting', { ti
               const logOne = `${homeDir}/deploy-one.jsonl`
               const logTwo = `${homeDir}/deploy-two.jsonl`
 
-              const first = yield* runDeploy({ projectDir, homeDir, port, logPath: logOne, force: false })
-              const second = yield* runDeploy({ projectDir, homeDir, port, logPath: logTwo, force: true })
+              const firstOutput = yield* runDeploy({ projectDir, homeDir, port, logPath: logOne, force: false })
+              const secondOutput = yield* runDeploy({ projectDir, homeDir, port, logPath: logTwo, force: true })
 
-              const firstLog = yield* readLog(logOne, first.output)
-              const secondLog = yield* readLog(logTwo, second.output)
+              const firstLog = yield* readLog(logOne, firstOutput)
+              const secondLog = yield* readLog(logTwo, secondOutput)
               yield* Effect.ignore(fs.remove(rootDir, { recursive: true, force: true }))
 
               return {
-                firstExitCode: first.exitCode,
-                secondExitCode: second.exitCode,
                 firstPatchCount: countPatches(firstLog),
                 secondPatchCount: countPatches(secondLog),
-                firstRoutes: firstLog.map((line) => normalize(`${line.method} ${line.path}`)),
-                secondRoutes: secondLog.map((line) => normalize(`${line.method} ${line.path}`)),
                 recordedIssues: state.issues,
               }
             }),
         ),
         Then('deploy one patches Issues on and deploy two sends no settings patch')((s, expect) =>
           expect({
-            firstExitCode: s.deploys.firstExitCode,
-            secondExitCode: s.deploys.secondExitCode,
             firstPatchCount: s.deploys.firstPatchCount,
             secondPatchCount: s.deploys.secondPatchCount,
             recordedIssues: s.deploys.recordedIssues,
           }).toEqual({
-            firstExitCode: 0,
-            secondExitCode: 0,
             firstPatchCount: 1,
             secondPatchCount: 0,
             recordedIssues: [true],
