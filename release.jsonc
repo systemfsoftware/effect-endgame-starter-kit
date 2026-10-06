@@ -1,0 +1,20 @@
+{
+  // Consumed by the shared release tooling (systemfsoftware/pnpm-release-management),
+  // which this repository calls as a reusable workflow instead of carrying its
+  // own copy. This template models that unified pattern for the repositories
+  // adopters fork from it.
+  "base": "main",
+  "branch": "changeset-release/main",
+  "versioning": {
+    // Each workspace package owns its version in its own package.json; the
+    // release delegates to `pnpm version -r`, as the deleted local tooling did.
+    "strategy": "pnpm",
+  },
+  // Turbo's task graph decides which packages a change touches, so an intent is
+  // required for exactly the publishable packages a PR actually affects.
+  "gate": { "strategy": "turbo", "task": "build" },
+  "pr": {
+    "title": "chore(release): version packages",
+    "body": "Consumes pending `.changeset/` intents.\n\nMerging tags the released versions and creates GitHub Releases.",
+  },
+}
