@@ -7,6 +7,7 @@ import { siteWorker } from './site-worker.ts'
 export const Site = Cloudflare.Website.Vite('Site', {
   main: siteWorker.main,
   compatibility: { date: siteWorker.compatibilityDate, flags: [...siteWorker.compatibilityFlags] },
+  dev: { port: 1337, strictPort: true },
 })
 
 export default Alchemy.Stack(

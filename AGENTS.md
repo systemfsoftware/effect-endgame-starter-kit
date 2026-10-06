@@ -20,6 +20,7 @@ Starter template for TypeScript / Effect libraries and tools.
 | `START-2` | Typechecking succeeds workspace-wide with no errors | `pnpm typecheck`    |
 | `START-3` | All test suites pass                                | `pnpm test`         |
 | `START-4` | Full CI validation passes before completion         | `pnpm check:ci`     |
+| `START-5` | The e2e journeys pass against `pnpm dev`            | `pnpm journeys`     |
 
 Workspace roots: `packages/` holds libraries, `apps/` holds publishable
 applications — both are workspace globs in `pnpm-workspace.yaml`. Turbo declares
