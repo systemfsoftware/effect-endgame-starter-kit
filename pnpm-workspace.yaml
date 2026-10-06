@@ -45,6 +45,7 @@ catalog:
   miniflare: 5.20261001.0-alpha
   oxlint: 1.82.0
   oxlint-tsgolint: 7.0.2001
+  playwright: 1.63.0
   react: 19.3.0
   react-dom: 19.3.0
   turbo: 2.11.7

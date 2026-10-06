@@ -3,6 +3,7 @@ import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
+import { CspNonce } from './content-security-policy.schema.ts'
 import { Accept, type AcceptPreferences, Origin, PathRoute, prefersHtml } from './serve-page.schema.ts'
 
 const ServePageTypeId: unique symbol = Symbol.for('endgame/site/ServePageDecision')
@@ -45,6 +46,7 @@ export class ServePageCommand extends S.Class<ServePageCommand>('ServePageComman
   path: PathRoute,
   accept: Accept,
   origin: Origin,
+  nonce: CspNonce,
 }) {
   static readonly [Workflow.InstrumentationBrand]: { readonly path: 'app.front_door.route' } = {
     path: 'app.front_door.route',
