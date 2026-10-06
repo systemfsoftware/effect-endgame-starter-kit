@@ -20,9 +20,19 @@ export class CspReportTooLarge extends S.TaggedError<CspReportTooLarge>()('CspRe
   }
 }
 
-export class CspReportRefused extends S.TaggedError<CspReportRefused>()('CspReportRefused', {}) {
+export class CspReportRefused extends S.TaggedError<CspReportRefused>()('CspReportRefused', {
+  reason: S.String,
+}) {
   override get message(): string {
-    return 'the csp report body could not be decoded'
+    return `the csp report body could not be decoded: ${this.reason}`
+  }
+}
+
+export class CspReportFailed extends S.TaggedError<CspReportFailed>()('CspReportFailed', {
+  reason: S.String,
+}) {
+  override get message(): string {
+    return `the csp report could not be recorded: ${this.reason}`
   }
 }
 
@@ -116,6 +126,7 @@ export const violationsOf = (body: CspReportBody): ReadonlyArray<CspViolation> =
 export const AcceptedReport = S.TaggedStruct('Accepted', { dropped: S.Finite })
 export const TooLargeReport = S.TaggedStruct('TooLarge', { reason: S.String })
 export const RefusedReport = S.TaggedStruct('Refused', { reason: S.String })
+export const FailedReport = S.TaggedStruct('Failed', { reason: S.String })
 
-export const CspReportOutcome = S.Union([AcceptedReport, TooLargeReport, RefusedReport])
+export const CspReportOutcome = S.Union([AcceptedReport, TooLargeReport, RefusedReport, FailedReport])
 export type CspReportOutcome = S.Schema.Type<typeof CspReportOutcome>
