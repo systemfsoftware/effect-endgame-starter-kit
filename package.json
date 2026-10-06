@@ -28,6 +28,8 @@
     "check:ci": "s=0; pnpm format:check || s=1; pnpm check:sfs-sources || s=1; TURBO_CONCURRENCY=${TURBO_CONCURRENCY:-100%} pnpm gate:tasks || s=1; pnpm gate:dist || s=1; pnpm test:sandbox || s=1; exit $s",
     "check:sfs-sources": "sandbox --allow-host jsr.io -- ./scripts/check-sfs-sources.ts",
     "clean": "sandbox -- turbo clean",
+    "deploy": "./bin/cloud pnpm --filter @endgame/site exec alchemy deploy --stage \"${ALCHEMY_STAGE:-prod}\" --no-input --yes",
+    "destroy": "./bin/cloud pnpm --filter @endgame/site exec alchemy destroy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. pr-<N>}\" --no-input --yes",
     "format": "./bin/dprint fmt",
     "format:check": "./bin/dprint check",
     "gate:dist": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-100%} build",

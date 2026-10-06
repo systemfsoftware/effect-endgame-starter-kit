@@ -112,6 +112,25 @@ pnpm build
 pnpm check:ci
 ```
 
+### 4. Run It Locally
+
+```bash
+pnpm dev       # the whole app at http://localhost:1337, Alchemy's local emulation, no cloud
+pnpm journeys  # the end-to-end journeys in a real browser against pnpm dev
+```
+
+### 5. Deploy
+
+Your copy deploys to your own Cloudflare account; the template holds no credentials. Set `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and optionally `SITE_DOMAIN` (a hostname in a zone on that account) to serve production there instead of on `workers.dev`:
+
+```bash
+pnpm run deploy                         # stage prod
+ALCHEMY_STAGE=pr-12 pnpm run deploy     # a preview stage
+ALCHEMY_STAGE=pr-12 pnpm run destroy
+```
+
+`pnpm run deploy`, not `pnpm deploy`: the bare form is pnpm's own built-in command.
+
 ---
 
 ## 🚦 Verification Gates
