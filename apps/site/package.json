@@ -53,7 +53,9 @@
   "private": true,
   "scripts": {
     "build": "tsr generate && vite build",
+    "dev": "vite dev",
     "generate": "tsr generate",
+    "preview": "vite preview",
     "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
     "mutation": "stryker run",
     "test": "vitest run --passWithNoTests",
