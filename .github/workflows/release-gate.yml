@@ -90,10 +90,10 @@ jobs:
         id: prior
         run: |
           worker=""
-          if state="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" 2>"$RUNNER_TEMP/prior.err")"; then
-            worker="$(jq -er '.workerName' <<<"$state")"
-          elif ! grep -q 'path does not exist' "$RUNNER_TEMP/prior.err"; then
-            cat "$RUNNER_TEMP/prior.err" >&2
+          if out="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" 2>&1)"; then
+            worker="$(sed -n '/^{/,$p' <<<"$out" | jq -er '.workerName')"
+          elif ! grep -q 'path does not exist' <<<"$out"; then
+            echo "$out" >&2
             exit 1
           fi
           echo "worker=$worker" >> "$GITHUB_OUTPUT"
@@ -118,10 +118,11 @@ jobs:
       - name: Read the production worker and URL
         id: site
         run: |
-          state="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output")"
+          state="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" | sed -n '/^{/,$p')"
           echo "$state"
-          echo "worker=$(jq -er '.workerName' <<<"$state")" >> "$GITHUB_OUTPUT"
-          echo "url=$(jq -er '.url' <<<"$state")" >> "$GITHUB_OUTPUT"
+          worker="$(jq -er '.workerName' <<<"$state")"
+          url="$(jq -er '.url' <<<"$state")"
+          { echo "worker=$worker"; echo "url=$url"; } >> "$GITHUB_OUTPUT"
       - name: Check the redeploy log and Workers Issues
         env:
           DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
