@@ -20,6 +20,7 @@ const FAILURE_HTML =
 export interface ServePageRequest {
   readonly request: HttpServerRequest.HttpServerRequest
   readonly random: Crypto
+  readonly url: URL
 }
 
 const drawNonce = (random: Crypto) =>
@@ -69,12 +70,8 @@ const renderHtml = (command: { readonly nonce: CspNonce }) =>
     return withCsp(HttpServerResponse.setHeader(HttpServerResponse.fromWeb(response), 'Vary', 'Accept'), command.nonce)
   })
 
-const read = ({ request, random }: ServePageRequest) =>
+const read = ({ request, random, url }: ServePageRequest) =>
   Effect.gen(function*() {
-    const web = yield* HttpServerRequest.toWeb(request).pipe(
-      Effect.catchCause((cause) => Effect.fail(new PageFailure({ detail: Cause.pretty(cause) }))),
-    )
-    const url = new URL(web.url)
     return {
       path: url.pathname,
       accept: request.headers['accept'] ?? '',
