@@ -21,6 +21,8 @@ checked by mutation. What reaches `main` is what you would have written by hand.
 
 Point an agent at a capability and let it grow one layer at a time.
 
+Read this page as plain text at [llms.txt](/llms.txt).
+
 <!-- home:end -->
 
 ---
