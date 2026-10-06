@@ -15,7 +15,7 @@ concurrency:
 jobs:
   plan:
     name: plan · mutation shards
-    runs-on: [self-hosted, systemfsoftware-runner, small]
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       packages: ${{ steps.shards.outputs.packages }}
@@ -28,7 +28,7 @@ jobs:
   mutation:
     name: mutation · ${{ matrix.package }}
     needs: [plan]
-    runs-on: [self-hosted, systemfsoftware-runner, large]
+    runs-on: ubuntu-latest
     timeout-minutes: 75
     strategy:
       fail-fast: false
