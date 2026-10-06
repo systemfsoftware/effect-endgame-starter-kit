@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  SCORECARD_FLAKE: ./evals/ratstack-scorecard
+  INSTRUMENT_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
 
 jobs:
   plan:
@@ -28,11 +28,15 @@ jobs:
       matrix: ${{ steps.plan.outputs.matrix }}
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.INSTRUMENT_REF }}
+          path: instrument
       - uses: cachix/install-nix-action@v31
       - id: plan
         name: Families and rat-stack cache keys
+        working-directory: instrument
         run: |
-          scorecard="$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")"
+          scorecard="$(nix build --no-link --print-out-paths ./evals/ratstack-scorecard#scorecard)"
           matrix="$("$scorecard/bin/scorecard" plan)"
           echo "$matrix" | jq .
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
@@ -47,24 +51,46 @@ jobs:
     timeout-minutes: ${{ matrix.timeoutMinutes }}
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.INSTRUMENT_REF }}
+          path: .scorecard-instrument
       - uses: cachix/install-nix-action@v31
       - name: Allow the launcher's unprivileged user namespaces
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-      - name: Build the instrument
-        run: echo "SCORECARD=$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")/bin/scorecard" >> "$GITHUB_ENV"
+      - name: Build main's instrument
+        run: echo "SCORECARD=$(nix build --no-link --print-out-paths ./.scorecard-instrument/evals/ratstack-scorecard#scorecard)/bin/scorecard" >> "$GITHUB_ENV"
       - id: ratstack-cache
         name: Restore the rat-stack side
         uses: actions/cache/restore@v6
         with:
           path: scorecard-out/ratstack-${{ matrix.family }}.json
           key: ${{ matrix.cacheKey }}
+      - id: cached
+        name: Refuse a cached rat-stack side that holds an instrument error
+        if: steps.ratstack-cache.outputs.cache-hit == 'true'
+        run: |
+          if "$SCORECARD" cache-check --file "scorecard-out/ratstack-${{ matrix.family }}.json"; then
+            echo "usable=true" >> "$GITHUB_OUTPUT"
+          else
+            rm -f "scorecard-out/ratstack-${{ matrix.family }}.json"
+            echo "::warning::cached rat-stack ${{ matrix.family }} side refused; measuring it again"
+          fi
       - name: Measure the rat-stack side
-        if: steps.ratstack-cache.outputs.cache-hit != 'true'
+        if: steps.cached.outputs.usable != 'true'
         run: |
           mkdir -p scorecard-out
-          "$SCORECARD" measure --family "${{ matrix.family }}" --side ratstack --out "scorecard-out/ratstack-${{ matrix.family }}.json"
+          "$SCORECARD" measure --family "${{ matrix.family }}" --side ratstack --checkout "$GITHUB_WORKSPACE" \
+            --out "scorecard-out/ratstack-${{ matrix.family }}.json"
+      - id: savable
+        name: Check the fresh rat-stack side before caching it
+        if: steps.cached.outputs.usable != 'true' && github.event_name != 'pull_request'
+        run: |
+          if "$SCORECARD" cache-check --file "scorecard-out/ratstack-${{ matrix.family }}.json"; then
+            echo "save=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Save the rat-stack side for later runs
-        if: steps.ratstack-cache.outputs.cache-hit != 'true' && github.event_name != 'pull_request'
+        if: steps.savable.outputs.save == 'true'
         uses: actions/cache/save@v6
         with:
           path: scorecard-out/ratstack-${{ matrix.family }}.json
@@ -72,7 +98,8 @@ jobs:
       - name: Measure the starter side
         run: |
           mkdir -p scorecard-out
-          "$SCORECARD" measure --family "${{ matrix.family }}" --side starter --out "scorecard-out/starter-${{ matrix.family }}.json"
+          "$SCORECARD" measure --family "${{ matrix.family }}" --side starter --checkout "$GITHUB_WORKSPACE" \
+            --out "scorecard-out/starter-${{ matrix.family }}.json"
       - uses: actions/upload-artifact@v7
         with:
           name: family-${{ matrix.family }}
@@ -86,9 +113,15 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.INSTRUMENT_REF }}
+          path: .scorecard-instrument
       - uses: cachix/install-nix-action@v31
-      - name: Build the instrument
-        run: echo "SCORECARD=$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")/bin/scorecard" >> "$GITHUB_ENV"
+      - name: Allow the launcher's unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Build main's instrument
+        run: echo "SCORECARD=$(nix build --no-link --print-out-paths ./.scorecard-instrument/evals/ratstack-scorecard#scorecard)/bin/scorecard" >> "$GITHUB_ENV"
       - uses: actions/download-artifact@v8
         with:
           pattern: family-*
@@ -113,7 +146,7 @@ jobs:
           if [ -f main/scorecard.json ]; then main_args=(--main main/scorecard.json); fi
           status=0
           "$SCORECARD" aggregate --families families "${main_args[@]}" --out scorecard.json --summary summary.md || status=$?
-          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+          if [ -f summary.md ]; then cat summary.md >> "$GITHUB_STEP_SUMMARY"; fi
           exit "$status"
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
@@ -122,17 +155,73 @@ jobs:
           path: scorecard.json
           if-no-files-found: error
 
+  instrument-preview:
+    name: instrument preview (informational)
+    needs: aggregate
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.aggregate.result != 'skipped' }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: changed
+        name: Does this PR edit the instrument
+        run: |
+          if git diff --quiet "${{ github.event.pull_request.base.sha }}" HEAD -- evals/ratstack-scorecard; then
+            echo "edits=false" >> "$GITHUB_OUTPUT"
+            echo "This PR leaves the instrument alone; nothing to preview." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "edits=true" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: cachix/install-nix-action@v31
+        if: steps.changed.outputs.edits == 'true'
+      - name: Allow the launcher's unprivileged user namespaces
+        if: steps.changed.outputs.edits == 'true'
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - uses: actions/download-artifact@v8
+        if: steps.changed.outputs.edits == 'true'
+        with:
+          name: scorecard
+          path: graded
+      - name: Measure with this PR's instrument and list what it would re-baseline
+        if: steps.changed.outputs.edits == 'true'
+        run: |
+          scorecard="$(nix build --no-link --print-out-paths ./evals/ratstack-scorecard#scorecard)/bin/scorecard"
+          mkdir -p preview
+          for family in $("$scorecard" plan | jq -r '.include[].family'); do
+            "$scorecard" measure --family "$family" --out "preview/$family.json"
+          done
+          status=0
+          "$scorecard" aggregate --families preview --main graded/scorecard.json \
+            --out preview-scorecard.json --summary preview-summary.md || status=$?
+          {
+            echo "## Instrument preview (does not gate)"
+            echo
+            echo "This PR's own instrument, compared with the scorecard main's instrument produced for it. Re-baselined rows are listed under definition drift."
+            echo
+            cat preview-summary.md
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"
+
   pin:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
       - uses: cachix/install-nix-action@v31
+      - name: Allow the launcher's unprivileged user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Build the instrument
-        run: echo "SCORECARD=$(nix build --no-link --print-out-paths "$SCORECARD_FLAKE#scorecard")/bin/scorecard" >> "$GITHUB_ENV"
+        run: echo "SCORECARD=$(nix build --no-link --print-out-paths ./evals/ratstack-scorecard#scorecard)/bin/scorecard" >> "$GITHUB_ENV"
       - id: check
         name: Compare the pin with rat-stack main
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           plan="$("$SCORECARD" pin check)"
           echo "$plan" | jq .
@@ -148,22 +237,37 @@ jobs:
           private-key: ${{ secrets.SCORECARD_APP_PRIVATE_KEY }}
           permission-contents: write
           permission-pull-requests: write
+      # scorecard/pin-rat-stack is bot-owned: the job only ever replaces a tip the bot
+      # itself wrote, through a lease pinned to that tip, so a human commit there is
+      # never overwritten. The App token reaches git through a credential helper that
+      # reads it from the environment, never through argv or a URL.
       - name: Open or update the pin-bump PR
         if: steps.check.outputs.tag == 'PinMoved'
         env:
           GH_TOKEN: ${{ steps.token.outputs.token }}
           TO: ${{ steps.check.outputs.to }}
+          BRANCH: scorecard/pin-rat-stack
+          BOT_EMAIL: scorecard-pin[bot]@users.noreply.github.com
         run: |
+          git config credential.helper "!f() { echo username=x-access-token; echo \"password=\${GH_TOKEN}\"; }; f"
           nar_hash="$(nix flake prefetch --json "github:joelhooks/rat-stack/$TO" | jq -r .hash)"
           "$SCORECARD" pin write --commit "$TO" --nar-hash "$nar_hash"
-          branch="scorecard/pin-rat-stack"
+          lease="$(git ls-remote origin "refs/heads/$BRANCH" | cut -f1)"
+          if [ -n "$lease" ]; then
+            git fetch --quiet origin "$lease"
+            author="$(git log -1 --format=%ae "$lease")"
+            if [ "$author" != "$BOT_EMAIL" ]; then
+              echo "::error::$BRANCH tip $lease was written by $author, not the pin bot; refusing to replace it"
+              exit 1
+            fi
+          fi
           git config user.name "scorecard-pin[bot]"
-          git config user.email "scorecard-pin[bot]@users.noreply.github.com"
-          git switch -c "$branch"
+          git config user.email "$BOT_EMAIL"
+          git switch -c "$BRANCH"
           git commit -m "chore(deps): pin rat-stack to ${TO:0:7} for the scorecard" -- evals/ratstack-scorecard/ratstack.pin.json
-          git push --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$branch"
-          if [ -z "$(gh pr list --head "$branch" --json number --jq '.[0].number')" ]; then
-            gh pr create --base main --head "$branch" \
+          git push --force-with-lease="refs/heads/$BRANCH:$lease" origin "HEAD:refs/heads/$BRANCH"
+          if [ -z "$(gh pr list --head "$BRANCH" --json number --jq '.[0].number')" ]; then
+            gh pr create --base main --head "$BRANCH" \
               --title "chore(deps): pin rat-stack to ${TO:0:7} for the scorecard" \
               --body "rat-stack \`main\` moved to \`$TO\`. This PR moves \`evals/ratstack-scorecard/ratstack.pin.json\` only; its scorecard run measures the new rat-stack. Kiro merges."
           fi

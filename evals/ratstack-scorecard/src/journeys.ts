@@ -1,6 +1,6 @@
 import { join, relative } from 'node:path'
 import { measureStatic } from './families/static.ts'
-import { arrayAt, at, objectAt, parseJson, stringAt, type JsonValue } from './harness/decode.ts'
+import { arrayAt, at, type JsonValue, objectAt, parseJson, stringAt } from './harness/decode.ts'
 import { git, type Instrument, walkFiles } from './harness/instrument.ts'
 import { runSandboxed } from './harness/sandbox.ts'
 
@@ -113,7 +113,7 @@ const overlayWithFailingTool = async (instrument: Instrument, work: string, tool
   await Promise.all(files.map((file) => overlayFile(instrument, dir, file)))
   const failing = join(dir, 'src/tools', tool)
   await Deno.remove(failing)
-  await Deno.writeTextFile(failing, 'Deno.exit(3)\n')
+  await Deno.writeTextFile(failing, 'process.exit(3)\n')
   return dir
 }
 
@@ -133,17 +133,35 @@ const producedFiles = async (out: string): Promise<Readonly<Record<string, strin
   return files
 }
 
-const producedArgv = (out: string, argv: readonly string[]): readonly string[] =>
-  ['scorecard', ...argv.map((arg) => arg.startsWith(out) ? arg.slice(out.length + 1) : arg)]
+const producedArgv = (
+  out: string,
+  argv: readonly string[],
+): readonly string[] => ['scorecard', ...argv.map((arg) => arg.startsWith(out) ? arg.slice(out.length + 1) : arg)]
 
-const produceAggregate = async (root: string, entry: JourneyEntry, spec: Aggregate): Promise<LauncherRecord> => {
-  const out = await Deno.makeTempDir({ prefix: `journey-${entry.id}-` })
+const produceAggregate = async (
+  instrument: Instrument,
+  root: string,
+  entry: JourneyEntry,
+  spec: Aggregate,
+): Promise<LauncherRecord> => {
+  await Deno.mkdir(join(root, '.cache'), { recursive: true })
+  const out = await Deno.makeTempDir({ dir: join(root, '.cache'), prefix: `journey-${entry.id}-` })
   const started = performance.now()
   try {
     const argv = aggregateArgv(root, spec)
     const run = await new Deno.Command(Deno.execPath(), {
-      args: ['run', '--no-config', '--allow-read', '--allow-write', '--allow-env', join(root, 'src/main.ts'), ...argv],
-      env: { DENO_NO_PACKAGE_JSON: '1' },
+      args: [
+        'run',
+        '--no-config',
+        '--allow-read',
+        '--allow-write',
+        '--allow-env',
+        '--allow-sys=hostname',
+        `--allow-run=git,${instrument.launcher.executable}`,
+        join(root, 'src/main.ts'),
+        ...argv,
+      ],
+      env: { ...Deno.env.toObject(), DENO_NO_PACKAGE_JSON: '1' },
       stdout: 'piped',
       stderr: 'piped',
     }).output()
@@ -205,7 +223,7 @@ const produceStatic = async (
 
 const produce = async (instrument: Instrument, root: string, entry: JourneyEntry): Promise<LauncherRecord> => {
   const record = entry.produce.kind === 'aggregate'
-    ? await produceAggregate(root, entry, entry.produce)
+    ? await produceAggregate(instrument, root, entry, entry.produce)
     : await produceStatic(instrument, root, entry, entry.produce)
   return { ...record, inputHash: await inputHashOf(root, entry.inputs, instrument.launcher.executable) }
 }
