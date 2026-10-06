@@ -1,14 +1,23 @@
 #!/usr/bin/env bash
-# Start the local stack, run the e2e journeys against it, then stop it.
+# Start the local stack, run the e2e journeys against it, then stop it — the
+# stack, the Worker and the journeys all inside one sandbox launcher, so its
+# network denial and cleared environment cover every dependency-running process.
 # On failure it first writes local-stack/data/stack-report.md: every
 # process's state and the tail of its log, so a red run names the process
 # that never became ready and why.
 set -uo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
+readonly self="$(readlink -f "${BASH_SOURCE[0]}")"
+cd "$(dirname "$self")/.." || exit 1
 
 readonly log=local-stack/data/process-compose.log
 readonly report=local-stack/data/stack-report.md
+# Every port the stack binds, declared so the launcher's macOS profile permits
+# each bind; none is published, because the journeys reach the site in-sandbox.
+readonly stack_ports=(
+  --listen 1337 --listen 3000 --listen 3200 --listen 4317 --listen 4318
+  --listen 4417 --listen 8080 --listen 8888 --listen 9095 --listen 13133
+)
 
 process_names() {
   awk '/^processes:/ { inside = 1; next } inside && /^  [a-z0-9-]+:$/ { sub(":$", ""); print $1 }' process-compose.yaml
@@ -35,10 +44,24 @@ write_report() {
   cat "$report"
 }
 
-status=0
-./bin/local-stack up -D -t=false --keep-project || status=1
-[ "$status" = 0 ] && { timeout 300 ./bin/local-stack project is-ready --wait || status=1; }
-[ "$status" = 0 ] && { SITE_URL=http://localhost:1337 pnpm --filter @endgame/site-e2e test:local || status=1; }
-[ "$status" = 0 ] || write_report
-./bin/local-stack down
-exit "$status"
+run_journeys() {
+  status=0
+  ./bin/local-stack up -D -t=false --keep-project || status=1
+  [ "$status" = 0 ] && { timeout 300 ./bin/local-stack project is-ready --wait || status=1; }
+  [ "$status" = 0 ] && { SITE_URL=http://localhost:1337 pnpm --filter @endgame/site-e2e test:local || status=1; }
+  [ "$status" = 0 ] || write_report
+  ./bin/local-stack down
+  exit "$status"
+}
+
+if [ "${SANDBOX:-}" = 1 ]; then
+  run_journeys
+else
+  # The journeys run pnpm, the Worker and Chromium; outside the dev shell none
+  # of them is in the launcher's readable closure, so enter it first.
+  if ! command -v sandbox >/dev/null 2>&1; then
+    command -v nix >/dev/null 2>&1 || { echo 'stack-ci: no sandbox on PATH and no nix to enter the dev shell' >&2; exit 1; }
+    exec nix develop --command bash "$self"
+  fi
+  exec sandbox "${stack_ports[@]}" --pass-env PLAYWRIGHT_BROWSERS_PATH -- bash "$self"
+fi

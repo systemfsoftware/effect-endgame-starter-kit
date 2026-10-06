@@ -80,6 +80,20 @@
       devShells = forEachSystem (pkgs:
         let
           own = self.packages.${pkgs.stdenv.hostPlatform.system};
+          playwrightBrowsers = pkgs.playwright-driver.browsers.override {
+            withChromium = false;
+            withFirefox = false;
+            withWebkit = false;
+            withFfmpeg = false;
+          };
+          # The launcher reads only store paths on PATH, the command and the
+          # pnpm store, so a bare --pass-env cannot carry the browsers in. A
+          # PATH entry whose closure reaches them makes the store path readable.
+          playwrightBrowsersAnchor = pkgs.writeShellApplication {
+            name = "playwright-browsers-anchor";
+            runtimeInputs = [ playwrightBrowsers ];
+            text = ":";
+          };
         in {
         default = pkgs.mkShell {
           packages = [
@@ -92,7 +106,7 @@
             pkgs.nodejs_24
             pkgs.pnpm_12
             pkgs.deno
-          ];
+          ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ playwrightBrowsersAnchor ];
           SANDBOX_PNPM_STORE = own.pnpm-store;
           shellHook = ''
             root="$(git rev-parse --show-toplevel)"
@@ -101,12 +115,7 @@
             cp -r --no-preserve=mode ${own.sfs-deps} "$root/.sfs-deps"
           '';
           env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-            PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers.override {
-              withChromium = false;
-              withFirefox = false;
-              withWebkit = false;
-              withFfmpeg = false;
-            }}";
+            PLAYWRIGHT_BROWSERS_PATH = "${playwrightBrowsers}";
           };
         };
       });

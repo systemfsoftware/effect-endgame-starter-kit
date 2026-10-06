@@ -23,7 +23,7 @@
     "attw": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} attw",
     "bootstrap": "sandbox -- pnpm install && sandbox -- pnpm rebuild --config.ignore-scripts=false && sandbox -- pnpm run prepare",
     "build": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} build",
-    "dev": "./bin/local-stack up",
+    "dev": "sandbox --publish 1337:1337 --publish 3000:3000 --publish 3200:3200 --publish 8080:8080 --publish 8888:8888 --listen 9095 --listen 4417 --listen 4317 --listen 4318 --listen 13133 -- ./bin/local-stack up",
     "stack:ci": "./bin/stack-ci",
     "check:ci": "s=0; pnpm format:check || s=1; TURBO_CONCURRENCY=${TURBO_CONCURRENCY:-100%} pnpm gate:tasks || s=1; pnpm gate:dist || s=1; pnpm test:sandbox || s=1; [ \"$(uname)\" = Linux ] && { pnpm check:ci-run || s=1; }; exit $s",
     "check:ci-run": "./bin/check-local-stack",
