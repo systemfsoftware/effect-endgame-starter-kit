@@ -12,10 +12,14 @@ const opening = readme
   .slice(readme.indexOf(README_HOME_START) + README_HOME_START.length, readme.indexOf(README_HOME_END))
   .trim()
 
-const HTML_BODY = '<h1>Rendered README opening</h1>'
-
 const HtmlPortDouble = Layer.succeed(HtmlPort, {
-  render: () => Effect.succeed(new Response(HTML_BODY, { status: 200, headers: { 'content-type': 'text/html' } })),
+  render: (web: Request) =>
+    Effect.succeed(
+      new Response(`<h1>Rendered README opening at ${web.url}</h1>`, {
+        status: 200,
+        headers: { 'content-type': 'text/html' },
+      }),
+    ),
 })
 
 const callPage = (path: string, accept?: string) =>
@@ -61,8 +65,13 @@ Feature('Reading the site as an agent').withLayer(HtmlPortDouble).body(({ scenar
             'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
           ),
       ),
-      Then('the HTML renderer answers')((s, expect) =>
-        expect(s.response).toMatchObject({ status: 200, contentType: 'text/html', vary: 'Accept', body: HTML_BODY })
+      Then('the HTML renderer answers with the composed request')((s, expect) =>
+        expect(s.response).toMatchObject({
+          status: 200,
+          contentType: 'text/html',
+          vary: 'Accept',
+          body: expect.stringContaining('https://site.example/'),
+        })
       ),
     ),
   )
@@ -96,6 +105,16 @@ Feature('Reading the site as an agent').withLayer(HtmlPortDouble).body(({ scenar
           vary: 'Accept',
           body: opening,
         })
+      ),
+    ),
+  )
+
+  scenario(
+    'An agent is pointed at the llms.txt catalog',
+    Gherkin.Do.pipe(
+      When('an agent requests the home page with no Accept header')('response', () => callPage('/')),
+      Then('the Markdown body links the llms.txt catalog')((s, expect) =>
+        expect(s.response.body).toContain('](/llms.txt)')
       ),
     ),
   )
