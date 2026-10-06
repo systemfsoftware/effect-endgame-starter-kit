@@ -1,4 +1,4 @@
-import type { Cell, Flag, Kind, Row, RowOutcome, ScorecardDocument, Verdict } from './cell.ts'
+import type { Cell, Flag, JudgedRow, Kind, Row, RowOutcome, ScorecardDocument, Verdict } from './cell.ts'
 import { matchCell, matchFlag, matchKind, matchOutcome, matchRatchet, matchVerdict } from './dispatch.ts'
 import { median } from './runs.ts'
 
@@ -63,7 +63,7 @@ const ratchetLine = (doc: ScorecardDocument): string =>
     Compared: (r) => `compared with \`main\` at \`${short(r.mainCommit)}\`, ${r.failures.length} failing rows`,
   })
 
-const tableRow = (row: Row, outcomes: readonly RowOutcome[]): string =>
+const tableRow = (row: JudgedRow, outcomes: readonly RowOutcome[]): string =>
   `| ${
     [
       row.definition.id,
@@ -76,6 +76,9 @@ const tableRow = (row: Row, outcomes: readonly RowOutcome[]): string =>
       row.flags.map(showFlag).join(', '),
     ].map(cellText).join(' | ')
   } |`
+
+const beaten = (verdict: Verdict): boolean =>
+  matchVerdict(verdict, { Beaten: () => true, NotBeaten: () => false, Tie: () => false, InstrumentError: () => false })
 
 export const renderSummary = (doc: ScorecardDocument): string =>
   [
@@ -91,7 +94,7 @@ export const renderSummary = (doc: ScorecardDocument): string =>
     '',
     ...failuresOf(doc).map((failure) => `- ${failure.id}: ${cellText(showOutcome(failure))}`),
     '',
-    `Beaten: ${doc.rows.filter((row) => row.verdict._tag === 'Beaten').length} of ${doc.rows.length} rows.`,
+    `Beaten: ${doc.rows.filter((row) => beaten(row.verdict)).length} of ${doc.rows.length} rows.`,
     '',
     '| Row | Bin | Metric | rat-stack | starter | Verdict | Ratchet | Flags |',
     '| --- | --- | --- | --- | --- | --- | --- | --- |',

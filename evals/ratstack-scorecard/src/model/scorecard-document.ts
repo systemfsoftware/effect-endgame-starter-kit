@@ -1,6 +1,7 @@
 import type {
   DocumentProvenance,
   Flag,
+  JudgedRow,
   MainBaseline,
   MeasuredCell,
   Row,
@@ -9,7 +10,7 @@ import type {
   Side,
 } from './cell.ts'
 import { compareWithMain } from './compare-with-main.workflow.ts'
-import { judgeRow } from './judge-row.workflow.ts'
+import { verdictOf } from './judge-row.workflow.ts'
 
 export interface DefinedRow {
   readonly definition: RowDefinition
@@ -61,17 +62,18 @@ const rowOf = (input: AssembleInput, defined: DefinedRow): Row => {
     definitionHash: defined.hash,
     ratstack,
     starter,
-    verdict: judgeRow({ definition: defined.definition, ratstack: ratstack.cell, starter: starter.cell }),
     flags: input.flags.filter((flag) => flag.id === defined.definition.id).map((flag) => flag.flag),
   }
 }
+
+const judged = (row: Row): JudgedRow => ({ ...row, verdict: verdictOf(row) })
 
 export const assembleScorecard = (input: AssembleInput): ScorecardDocument => {
   const rows = input.rows.map((defined) => rowOf(input, defined))
   return {
     schemaVersion: 1,
     provenance: input.provenance,
-    rows,
+    rows: rows.map(judged),
     ratchet: compareWithMain({ rows, main: input.main }),
   }
 }

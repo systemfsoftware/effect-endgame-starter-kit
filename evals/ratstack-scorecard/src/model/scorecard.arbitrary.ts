@@ -1,15 +1,5 @@
 import fc from 'fast-check'
-import type {
-  Cell,
-  CellProvenance,
-  DocumentProvenance,
-  Flag,
-  MeasuredCell,
-  Row,
-  RowDefinition,
-  Side,
-  Verdict,
-} from './cell.ts'
+import type { Cell, CellProvenance, DocumentProvenance, Flag, MeasuredCell, Row, RowDefinition, Side } from './cell.ts'
 import type { AssembleInput } from './scorecard-document.ts'
 
 export const sha = fc.stringMatching(/^[0-9a-f]{40}$/)
@@ -90,13 +80,6 @@ export const documentProvenance: fc.Arbitrary<DocumentProvenance> = fc.record({
   generatedAt: fc.date({ noInvalidDate: true }).map((d) => d.toISOString()),
 })
 
-export const verdict: fc.Arbitrary<Verdict> = fc.oneof(
-  fc.constant<Verdict>({ _tag: 'Beaten' }),
-  fc.constant<Verdict>({ _tag: 'NotBeaten' }),
-  fc.constant<Verdict>({ _tag: 'Tie' }),
-  text.map((error): Verdict => ({ _tag: 'InstrumentError', error })),
-)
-
 const flag: fc.Arbitrary<Flag> = fc.oneof(
   fc.record({ _tag: fc.constant('LiveDiffersFromPin' as const), live: sha, pin: sha }),
   fc.record({ _tag: fc.constant('ScannersDisagree' as const), primary: value, crossCheck: value }),
@@ -109,7 +92,6 @@ export const row = (overrides: Partial<RowDefinition> = {}): fc.Arbitrary<Row> =
       definitionHash: sha,
       ratstack: measuredCell(def, 'ratstack'),
       starter: measuredCell(def, 'starter'),
-      verdict,
       flags: fc.array(flag, { maxLength: 2 }),
     })
   )
@@ -130,7 +112,7 @@ export const assembleInput: fc.Arbitrary<AssembleInput> = uniqueDefinitions.chai
         definitions.map((d) => [
           d.id,
           Object.fromEntries(
-            cells.filter((c) => c !== undefined && c.id === d.id).map((c) => [c!.side, c!.measured]),
+            cells.flatMap((c) => (c === undefined || c.id !== d.id ? [] : [[c.side, c.measured] as const])),
           ),
         ]),
       )

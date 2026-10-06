@@ -46,7 +46,6 @@ const row = (definition: RowDefinition, ratstack: Cell, starter: Cell): Row => (
   definitionHash: 'd'.repeat(40),
   ratstack: at(ratstack),
   starter: at(starter),
-  verdict: judgeRow({ definition, ratstack, starter }),
   flags: [],
 })
 

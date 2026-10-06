@@ -81,8 +81,11 @@ export interface Row {
   readonly definitionHash: string
   readonly ratstack: MeasuredCell
   readonly starter: MeasuredCell
-  readonly verdict: Verdict
   readonly flags: readonly Flag[]
+}
+
+export interface JudgedRow extends Row {
+  readonly verdict: Verdict
 }
 
 export type RowOutcome =
@@ -125,6 +128,6 @@ export interface DocumentProvenance {
 export interface ScorecardDocument {
   readonly schemaVersion: 1
   readonly provenance: DocumentProvenance
-  readonly rows: readonly Row[]
+  readonly rows: readonly JudgedRow[]
   readonly ratchet: Ratchet
 }

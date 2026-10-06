@@ -1,5 +1,6 @@
 import type { Cell, Direction, MainBaseline, Ratchet, Row, RowOutcome, Verdict } from './cell.ts'
 import { firstRule, matchBaseline, matchCell, matchOutcome, matchVerdict } from './dispatch.ts'
+import { verdictOf } from './judge-row.workflow.ts'
 import { median, smallerIsBetter } from './runs.ts'
 
 export interface CompareWithMainInput {
@@ -63,7 +64,7 @@ const compareRow = (main: Row, pr: Row): RowOutcome =>
   firstRule<RowOutcome>([
     [main.definitionHash !== pr.definitionHash, () => ({ _tag: 'ReBaselined', id: pr.definition.id })],
     [
-      beatenWeight(main.verdict) > beatenWeight(pr.verdict),
+      beatenWeight(verdictOf(main)) > beatenWeight(verdictOf(pr)),
       () => ({
         _tag: 'LostBeaten',
         id: pr.definition.id,
@@ -74,7 +75,7 @@ const compareRow = (main: Row, pr: Row): RowOutcome =>
   ], () => starterAgainstMain(main, pr))
 
 const unlessInstrumentError = (pr: Row, otherwise: () => RowOutcome): RowOutcome =>
-  matchVerdict(pr.verdict, {
+  matchVerdict(verdictOf(pr), {
     InstrumentError: (verdict) => ({ _tag: 'InstrumentError', id: pr.definition.id, error: verdict.error }),
     Beaten: otherwise,
     NotBeaten: otherwise,
