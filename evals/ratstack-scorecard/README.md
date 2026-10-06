@@ -15,7 +15,7 @@ The scorecard measures the starter against [rat-stack](https://github.com/joelho
 - A row is **beaten** only when the starter's worst run is strictly better than rat-stack's best run. Overlapping ranges are **not beaten**; identical ranges are a **tie**.
 - A count that does not reproduce exactly, or a side that produced the wrong number of runs, is an **instrument error**.
 - An invariant rat-stack lacks is **unsupported** with a `file:line` citation. The citation is re-checked at the pin; if the cited lines no longer say it, the row is an instrument error.
-- The ratchet compares a PR with the latest `main` artifact. It fails on any instrument error, on a row beaten on `main` that the PR no longer beats, and on a starter value worse than `main`'s worst run. A missing secret or a fork PR without a preview is neutral. A changed metric definition is re-baselined.
+- The ratchet compares a PR with the latest `main` artifact. It fails on any instrument error, on a row beaten on `main` that the PR no longer beats, and on a starter value worse than `main`'s worst run. A missing secret or a fork PR without a preview is neutral. A changed metric definition is re-baselined: the outcome carries both definition hashes and the summary lists them under definition drift.
 
 ## Running it
 

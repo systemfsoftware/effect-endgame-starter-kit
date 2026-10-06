@@ -1,5 +1,13 @@
 import { NodeServices } from '@effect/platform-node'
-import { assembleScorecard, type MeasuredCell, type Verdict } from '@starter/ratstack-scorecard'
+import {
+  type AssembleInput,
+  assembleScorecard,
+  type MeasuredCell,
+  renderSummary,
+  type RowOutcome,
+  type ScorecardDocument,
+  type Verdict,
+} from '@starter/ratstack-scorecard'
 import { Gherkin, Given, it, makeFeature, Then, When } from '@systemfsoftware/effect-gherkin-spec'
 import Ajv from 'ajv'
 import { Effect, Match } from 'effect'
@@ -13,6 +21,25 @@ const verdictTagOf = (verdict: Verdict): string => verdict._tag
 
 const errorOf = (cell: MeasuredCell['cell']): string | undefined =>
   Match.value(cell).pipe(Match.tag('InstrumentError', (error) => error.error), Match.orElse(() => undefined))
+
+const reBaselinedOf = (outcome: RowOutcome): readonly string[] =>
+  Match.value(outcome).pipe(
+    Match.tag('ReBaselined', (o) => [`${o.id}:${o.mainHash}:${o.prHash}`]),
+    Match.orElse(() => []),
+  )
+
+const reBaselined = (document: ScorecardDocument): readonly string[] => document.ratchet.outcomes.flatMap(reBaselinedOf)
+
+const withChangedHash: AssembleInput = {
+  ...sampleInput,
+  main: {
+    _tag: 'Found',
+    commit: 'f'.repeat(40),
+    rows: assembleScorecard(sampleInput).rows.map((row) =>
+      row.definition.id === 'M23' ? { ...row, definitionHash: 'main-changed' } : row
+    ),
+  },
+}
 
 Feature('Assembling the scorecard document')
   .withScenarioLayer(NodeServices.layer)
@@ -54,6 +81,26 @@ Feature('Assembling the scorecard document')
             ['M23', 'Beaten'],
             ['M12', 'Beaten'],
           ])
+        ),
+      ),
+    )
+    scenario(
+      'A changed definition hash publishes a ReBaselined carrying both hashes and validates',
+      Gherkin.Do.pipe(
+        Given('a main baseline whose M23 definition hash differs')('input', () => Effect.succeed(withChangedHash)),
+        When('the document is assembled')('document', (scope) => Effect.succeed(assembleScorecard(scope.input))),
+        Then('the schema accepts it and the summary lists both hashes')((scope, expect) =>
+          expect({
+            reBaselined: reBaselined(scope.document),
+            drift: renderSummary(scope.document).includes(
+              `- M23: \`main-changed\` on \`main\`, \`${'d'.repeat(40)}\` here`,
+            ),
+            valid: validate(scope.document),
+          }).toEqual({
+            reBaselined: [`M23:main-changed:${'d'.repeat(40)}`],
+            drift: true,
+            valid: true,
+          })
         ),
       ),
     )

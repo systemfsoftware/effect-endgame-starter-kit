@@ -161,7 +161,12 @@ const lostBeaten = (main: Row, pr: Row): RowOutcome => ({
 const reBaselinedOr = (main: Row, pr: Row, otherwise: () => RowOutcome): RowOutcome =>
   Match.value(main.definitionHash === pr.definitionHash).pipe(
     Match.when(true, otherwise),
-    Match.orElse((): RowOutcome => ({ _tag: 'ReBaselined', id: pr.definition.id })),
+    Match.orElse((): RowOutcome => ({
+      _tag: 'ReBaselined',
+      id: pr.definition.id,
+      mainHash: main.definitionHash,
+      prHash: pr.definitionHash,
+    })),
   )
 
 const lostBeatenOr = (

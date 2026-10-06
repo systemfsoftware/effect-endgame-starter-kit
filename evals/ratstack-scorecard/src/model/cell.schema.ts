@@ -81,7 +81,11 @@ export type Flag = S.Schema.Type<typeof FlagBase>
 
 const RowOutcomeHeld = S.TaggedStruct('Held', { id: RowIdBase })
 const RowOutcomeNew = S.TaggedStruct('New', { id: RowIdBase })
-const RowOutcomeReBaselined = S.TaggedStruct('ReBaselined', { id: RowIdBase })
+const RowOutcomeReBaselined = S.TaggedStruct('ReBaselined', {
+  id: RowIdBase,
+  mainHash: S.String,
+  prHash: S.String,
+})
 const RowOutcomeNeutral = S.TaggedStruct('Neutral', { id: RowIdBase, cause: S.String })
 const RowOutcomeInstrumentError = S.TaggedStruct('InstrumentError', { id: RowIdBase, error: S.String })
 const RowOutcomeLostBeaten = S.TaggedStruct('LostBeaten', { id: RowIdBase, ratstack: S.String, starter: S.String })

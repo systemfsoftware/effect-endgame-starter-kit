@@ -106,7 +106,7 @@ const RowSchema: Schema.Codec<JudgedRow> = Schema.Struct({
 const OutcomeSchema: Schema.Codec<RowOutcome> = Schema.Union([
   tagged('Held', { id: rowId }),
   tagged('New', { id: rowId }),
-  tagged('ReBaselined', { id: rowId }),
+  tagged('ReBaselined', { id: rowId, mainHash: Schema.String, prHash: Schema.String }),
   tagged('Neutral', { id: rowId, cause: cellTag }),
   tagged('InstrumentError', { id: rowId, error: Schema.String }),
   tagged('LostBeaten', { id: rowId, ratstack: cellTag, starter: cellTag }),

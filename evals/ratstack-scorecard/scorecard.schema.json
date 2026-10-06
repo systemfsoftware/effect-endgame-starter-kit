@@ -248,7 +248,18 @@
           "type": "object",
           "additionalProperties": false,
           "required": ["_tag", "id"],
-          "properties": { "_tag": { "enum": ["Held", "New", "ReBaselined"] }, "id": { "type": "string" } }
+          "properties": { "_tag": { "enum": ["Held", "New"] }, "id": { "type": "string" } }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["_tag", "id", "mainHash", "prHash"],
+          "properties": {
+            "_tag": { "const": "ReBaselined" },
+            "id": { "type": "string" },
+            "mainHash": { "type": "string" },
+            "prHash": { "type": "string" }
+          }
         },
         {
           "type": "object",
