@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import { arrayAt, numberAt, stringAt } from '../harness/decode.ts'
 import {
   type Instrument,
+  materializeRatstack,
   materializeStarter,
   prepareTools,
   provenanceFor,
@@ -41,7 +42,11 @@ const node = async (instrument: Instrument, work: string, tools: string, args: r
 
 const subjectOf = async (instrument: Instrument, work: string, side: Side): Promise<Subject> =>
   side === 'ratstack'
-    ? { adapter: ratstack, root: instrument.ratstackSrc, files: await walkFiles(instrument.ratstackSrc) }
+    ? {
+      adapter: ratstack,
+      root: await materializeRatstack(instrument, work),
+      files: await walkFiles(instrument.ratstackSrc),
+    }
     : {
       adapter: starter,
       root: await materializeStarter(instrument, work),

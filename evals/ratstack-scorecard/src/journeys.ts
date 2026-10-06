@@ -95,8 +95,10 @@ const produce = async (instrument: Instrument, root: string, entry: JourneyEntry
   const work = await Deno.makeTempDir({ prefix: `journey-${entry.id}-` })
   const started = performance.now()
   try {
-    const ratstackSrc = await gitRepoFrom(join(root, entry.produce.ratstackRepo), join(work, 'ratstack'))
-    const checkout = await gitRepoFrom(join(root, entry.produce.starterRepo), join(work, 'starter-checkout'))
+    const ratstackSrc = await gitRepoFrom(join(root, entry.produce.ratstackRepo), join(work, 'sources/ratstack'))
+    const checkout = await gitRepoFrom(join(root, entry.produce.starterRepo), join(work, 'sources/starter-checkout'))
+    const project = join(work, 'project')
+    await Deno.mkdir(project)
     const dir = entry.produce.failingTool === null
       ? instrument.dir
       : await overlayWithFailingTool(instrument, work, entry.produce.failingTool)
@@ -107,7 +109,7 @@ const produce = async (instrument: Instrument, root: string, entry: JourneyEntry
       checkout,
       starterCommit: new TextDecoder().decode(await git(checkout, ['rev-parse', 'HEAD'])).trim(),
     }
-    const result = await measureStatic(subject, work, ['ratstack', 'starter'])
+    const result = await measureStatic(subject, project, ['ratstack', 'starter'])
     return {
       id: entry.id,
       inputHash: await inputHashOf(root, entry.inputs, instrument.launcher.executable),
