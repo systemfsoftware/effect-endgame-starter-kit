@@ -20,7 +20,7 @@ import type {
   Side,
   Verdict,
 } from '../model/cell.ts'
-import type { FamilyResult, RowFlag, SideCell } from '../model/scorecard-document.ts'
+import type { CellsByRow, FamilyResult, RowFlag, SideCell } from '../model/scorecard-document.ts'
 import { at, arrayAt, numberAt, objectAt, stringAt, type JsonObject, type JsonValue } from './decode.ts'
 
 const failure = (what: string, detail: string): never => {
@@ -90,11 +90,16 @@ const optionalDetail = (
   )
 }
 
+const pairOf = (value: JsonValue, key: string, what: string): readonly [JsonValue, JsonValue] => {
+  const lines = arrayAt(value, [key], what)
+  if (lines.length !== 2) return failure(what, `expected a pair at ${key}`)
+  const first = lines[0] ?? failure(what, `expected a pair at ${key}`)
+  const second = lines[1] ?? failure(what, `expected a pair at ${key}`)
+  return [first, second]
+}
+
 const citationOf = (value: JsonValue, what: string): Citation => {
-  const lines = arrayAt(value, ['lines'], what)
-  if (lines.length !== 2) return failure(what, 'expected a pair of lines')
-  const first = lines[0] ?? failure(what, 'expected a pair of lines')
-  const second = lines[1] ?? failure(what, 'expected a pair of lines')
+  const [first, second] = pairOf(value, 'lines', what)
   return {
     file: textOf(value, 'file', what),
     lines: [numberAt(first, [], what), numberAt(second, [], what)],
@@ -108,30 +113,25 @@ const citationCheckOf = (value: JsonValue, what: string): CitationCheck =>
     found: textOf(value, 'found', what),
   }
 
-const cellOf = (value: JsonValue, what: string): Cell => {
-  switch (tagOf(value, what)) {
-    case 'Measured':
-      return { _tag: 'Measured', runs: arrayOf(value, 'runs', what).map((run) => scalarNumber(run, `${what}.runs`)) }
-    case 'Absent':
-      return { _tag: 'Absent', reason: textOf(value, 'reason', what) }
-    case 'NoDeployment':
-      return { _tag: 'NoDeployment', sha: textOf(value, 'sha', what) }
-    case 'Unsupported':
-      return {
-        _tag: 'Unsupported',
-        citation: citationOf(objectOf(value, 'citation', what), `${what}.citation`),
-        check: citationCheckOf(objectOf(value, 'check', what), `${what}.check`),
-      }
-    case 'Unmeasurable':
-      return { _tag: 'Unmeasurable', error: textOf(value, 'error', what) }
-    case 'NoSecret':
-      return { _tag: 'NoSecret', name: textOf(value, 'name', what) }
-    case 'InstrumentError':
-      return { _tag: 'InstrumentError', error: textOf(value, 'error', what) }
-    default:
-      return failure(what, `expected a known cell tag`)
-  }
+const cellBuilders: Readonly<Record<string, (value: JsonValue, what: string) => Cell>> = {
+  Measured: (value, what) => ({
+    _tag: 'Measured',
+    runs: arrayOf(value, 'runs', what).map((run) => scalarNumber(run, `${what}.runs`)),
+  }),
+  Absent: (value, what) => ({ _tag: 'Absent', reason: textOf(value, 'reason', what) }),
+  NoDeployment: (value, what) => ({ _tag: 'NoDeployment', sha: textOf(value, 'sha', what) }),
+  Unsupported: (value, what) => ({
+    _tag: 'Unsupported',
+    citation: citationOf(objectOf(value, 'citation', what), `${what}.citation`),
+    check: citationCheckOf(objectOf(value, 'check', what), `${what}.check`),
+  }),
+  Unmeasurable: (value, what) => ({ _tag: 'Unmeasurable', error: textOf(value, 'error', what) }),
+  NoSecret: (value, what) => ({ _tag: 'NoSecret', name: textOf(value, 'name', what) }),
+  InstrumentError: (value, what) => ({ _tag: 'InstrumentError', error: textOf(value, 'error', what) }),
 }
+
+const cellOf = (value: JsonValue, what: string): Cell =>
+  (cellBuilders[tagOf(value, what)] ?? failure(what, 'expected a known cell tag'))(value, what)
 
 const provenanceOf = (value: JsonValue, what: string): CellProvenance => {
   const liveCommit = optionalText(value, 'liveCommit', what)
@@ -190,42 +190,42 @@ const rowOf = (value: JsonValue, what: string): Row => ({
   flags: arrayOf(value, 'flags', what).map((flag, index) => flagOf(flag, `${what}.flags[${index}]`)),
 })
 
-const verdictOf = (value: JsonValue, what: string): Verdict => {
-  switch (tagOf(value, what)) {
-    case 'Beaten':
-      return { _tag: 'Beaten' }
-    case 'NotBeaten':
-      return { _tag: 'NotBeaten' }
-    case 'Tie':
-      return { _tag: 'Tie' }
-    case 'InstrumentError':
-      return { _tag: 'InstrumentError', error: textOf(value, 'error', what) }
-    default:
-      return failure(what, 'expected a known verdict tag')
-  }
+const verdictBuilders: Readonly<Record<string, (value: JsonValue, what: string) => Verdict>> = {
+  Beaten: () => ({ _tag: 'Beaten' }),
+  NotBeaten: () => ({ _tag: 'NotBeaten' }),
+  Tie: () => ({ _tag: 'Tie' }),
+  InstrumentError: (value, what) => ({ _tag: 'InstrumentError', error: textOf(value, 'error', what) }),
 }
 
-const outcomeOf = (value: JsonValue, what: string): RowOutcome => {
-  const id = rowIdOf(objectOf(value, 'id', what), `${what}.id`)
-  switch (tagOf(value, what)) {
-    case 'Held':
-      return { _tag: 'Held', id }
-    case 'New':
-      return { _tag: 'New', id }
-    case 'ReBaselined':
-      return { _tag: 'ReBaselined', id }
-    case 'Neutral':
-      return { _tag: 'Neutral', id, cause: textOf(value, 'cause', what) }
-    case 'InstrumentError':
-      return { _tag: 'InstrumentError', id, error: textOf(value, 'error', what) }
-    case 'LostBeaten':
-      return { _tag: 'LostBeaten', id, ratstack: textOf(value, 'ratstack', what), starter: textOf(value, 'starter', what) }
-    case 'Regressed':
-      return { _tag: 'Regressed', id, main: textOf(value, 'main', what), pr: textOf(value, 'pr', what) }
-    default:
-      return failure(what, 'expected a known row outcome tag')
-  }
+const verdictOf = (value: JsonValue, what: string): Verdict =>
+  (verdictBuilders[tagOf(value, what)] ?? failure(what, 'expected a known verdict tag'))(value, what)
+
+const outcomeBuilders: Readonly<Record<string, (id: RowId, value: JsonValue, what: string) => RowOutcome>> = {
+  Held: (id) => ({ _tag: 'Held', id }),
+  New: (id) => ({ _tag: 'New', id }),
+  ReBaselined: (id) => ({ _tag: 'ReBaselined', id }),
+  Neutral: (id, value, what) => ({ _tag: 'Neutral', id, cause: textOf(value, 'cause', what) }),
+  InstrumentError: (id, value, what) => ({ _tag: 'InstrumentError', id, error: textOf(value, 'error', what) }),
+  LostBeaten: (id, value, what) => ({
+    _tag: 'LostBeaten',
+    id,
+    ratstack: textOf(value, 'ratstack', what),
+    starter: textOf(value, 'starter', what),
+  }),
+  Regressed: (id, value, what) => ({
+    _tag: 'Regressed',
+    id,
+    main: textOf(value, 'main', what),
+    pr: textOf(value, 'pr', what),
+  }),
 }
+
+const outcomeOf = (value: JsonValue, what: string): RowOutcome =>
+  (outcomeBuilders[tagOf(value, what)] ?? failure(what, 'expected a known row outcome tag'))(
+    rowIdOf(objectOf(value, 'id', what), `${what}.id`),
+    value,
+    what,
+  )
 
 const outcomesOf = (value: JsonValue, key: string, what: string): readonly RowOutcome[] =>
   arrayOf(value, key, what).map((outcome, index) => outcomeOf(outcome, `${what}.${key}[${index}]`))
@@ -243,6 +243,16 @@ const ratchetOf = (value: JsonValue, what: string): Ratchet =>
       outcomes: outcomesOf(value, 'outcomes', what),
       failures: outcomesOf(value, 'failures', what),
     }
+
+export const cellsByRow = (cells: readonly SideCell[]): CellsByRow => {
+  const byRow = new Map<RowId, Partial<Record<Side, MeasuredCell>>>()
+  for (const cell of cells) {
+    const row = byRow.get(cell.id) ?? {}
+    row[cell.side] = cell.measured
+    byRow.set(cell.id, row)
+  }
+  return Object.fromEntries(byRow)
+}
 
 const documentProvenanceOf = (value: JsonValue, what: string): DocumentProvenance => ({
   commit: textOf(value, 'commit', what),

@@ -1,6 +1,6 @@
 import { join, relative } from 'node:path'
 import { measureStatic } from './families/static.ts'
-import { arrayAt, at, type JsonValue, objectAt, parseJson, stringAt } from './harness/decode.ts'
+import { arrayAt, at, objectAt, parseJson, stringAt, type JsonValue } from './harness/decode.ts'
 import { git, type Instrument, walkFiles } from './harness/instrument.ts'
 import { runSandboxed } from './harness/sandbox.ts'
 
@@ -11,9 +11,15 @@ interface MeasureStatic {
   readonly failingTool: string | null
 }
 
+interface Aggregate {
+  readonly kind: 'aggregate'
+  readonly families: string
+  readonly main: string | null
+}
+
 interface JourneyEntry {
   readonly id: string
-  readonly produce: MeasureStatic
+  readonly produce: MeasureStatic | Aggregate
   readonly inputs: readonly string[]
 }
 
@@ -29,17 +35,31 @@ export interface LauncherRecord {
   readonly wallMs: number
 }
 
+const optionalString = (produce: JsonValue, key: string, what: string): string | null => {
+  const value = at(produce, key)
+  return value === null ? null : stringAt(produce, [key], what)
+}
+
+const staticProduceOf = (produce: JsonValue): MeasureStatic => ({
+  kind: 'measure-static',
+  ratstackRepo: stringAt(produce, ['ratstackRepo'], 'journey produce'),
+  starterRepo: stringAt(produce, ['starterRepo'], 'journey produce'),
+  failingTool: optionalString(produce, 'failingTool', 'journey produce'),
+})
+
+const aggregateProduceOf = (produce: JsonValue): Aggregate => ({
+  kind: 'aggregate',
+  families: stringAt(produce, ['families'], 'journey produce'),
+  main: optionalString(produce, 'main', 'journey produce'),
+})
+
 const journeyEntry = (value: JsonValue): JourneyEntry => {
   const produce = objectAt(value, ['produce'], 'journey')
-  const failingTool = at(produce, 'failingTool')
   return {
     id: stringAt(value, ['id'], 'journey'),
-    produce: {
-      kind: 'measure-static',
-      ratstackRepo: stringAt(produce, ['ratstackRepo'], 'journey produce'),
-      starterRepo: stringAt(produce, ['starterRepo'], 'journey produce'),
-      failingTool: failingTool === null ? null : stringAt(produce, ['failingTool'], 'journey produce'),
-    },
+    produce: stringAt(produce, ['kind'], 'journey produce') === 'aggregate'
+      ? aggregateProduceOf(produce)
+      : staticProduceOf(produce),
     inputs: arrayAt(value, ['inputs'], 'journey').map((input) => stringAt({ input }, ['input'], 'journey input')),
   }
 }
@@ -97,17 +117,68 @@ const overlayWithFailingTool = async (instrument: Instrument, work: string, tool
   return dir
 }
 
-const produce = async (instrument: Instrument, root: string, entry: JourneyEntry): Promise<LauncherRecord> => {
+const aggregateArgv = (root: string, spec: Aggregate): readonly string[] => [
+  'aggregate',
+  '--families',
+  join(root, spec.families),
+  ...(spec.main === null ? [] : ['--main', join(root, spec.main)]),
+]
+
+const producedFiles = async (out: string): Promise<Readonly<Record<string, string>>> => {
+  const files: Record<string, string> = {}
+  for (const name of ['scorecard.json', 'summary.md']) {
+    const text = await Deno.readTextFile(join(out, name)).catch(() => undefined)
+    if (text !== undefined) files[name] = text
+  }
+  return files
+}
+
+const producedArgv = (out: string, argv: readonly string[]): readonly string[] =>
+  ['scorecard', ...argv.map((arg) => arg.startsWith(out) ? arg.slice(out.length + 1) : arg)]
+
+const produceAggregate = async (root: string, entry: JourneyEntry, spec: Aggregate): Promise<LauncherRecord> => {
+  const out = await Deno.makeTempDir({ prefix: `journey-${entry.id}-` })
+  const started = performance.now()
+  try {
+    const argv = aggregateArgv(root, spec)
+    const run = await new Deno.Command(Deno.execPath(), {
+      args: ['run', '--no-config', '--allow-read', '--allow-write', '--allow-env', join(root, 'src/main.ts'), ...argv],
+      env: { DENO_NO_PACKAGE_JSON: '1' },
+      stdout: 'piped',
+      stderr: 'piped',
+    }).output()
+    return {
+      id: entry.id,
+      inputHash: '',
+      argv: producedArgv(out, argv),
+      code: run.code,
+      stdout: new TextDecoder().decode(run.stdout),
+      stderr: new TextDecoder().decode(run.stderr),
+      files: await producedFiles(out),
+      egressLog: null,
+      wallMs: Math.round(performance.now() - started),
+    }
+  } finally {
+    await Deno.remove(out, { recursive: true })
+  }
+}
+
+const produceStatic = async (
+  instrument: Instrument,
+  root: string,
+  entry: JourneyEntry,
+  spec: MeasureStatic,
+): Promise<LauncherRecord> => {
   const work = await Deno.makeTempDir({ prefix: `journey-${entry.id}-` })
   const started = performance.now()
   try {
-    const ratstackSrc = await gitRepoFrom(join(root, entry.produce.ratstackRepo), join(work, 'sources/ratstack'))
-    const checkout = await gitRepoFrom(join(root, entry.produce.starterRepo), join(work, 'sources/starter-checkout'))
+    const ratstackSrc = await gitRepoFrom(join(root, spec.ratstackRepo), join(work, 'sources/ratstack'))
+    const checkout = await gitRepoFrom(join(root, spec.starterRepo), join(work, 'sources/starter-checkout'))
     const project = join(work, 'project')
     await Deno.mkdir(project)
-    const dir = entry.produce.failingTool === null
+    const dir = spec.failingTool === null
       ? instrument.dir
-      : await overlayWithFailingTool(instrument, work, entry.produce.failingTool)
+      : await overlayWithFailingTool(instrument, work, spec.failingTool)
     const subject: Instrument = {
       ...instrument,
       dir,
@@ -118,7 +189,7 @@ const produce = async (instrument: Instrument, root: string, entry: JourneyEntry
     const result = await measureStatic(subject, project, ['ratstack', 'starter'])
     return {
       id: entry.id,
-      inputHash: await inputHashOf(root, entry.inputs, instrument.launcher.executable),
+      inputHash: '',
       argv: ['scorecard', 'measure', '--family', 'static'],
       code: 0,
       stdout: '',
@@ -130,6 +201,13 @@ const produce = async (instrument: Instrument, root: string, entry: JourneyEntry
   } finally {
     await Deno.remove(work, { recursive: true })
   }
+}
+
+const produce = async (instrument: Instrument, root: string, entry: JourneyEntry): Promise<LauncherRecord> => {
+  const record = entry.produce.kind === 'aggregate'
+    ? await produceAggregate(root, entry, entry.produce)
+    : await produceStatic(instrument, root, entry, entry.produce)
+  return { ...record, inputHash: await inputHashOf(root, entry.inputs, instrument.launcher.executable) }
 }
 
 const recordsOf = async (

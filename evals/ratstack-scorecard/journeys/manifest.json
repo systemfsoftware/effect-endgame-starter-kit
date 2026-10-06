@@ -29,6 +29,30 @@
         "pnpm-lock.yaml",
         "flake.lock"
       ]
+    },
+    {
+      "id": "aggregate-regressed",
+      "produce": {
+        "kind": "aggregate",
+        "families": "journeys/__fixtures__/aggregate/families",
+        "main": "journeys/__fixtures__/aggregate/main/scorecard.json"
+      },
+      "inputs": [
+        "journeys/__fixtures__/aggregate",
+        "src"
+      ]
+    },
+    {
+      "id": "aggregate-first-baseline",
+      "produce": {
+        "kind": "aggregate",
+        "families": "journeys/__fixtures__/aggregate/families",
+        "main": null
+      },
+      "inputs": [
+        "journeys/__fixtures__/aggregate",
+        "src"
+      ]
     }
   ]
 }

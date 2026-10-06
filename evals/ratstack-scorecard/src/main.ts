@@ -4,13 +4,13 @@ import { measureStatic } from './families/static.ts'
 import { arrayAt, numberAt, parseJson, type JsonValue } from './harness/decode.ts'
 import { runCheck } from './harness/gates.ts'
 import { git, type Instrument, loadInstrument } from './harness/instrument.ts'
-import { familyResultOf, mainBaselineOf } from './harness/scorecard-codec.ts'
+import { cellsByRow, familyResultOf, mainBaselineOf } from './harness/scorecard-codec.ts'
 import { runJourneys } from './journeys.ts'
 import { familyTimeoutMinutes, rowDefinitions } from './metrics/registry.ts'
 import { ratstackCacheKey } from './model/cache-key.ts'
-import type { Family, MainBaseline, MeasuredCell, RowId, Side } from './model/cell.ts'
+import type { Family, MainBaseline, Side } from './model/cell.ts'
 import { planPinBump } from './model/plan-pin-bump.workflow.ts'
-import { assembleScorecard, type CellsByRow, type FamilyResult, type SideCell } from './model/scorecard-document.ts'
+import { assembleScorecard, type FamilyResult } from './model/scorecard-document.ts'
 import { renderSummary } from './model/summary-table.ts'
 
 const usage = [
@@ -115,16 +115,6 @@ const readFamilyResults = async (dir: string): Promise<readonly FamilyResult[]> 
 const mainBaseline = async (path: string | undefined): Promise<MainBaseline> => {
   if (path === undefined) return { _tag: 'Missing' }
   return mainBaselineOf(parseJson(await Deno.readTextFile(path)), path)
-}
-
-const cellsByRow = (cells: readonly SideCell[]): CellsByRow => {
-  const byRow = new Map<RowId, Partial<Record<Side, MeasuredCell>>>()
-  for (const cell of cells) {
-    const row = byRow.get(cell.id) ?? {}
-    row[cell.side] = cell.measured
-    byRow.set(cell.id, row)
-  }
-  return Object.fromEntries(byRow)
 }
 
 const aggregate = async (args: readonly string[]): Promise<void> => {
