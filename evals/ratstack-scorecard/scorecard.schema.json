@@ -193,7 +193,7 @@
     "rowDefinition": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "metric", "bin", "label", "unit", "direction", "kind", "runs", "family"],
+      "required": ["id", "metric", "bin", "label", "unit", "direction", "kind", "runs", "family", "ratstackSupport"],
       "properties": {
         "id": { "type": "string", "pattern": "^M[0-9]+(\\.[a-z0-9-]+)?$" },
         "metric": { "type": "string", "pattern": "^M[0-9]+$" },
@@ -203,7 +203,23 @@
         "direction": { "enum": ["lower", "higher"] },
         "kind": { "enum": ["count", "measurement"] },
         "runs": { "type": "integer", "minimum": 1 },
-        "family": { "enum": ["static", "cold-path", "gate-mutation", "running-stack", "agent-surfaces", "networked"] }
+        "family": { "enum": ["static", "cold-path", "gate-mutation", "running-stack", "agent-surfaces", "networked"] },
+        "ratstackSupport": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["_tag"],
+              "properties": { "_tag": { "const": "Required" } }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["_tag", "bar"],
+              "properties": { "_tag": { "const": "MayBeUnsupported" }, "bar": { "type": "number" } }
+            }
+          ]
+        }
       }
     },
     "row": {

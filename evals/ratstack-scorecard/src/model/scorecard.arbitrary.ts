@@ -34,6 +34,10 @@ export const definition = (overrides: Partial<RowDefinition> = {}): fc.Arbitrary
       'agent-surfaces' as const,
       'networked' as const,
     ),
+    ratstackSupport: fc.oneof(
+      fc.constant({ _tag: 'Required' } as const),
+      value.map((bar) => ({ _tag: 'MayBeUnsupported', bar }) as const),
+    ),
   }).map((generated) => ({ ...generated, ...overrides }))
 
 export const runsFor = (row: RowDefinition): fc.Arbitrary<readonly number[]> =>
@@ -121,7 +125,16 @@ export const assembleInput: fc.Arbitrary<AssembleInput> = uniqueDefinitions.chai
           fc.option(measuredCell(d, side).map((measured) => ({ id: d.id, side, measured })), { nil: undefined })
         )
       ),
-    ).map((cells) => cells.filter((c) => c !== undefined)),
+    ).map((cells) =>
+      Object.fromEntries(
+        definitions.map((d) => [
+          d.id,
+          Object.fromEntries(
+            cells.filter((c) => c !== undefined && c.id === d.id).map((c) => [c!.side, c!.measured]),
+          ),
+        ]),
+      )
+    ),
     flags: fc.tuple(
       ...definitions.map((d) => fc.array(flag, { maxLength: 2 }).map((fs) => fs.map((f) => ({ id: d.id, flag: f })))),
     )

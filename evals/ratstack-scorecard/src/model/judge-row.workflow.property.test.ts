@@ -37,6 +37,34 @@ describe('judgeRow', () => {
   test.prop([
     definition({ kind: 'measurement' }),
     fc.double({ min: -1e6, max: 1e6, noNaN: true }),
+    fc.double({ min: 1e-3, max: 1e3, noNaN: true }),
+  ])(
+    "against an unsupported rat-stack, the starter is beaten exactly when its worst run meets the row's bar",
+    (base, bar, gap) => {
+      const d = { ...base, ratstackSupport: { _tag: 'MayBeUnsupported', bar } } as const
+      const better = { lower: -1, higher: 1 }[d.direction]
+      const verdict = (worst: number) =>
+        judgeRow({
+          definition: d,
+          ratstack: verifiedCitation,
+          starter: measured([...Array(d.runs - 1).fill(bar + better * gap), worst]),
+        })
+          ._tag
+      return verdict(bar) === 'Beaten' && verdict(bar + better * gap) === 'Beaten' &&
+        verdict(bar - better * gap) === 'NotBeaten'
+    },
+  )
+
+  test.prop([definition({ ratstackSupport: { _tag: 'Required' } }), fc.double({ min: -1e6, max: 1e6, noNaN: true })])(
+    'a row requiring a rat-stack measurement never counts an unsupported rat-stack as beaten',
+    (d, v) =>
+      judgeRow({ definition: d, ratstack: verifiedCitation, starter: measured(Array(d.runs).fill(v)) })._tag ===
+        'InstrumentError',
+  )
+
+  test.prop([
+    definition({ kind: 'measurement' }),
+    fc.double({ min: -1e6, max: 1e6, noNaN: true }),
     fc.array(fc.double({ min: 1e-3, max: 1e3, noNaN: true }), { minLength: 4, maxLength: 4 }),
   ])("a starter whose every run only equals rat-stack's best run is not beaten", (d, best, gaps) => {
     const worse = { lower: 1, higher: -1 }[d.direction]

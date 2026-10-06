@@ -3,6 +3,7 @@ import type { Family, RowDefinition } from '../model/cell.ts'
 const count3 = { kind: 'count', runs: 3 } as const
 const measured5 = { kind: 'measurement', runs: 5 } as const
 const measured3 = { kind: 'measurement', runs: 3 } as const
+const required = { ratstackSupport: { _tag: 'Required' } } as const
 
 export const familyTimeoutMinutes: Readonly<Record<Family, number>> = {
   'static': 20,
@@ -23,6 +24,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M1.level',
@@ -33,6 +35,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M2',
@@ -43,6 +46,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M3.performance',
@@ -53,6 +57,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...measured5,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M3.lcp',
@@ -63,6 +68,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured5,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M3.cls',
@@ -73,6 +79,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured5,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M3.tbt',
@@ -83,6 +90,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured5,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M3.bytes',
@@ -93,6 +101,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured5,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M3.a11y',
@@ -103,6 +112,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured5,
     family: 'networked',
+    ...required,
   },
   {
     id: 'M4',
@@ -113,6 +123,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M5',
@@ -123,6 +134,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M6',
@@ -133,6 +145,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'cold-path',
+    ...required,
   },
   {
     id: 'M7',
@@ -143,6 +156,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'cold-path',
+    ...required,
   },
   {
     id: 'M8',
@@ -153,6 +167,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M9',
@@ -163,6 +178,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured5,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M10.seconds',
@@ -173,6 +189,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured5,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M10.correct',
@@ -183,6 +200,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...measured5,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M11',
@@ -193,6 +211,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'running-stack',
+    ...required,
   },
   {
     id: 'M12',
@@ -203,6 +222,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'running-stack',
+    ratstackSupport: { _tag: 'MayBeUnsupported', bar: 0 },
   },
   {
     id: 'M13',
@@ -213,6 +233,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'gate-mutation',
+    ...required,
   },
   {
     id: 'M14',
@@ -223,6 +244,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'running-stack',
+    ...required,
   },
   {
     id: 'M15',
@@ -233,6 +255,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M16',
@@ -243,6 +266,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M17',
@@ -253,6 +277,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'running-stack',
+    ...required,
   },
   {
     id: 'M18',
@@ -263,6 +288,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'agent-surfaces',
+    ...required,
   },
   {
     id: 'M19',
@@ -273,6 +299,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'running-stack',
+    ...required,
   },
   {
     id: 'M20',
@@ -283,6 +310,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'gate-mutation',
+    ...required,
   },
   {
     id: 'M21',
@@ -293,6 +321,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'gate-mutation',
+    ...required,
   },
   {
     id: 'M22',
@@ -303,6 +332,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'gate-mutation',
+    ...required,
   },
   {
     id: 'M23',
@@ -313,6 +343,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'static',
+    ...required,
   },
   {
     id: 'M24',
@@ -323,6 +354,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'gate-mutation',
+    ...required,
   },
   {
     id: 'M25',
@@ -333,6 +365,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'gate-mutation',
+    ...required,
   },
   {
     id: 'M26',
@@ -343,6 +376,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...measured3,
     family: 'cold-path',
+    ...required,
   },
   {
     id: 'M27',
@@ -353,6 +387,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'cold-path',
+    ...required,
   },
   {
     id: 'M28',
@@ -363,6 +398,7 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'lower',
     ...count3,
     family: 'static',
+    ...required,
   },
   {
     id: 'M29',
@@ -373,5 +409,6 @@ export const rowDefinitions: readonly RowDefinition[] = [
     direction: 'higher',
     ...count3,
     family: 'agent-surfaces',
+    ...required,
   },
 ]

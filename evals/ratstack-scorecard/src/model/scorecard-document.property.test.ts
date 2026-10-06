@@ -25,7 +25,7 @@ describe('assembleScorecard', () => {
     (input) =>
       assembleScorecard(input).rows.every((row) =>
         (['ratstack', 'starter'] as const)
-          .filter((side) => !input.cells.some((cell) => cell.id === row.definition.id && cell.side === side))
+          .filter((side) => input.cells[row.definition.id]?.[side] === undefined)
           .every((side) =>
             row[side].cell._tag === 'InstrumentError' && row[side].cell.error.includes(row.definition.id)
           )

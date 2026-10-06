@@ -205,7 +205,11 @@ CellStatus = Measured{runs[]} | Absent{reason} | Unsupported{citation} | Unmeasu
            | NoSecret{name} | InstrumentError{error}
 Verdict    = match (ratstack, starter):
   (Measured, Measured)        -> compare per KTD1 -> Beaten | NotBeaten | Tie
-  (Unsupported, Measured)     -> Beaten when the citation re-verified at the pin, else InstrumentError
+  (Unsupported, Measured)     -> citation contradicted at the pin: InstrumentError
+                                 row declares Required: InstrumentError
+                                 row declares MayBeUnsupported{bar}: Beaten only when the starter's worst
+                                 run meets bar in the row's direction (M12: 0 oversold seats on every run),
+                                 else NotBeaten; a non-reproducing starter count stays InstrumentError
   (_, Absent | NoSecret)      -> NotBeaten (neutral for the ratchet when NoSecret or fork-Absent)
   (InstrumentError, _) | (_, InstrumentError) -> InstrumentError
   (Unmeasurable, _)           -> NotBeaten, surfaced for Kiro
@@ -274,7 +278,7 @@ U1 → U2 → U3 → U4 → U5 → U6 → U7 → U8 → U9. Each is one PR layer
   - AE2: unequal count runs give `instrument-error`.
   - Swapping sides of a strictly separated `measurement` turns `beaten` into `not-beaten`, and identical ranges are always `tie`.
   - Direction `higher` mirrors direction `lower` under negation.
-  - AE3: an `Unsupported` cell whose citation check failed gives `instrument-error`, and one that passed gives `beaten`.
+  - AE3: an `Unsupported` cell whose citation check failed gives `instrument-error`. One that passed gives `beaten` only on a row that declares `MayBeUnsupported` with a bar the starter's worst run meets (M12 `[0,0,0]` beaten, `[5,5,5]` not beaten); a row that declares `Required` gives `instrument-error`.
   - AE5: a PR median inside `main`'s run range passes the ratchet, and a median just past `main`'s worst run fails, naming the metric.
   - AE4: `beaten` on `main` and `not-beaten` on the PR fails the ratchet, and the failure names the metric and the cell status that caused it (for example a rat-stack `Unmeasurable` cell, or a changed live commit).
   - Present on `main` and `absent` on the PR fails, while `NoSecret`, fork `Absent`, or a changed metric-definition hash (`re-baselined`) is neutral.
@@ -435,15 +439,14 @@ U1 → U2 → U3 → U4 → U5 → U6 → U7 → U8 → U9. Each is one PR layer
 
 ## Verification Contract
 
-| Gate                  | Command                                                                               | Applies to                                     |
-| --------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| Format (START-1)      | `pnpm format:check` (dprint covers `evals/**`)                                        | every unit                                     |
-| Instrument properties | `pnpm vitest run --project model` under the launcher, from `evals/ratstack-scorecard` | every unit                                     |
-| Journeys J1-J3        | `pnpm vitest run --project journeys` under the launcher                               | U2 (J2), U3 (J3), U4 (J1) and every later unit |
-| Family run            | `nix run ./evals/ratstack-scorecard#scorecard -- measure --family <f>`                | U2, U5-U9                                      |
-| Workflow lint         | `actionlint`                                                                          | U3                                             |
-| Repo gate (START-4)   | `pnpm check:ci`                                                                       | every unit before its PR                       |
-| Sabotage              | break one decision or one probe, show the test red, revert                            | every unit; recorded in the PR body            |
+| Gate                | Command                                                                                                                                                                                                                              | Applies to                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- |
+| Format (START-1)    | `pnpm format:check` (dprint covers `evals/**`)                                                                                                                                                                                       | every unit                          |
+| Instrument tests    | `pnpm vitest run` under the launcher, from `evals/ratstack-scorecard`: one project; a test is a journey because it imports the journey fixture (`journeys/fixture.ts`), which carries the sandbox, subprocess, timeout and isolation | every unit                          |
+| Family run          | `nix run ./evals/ratstack-scorecard#scorecard -- measure --family <f>`                                                                                                                                                               | U2, U5-U9                           |
+| Workflow lint       | `actionlint`                                                                                                                                                                                                                         | U3                                  |
+| Repo gate (START-4) | `pnpm check:ci`                                                                                                                                                                                                                      | every unit before its PR            |
+| Sabotage            | break one decision or one probe, show the test red, revert                                                                                                                                                                           | every unit; recorded in the PR body |
 
 Mutation testing never runs locally; it runs only in the scorecard workflow's `mutation` job on push to `main` (KTD15). PR bodies carry commands, outputs and sabotage evidence, and the verifier runs every check in this session (VER1).
 

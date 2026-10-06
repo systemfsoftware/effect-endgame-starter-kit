@@ -13,10 +13,18 @@ const lcp: RowDefinition = {
   kind: 'measurement',
   runs: 5,
   family: 'networked',
+  ratstackSupport: { _tag: 'Required' },
 }
 const debt: RowDefinition = { ...lcp, id: 'M23', metric: 'M23', kind: 'count', runs: 3, family: 'static' }
 const passwords: RowDefinition = { ...debt, id: 'M14', metric: 'M14', family: 'running-stack' }
 const cli: RowDefinition = { ...lcp, id: 'M9', metric: 'M9', family: 'agent-surfaces' }
+const oversold: RowDefinition = {
+  ...debt,
+  id: 'M12',
+  metric: 'M12',
+  family: 'running-stack',
+  ratstackSupport: { _tag: 'MayBeUnsupported', bar: 0 },
+}
 
 const measured = (runs: readonly number[]): Cell => ({ _tag: 'Measured', runs })
 
@@ -69,9 +77,23 @@ describe('plan acceptance examples', () => {
       citation: seats,
       check: { _tag: 'Contradicted', found: 'export const seats = confirmations' },
     }
-    expect(judgeRow({ definition: debt, ratstack: contradicted, starter })._tag).toBe('InstrumentError')
-    expect(judgeRow({ definition: debt, ratstack: { ...contradicted, check: { _tag: 'Verified' } }, starter })._tag)
+    expect(judgeRow({ definition: oversold, ratstack: contradicted, starter })._tag).toBe('InstrumentError')
+    expect(judgeRow({ definition: oversold, ratstack: { ...contradicted, check: { _tag: 'Verified' } }, starter })._tag)
       .toBe('Beaten')
+  })
+
+  test('M12: rat-stack unsupported is beaten only by a starter that oversells nothing on every run', () => {
+    const ratstack: Cell = { _tag: 'Unsupported', citation: seats, check: { _tag: 'Verified' } }
+    const verdict = (runs: readonly number[]) =>
+      judgeRow({ definition: oversold, ratstack, starter: measured(runs) })._tag
+    expect(verdict([5, 5, 5])).toBe('NotBeaten')
+    expect(verdict([0, 0, 0])).toBe('Beaten')
+    expect(verdict([0, 1, 0])).toBe('InstrumentError')
+  })
+
+  test('a row that requires a rat-stack measurement turns an unsupported rat-stack cell into an instrument error', () => {
+    const ratstack: Cell = { _tag: 'Unsupported', citation: seats, check: { _tag: 'Verified' } }
+    expect(judgeRow({ definition: debt, ratstack, starter: measured([0, 0, 0]) })._tag).toBe('InstrumentError')
   })
 
   test('AE4: main beats rat-stack on M14 and a PR re-enabling a password route fails, naming M14', () => {
