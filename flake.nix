@@ -10,12 +10,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     pnpm-release-management = {
-      url = "github:systemfsoftware/pnpm-release-management/149e762e73549f1664e792bcc048729a30fa41da";
+      url = "github:systemfsoftware/pnpm-release-management/54629f2889039eb2e53ccf0179aaf8c7ef0c46a3";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.comment-checker.follows = "comment-checker";
+      inputs.importPnpmLock.follows = "importPnpmLock";
     };
     systemfsoftware = {
-      url = "github:systemfsoftware/systemfsoftware/c53bfc9253fe1d2d63119d0e4daae00da846432e";
+      url = "github:systemfsoftware/systemfsoftware/29ef725f2587fa414f25b221b0f7d3051cdbfa12";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.comment-checker.follows = "comment-checker";
       inputs.pnpm-release-management.follows = "pnpm-release-management";
@@ -63,19 +64,23 @@
           };
           sandbox-source = pkgs.applyPatches {
             name = "sandbox-source";
-            src = "${pnpm-release-management}/nix/sandbox";
+            src = "${pnpm-release-management}/nix";
+            patchFlags = [ "-p1" "-d" "sandbox" ];
             patches = [
               ./nix/patches/sandbox-linked-worktree-git.patch
               ./nix/patches/sandbox-unprivileged-uid.patch
             ];
           };
-          sandbox = pkgs.callPackage "${sandbox-source}/default.nix" { };
+          sandbox = pkgs.callPackage "${sandbox-source}/sandbox/default.nix" { };
         in {
           inherit dprint local-stack sfs-deps sandbox pnpm-store;
         } // pkgs.lib.optionalAttrs isLinux {
           inherit heavy-job heavy-job-image;
         } // {
-          sandbox-proofs = pkgs.callPackage "${sandbox-source}/proofs.nix" { inherit sandbox; };
+          sandbox-proofs = (pkgs.callPackage "${sandbox-source}/sandbox/proofs.nix" {
+            inherit sandbox;
+            inherit (importPnpmLock.legacyPackages.${system}) iplConfigHook;
+          }).sandbox-proofs;
           comment-checker = sandboxed;
           comment-checker-unwrapped = unwrapped;
           default = dprint;

@@ -16,8 +16,10 @@ catalog:
   "@effect/tsgo": 0.48.1
   "@distilled.cloud/cloudflare": 1.0.0-rc.13
   "@effect/platform-node": 4.0.1
+  "@effect/sql-pg": 4.0.1
   "@mdx-js/mdx": 3.1.1
   "@rolldown/plugin-babel": 0.2.4
+  "@systemfsoftware/conformance-spec": file:.sfs-deps/conformance-spec-1.0.0.tgz
   "@systemfsoftware/effect-cell-types": file:.sfs-deps/effect-cell-types-12.0.0.tgz
   "@systemfsoftware/effect-gherkin-spec": file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz
   "@systemfsoftware/effect-schema-discovery": file:.sfs-deps/effect-schema-discovery-2.0.0.tgz
@@ -26,6 +28,7 @@ catalog:
   "@systemfsoftware/effect-schema-vite": file:.sfs-deps/effect-schema-vite-3.0.1.tgz
   "@systemfsoftware/effect-sim-kernel": file:.sfs-deps/effect-sim-kernel-1.0.0.tgz
   "@systemfsoftware/effect-spec-runtime": file:.sfs-deps/effect-spec-runtime-1.0.1.tgz
+  "@systemfsoftware/effect-unit-of-work": file:.sfs-deps/effect-unit-of-work-0.1.0.tgz
   "@systemfsoftware/oxlint-config-cell-architecture": file:.sfs-deps/oxlint-config-cell-architecture-4.0.0.tgz
   "@systemfsoftware/oxlint-config-dmmf": file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz
   "@systemfsoftware/oxlint-config-recommended": file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz
@@ -56,9 +59,11 @@ catalog:
   miniflare: 5.20261001.0-alpha
   oxlint: 1.82.0
   oxlint-tsgolint: 7.0.2001
+  pg: 8.23.1
   playwright: 1.63.0
   react: 19.3.0
   react-dom: 19.3.0
+  tstyche: 7.2.5
   turbo: 2.11.7
   typescript: 7.0.2
   vite: 8.3.2
@@ -75,6 +80,7 @@ minimumReleaseAgeExclude:
 verifyDepsBeforeRun: warn
 overrides:
   workerd: 1.20261005.1
+  "@systemfsoftware/conformance-spec": "catalog:"
   "@systemfsoftware/effect-cell-types": "catalog:"
   "@systemfsoftware/effect-gherkin-spec": "catalog:"
   "@systemfsoftware/effect-schema-discovery": "catalog:"
@@ -83,6 +89,7 @@ overrides:
   "@systemfsoftware/effect-schema-vite": "catalog:"
   "@systemfsoftware/effect-sim-kernel": "catalog:"
   "@systemfsoftware/effect-spec-runtime": "catalog:"
+  "@systemfsoftware/effect-unit-of-work": "catalog:"
   "@systemfsoftware/oxlint-config-cell-architecture": "catalog:"
   "@systemfsoftware/oxlint-config-dmmf": "catalog:"
   "@systemfsoftware/oxlint-config-recommended": "catalog:"
