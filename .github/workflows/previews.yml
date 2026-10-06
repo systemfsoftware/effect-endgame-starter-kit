@@ -24,26 +24,21 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
-      - uses: cachix/install-nix-action@v31
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
-      - name: Realise the dev shell
-        run: nix develop --command true
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Deploy the preview
         env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-1.jsonl
-        run: pnpm cloud:deploy
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-1.jsonl
+        run: nix develop --command pnpm cloud:deploy
       - name: Redeploy the preview to prove no settings drift
         env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-2.jsonl
-        run: pnpm cloud:redeploy
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
+        run: nix develop --command pnpm cloud:redeploy
       - name: Read the preview URL and worker
         id: site
         run: |
-          state="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/${ALCHEMY_STAGE}/output" | sed -n '/^{/,$p')"
+          state="$(nix develop --command ./bin/cloud pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/${ALCHEMY_STAGE}/output" | sed -n '/^{/,$p')"
           echo "$state"
           url="$(jq -er '.url' <<<"$state")"
           worker="$(jq -er '.workerName' <<<"$state")"
@@ -51,8 +46,8 @@ jobs:
       - name: Check the redeploy log and Workers Issues
         env:
           DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
-          DEPLOY_LOG: ${{ runner.temp }}/deploy-2.jsonl
-        run: pnpm --filter @endgame/site verify:deployment
+          DEPLOY_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
+        run: nix develop --command ./bin/cloud pnpm --filter @endgame/site verify:deployment
       - name: Preview transcripts
         env:
           SITE_URL: ${{ steps.site.outputs.url }}
@@ -92,15 +87,15 @@ jobs:
       - name: Deployed journeys
         env:
           SITE_URL: ${{ steps.site.outputs.url }}
-        run: nix develop --command pnpm --filter @endgame/site-e2e test:deployed
+        run: nix develop --command ./bin/cloud pnpm --filter @endgame/site-e2e test:deployed
       - if: always()
         uses: actions/upload-artifact@v6
         with:
           name: preview-artifacts
           path: |
             apps/site-e2e/artifacts/
-            ${{ runner.temp }}/deploy-1.jsonl
-            ${{ runner.temp }}/deploy-2.jsonl
+            .cache/deploy-1.jsonl
+            .cache/deploy-2.jsonl
           if-no-files-found: ignore
 
   destroy:
@@ -114,10 +109,8 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Destroy the preview
-        run: pnpm cloud:destroy
+        run: nix develop --command pnpm cloud:destroy

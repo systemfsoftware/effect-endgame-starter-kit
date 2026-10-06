@@ -81,16 +81,14 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Read the production worker before deploying
         id: prior
         run: |
           worker=""
-          if out="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" 2>&1)"; then
+          if out="$(nix develop --command ./bin/cloud pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" 2>&1)"; then
             worker="$(sed -n '/^{/,$p' <<<"$out" | jq -er '.workerName')"
           elif ! grep -q 'path does not exist' <<<"$out"; then
             echo "$out" >&2
@@ -103,22 +101,22 @@ jobs:
           DEPLOY_WORKER: ${{ steps.prior.outputs.worker }}
         run: |
           if [ -n "$DEPLOY_WORKER" ]; then
-            echo "version=$(node apps/site/deploy/current-worker-version.ts)" >> "$GITHUB_OUTPUT"
+            echo "version=$(nix develop --command ./bin/cloud node apps/site/deploy/current-worker-version.ts)" >> "$GITHUB_OUTPUT"
           else
             echo "version=" >> "$GITHUB_OUTPUT"
           fi
       - name: Deploy production
         env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-1.jsonl
-        run: pnpm cloud:deploy
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-1.jsonl
+        run: nix develop --command pnpm cloud:deploy
       - name: Redeploy production to prove no settings drift
         env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-2.jsonl
-        run: pnpm cloud:redeploy
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
+        run: nix develop --command pnpm cloud:redeploy
       - name: Read the production worker and URL
         id: site
         run: |
-          state="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" | sed -n '/^{/,$p')"
+          state="$(nix develop --command ./bin/cloud pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" | sed -n '/^{/,$p')"
           echo "$state"
           worker="$(jq -er '.workerName' <<<"$state")"
           url="$(jq -er '.url' <<<"$state")"
@@ -126,13 +124,13 @@ jobs:
       - name: Check the redeploy log and Workers Issues
         env:
           DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
-          DEPLOY_LOG: ${{ runner.temp }}/deploy-2.jsonl
-        run: node apps/site/deploy/verify-deployment.ts
+          DEPLOY_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
+        run: nix develop --command ./bin/cloud node apps/site/deploy/verify-deployment.ts
       - name: Record the version serving production now
         id: recorded
         env:
           DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
-        run: echo "version=$(node apps/site/deploy/current-worker-version.ts)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(nix develop --command ./bin/cloud node apps/site/deploy/current-worker-version.ts)" >> "$GITHUB_OUTPUT"
       - name: Deploy summary
         run: |
           {
@@ -146,7 +144,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: production-deploy-logs
-          path: ${{ runner.temp }}/deploy-*.jsonl
+          path: .cache/deploy-*.jsonl
           if-no-files-found: ignore
 
   qa:
@@ -161,16 +159,11 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v7
-      - uses: cachix/install-nix-action@v31
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
-      - name: Realise the dev shell
-        run: nix develop --command true
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Deployed journeys
-        run: nix develop --command pnpm --filter @endgame/site-e2e test:deployed
+        run: nix develop --command ./bin/cloud pnpm --filter @endgame/site-e2e test:deployed
       - if: always()
         uses: actions/upload-artifact@v6
         with:
@@ -183,7 +176,7 @@ jobs:
     needs: [deploy, qa]
     if: ${{ failure() && needs.qa.result == 'failure' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -192,14 +185,12 @@ jobs:
       ROLLBACK_TO_VERSION: ${{ needs.deploy.outputs.previous_version }}
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Roll production back to the recorded previous version
         if: env.ROLLBACK_TO_VERSION != ''
-        run: pnpm --filter @endgame/site rollback
+        run: nix develop --command ./bin/cloud pnpm --filter @endgame/site rollback
       - name: Rollback summary and red gate
         if: always()
         run: |

@@ -1,19 +1,33 @@
 #!/usr/bin/env bash
 # Run a Cloudflare-facing command (an alchemy deploy or destroy, a deploy
-# check, a rollback) inside the sandbox. This is the one place the Cloudflare
-# credentials enter a sandbox, and the one list of hosts such a command may
-# reach: Cloudflare's API, and the account's workers.dev hosts, where
-# alchemy's state store answers. Telemetry stays off, so nothing else needs
-# to be reachable.
+# check, a rollback, the deployed journeys) inside the sandbox. This is the
+# one place the Cloudflare credentials enter a sandbox, and the one list of
+# hosts such a command may reach: Cloudflare's API, the account's
+# workers.dev hosts, where alchemy's state store and the previews answer,
+# and the host of SITE_URL when one is set. Telemetry stays off, so nothing
+# else needs to be reachable.
 set -euo pipefail
+
+site=()
+if [ -n "${SITE_URL:-}" ]; then
+  host="${SITE_URL#*://}"
+  site=(--allow-host "${host%%/*}" --pass-env SITE_URL)
+fi
 
 export DO_NOT_TRACK=1
 exec sandbox \
   --allow-host api.cloudflare.com \
   --allow-host '*.workers.dev' \
+  "${site[@]}" \
   --pass-env CLOUDFLARE_API_TOKEN \
   --pass-env CLOUDFLARE_ACCOUNT_ID \
   --pass-env ALCHEMY_CLOUDFLARE_API_LOG \
+  --pass-env DEPLOY_WORKER \
+  --pass-env DEPLOY_LOG \
+  --pass-env ROLLBACK_WORKER \
+  --pass-env ROLLBACK_FROM_VERSION \
+  --pass-env ROLLBACK_TO_VERSION \
+  --pass-env PLAYWRIGHT_BROWSERS_PATH \
   --pass-env DO_NOT_TRACK \
   --pass-env CI \
   -- "$@"
