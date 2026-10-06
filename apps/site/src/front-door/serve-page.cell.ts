@@ -6,14 +6,12 @@ import { markdown } from 'virtual:readme-opening'
 import { ServePage } from './FrontDoorTaxonomy'
 import { HtmlPort } from './html-port.service'
 import { llmsTxt, LlmsTxtCommand } from './llms-txt.workflow'
-import { HOME_CATALOG, Origin, PageFailure, parseAccept, prefersHtml } from './serve-page.schema'
+import { HOME_CATALOG, Origin, PageFailure } from './serve-page.schema'
 import { servePage } from './serve-page.workflow'
 
 const ServerRequest = HttpServerRequest.HttpServerRequest
 
 const NOT_FOUND_BODY = '# Not found\n\nThe page you asked for is not here. Try `/`.\n'
-
-const FAILURE_BODY = '# Internal Server Error\n\nThe page could not be rendered.\n'
 
 const FAILURE_HTML =
   '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Internal Server Error</title></head><body><h1>Internal Server Error</h1><p>The page could not be rendered.</p></body></html>'
@@ -32,8 +30,7 @@ const htmlBody = (body: string, status: number): HttpServerResponse.HttpServerRe
     'Accept',
   )
 
-const failureBodyOf = (accept: string): HttpServerResponse.HttpServerResponse =>
-  prefersHtml(parseAccept(accept)) ? htmlBody(FAILURE_HTML, 500) : markdownBody(FAILURE_BODY, 500)
+const failureResponse = (): HttpServerResponse.HttpServerResponse => htmlBody(FAILURE_HTML, 500)
 
 const llmsDocumentOf = (origin: string): string =>
   Result.getOrThrow(llmsTxt(LlmsTxtCommand.make({ origin: Origin.make(origin), pages: HOME_CATALOG }))).document
@@ -66,7 +63,7 @@ const read = (request: HttpServerRequest.HttpServerRequest) =>
 
 const failureCell = Cell.map(
   Cell.id<HttpServerRequest.HttpServerRequest>(),
-  (request) => failureBodyOf(request.headers['accept'] ?? ''),
+  () => failureResponse(),
 )
 
 export const servePageCell = Sandwich.named(ServePage.name)(read)
