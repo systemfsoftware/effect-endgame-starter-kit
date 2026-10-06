@@ -2,6 +2,10 @@
   "name": "@starter/ratstack-scorecard",
   "private": true,
   "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
   "dependencies": {
     "oxc-parser": "0.152.0",
     "yaml": "2.9.1"

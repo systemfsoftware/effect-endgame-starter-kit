@@ -6,6 +6,7 @@ import type {
   JudgedRow,
   MainBaseline,
   MeasuredCell,
+  Ratchet,
   Row,
   RowDefinition,
   RowId,
@@ -94,6 +95,22 @@ const mainRows = (main: MainBaseline): readonly Row[] =>
 const verdictsOf = (rows: readonly Row[]): Record<string, Verdict> =>
   Object.fromEntries(rows.map((row) => [row.definition.id, verdictOf(row)]))
 
+const publishedRatchet = (ratchet: Ratchet): Ratchet =>
+  Match.value(ratchet).pipe(
+    Match.tag('FirstBaseline', (first): Ratchet => ({
+      _tag: 'FirstBaseline',
+      outcomes: first.outcomes,
+      failures: first.failures,
+    })),
+    Match.tag('Compared', (compared): Ratchet => ({
+      _tag: 'Compared',
+      mainCommit: compared.mainCommit,
+      outcomes: compared.outcomes,
+      failures: compared.failures,
+    })),
+    Match.exhaustive,
+  )
+
 export const assembleScorecard = (input: AssembleInput): ScorecardDocument => {
   const rows = input.rows.map((defined) => rowOf(input, defined))
   const verdicts = verdictsOf(rows)
@@ -102,8 +119,8 @@ export const assembleScorecard = (input: AssembleInput): ScorecardDocument => {
     schemaVersion: 1,
     provenance: input.provenance,
     rows: rows.map(judged),
-    ratchet: Result.getOrThrow(
-      compareWithMain(new CompareWithMain({ rows, main: input.main, verdicts, mainVerdicts })),
+    ratchet: publishedRatchet(
+      Result.getOrThrow(compareWithMain(new CompareWithMain({ rows, main: input.main, verdicts, mainVerdicts }))),
     ),
   }
 }
