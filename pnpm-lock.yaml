@@ -2731,7 +2731,7 @@ packages:
       effect: ^4
 
   '@systemfsoftware/effect-gherkin-spec@file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz':
-    resolution: {integrity: sha512-ueMUWVEYDa7R9WMw6j2wY7NmTXaZDdWFRiTeSaJFhD1Ty4InGBxKazZ/svzghU7GaeDYHXzm7WjEhEuVW0QlSw==, tarball: file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz}
+    resolution: {integrity: sha512-lZJW3Ex2VtVcn4YNmbGdVahKejjY0P9aXb/Qg1/XR+t9VMzKL4K5da9nEd5bJnScIMoTpoF8oz3przMEXXFo2g==, tarball: file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz}
     version: 7.0.1
     peerDependencies:
       '@systemfsoftware/vitest': ^2.0.0
@@ -2743,7 +2743,7 @@ packages:
     version: 2.0.0
 
   '@systemfsoftware/effect-schema-law@file:.sfs-deps/effect-schema-law-5.0.1.tgz':
-    resolution: {integrity: sha512-h4eGM21zN2U4h1yc2OCD9PBSYAMs3Hpkp6JrDQvkfIJrHUw2MC9Ph1UakEQV1yPSWFM862PH5EMUc5vSxpg4qQ==, tarball: file:.sfs-deps/effect-schema-law-5.0.1.tgz}
+    resolution: {integrity: sha512-UkBVTlf8UEgGAxfnd8Eq6GboX77SAR5SYu5QH+RG0ydcz+MxrljwJ9mLxpqfIelPE4MSK1YaB3xRcCX+XLpI+Q==, tarball: file:.sfs-deps/effect-schema-law-5.0.1.tgz}
     version: 5.0.1
     peerDependencies:
       '@systemfsoftware/vitest': ^2.0.0
@@ -2757,7 +2757,7 @@ packages:
       effect: ^4
 
   '@systemfsoftware/effect-schema-vite@file:.sfs-deps/effect-schema-vite-3.0.1.tgz':
-    resolution: {integrity: sha512-g8vD/wnkpp+E433Qp7siYtunyIpJ5ppAzuaDxJzin/FpNG2l3ikEy1851Qr7DPFA0FL3MbCwmHb69PN/lC17ew==, tarball: file:.sfs-deps/effect-schema-vite-3.0.1.tgz}
+    resolution: {integrity: sha512-Hb5JEdsXUE5+cmUUloZPZ9QZqwWhz4JzJfGyrWzsY2d64lTlRYAPkteC33shtGHCosM1w8ypKlTb0nRFOIZK9A==, tarball: file:.sfs-deps/effect-schema-vite-3.0.1.tgz}
     version: 3.0.1
     peerDependencies:
       '@systemfsoftware/effect-schema-law': 5.0.1
@@ -2772,7 +2772,7 @@ packages:
       effect: ^4
 
   '@systemfsoftware/effect-spec-runtime@file:.sfs-deps/effect-spec-runtime-1.0.1.tgz':
-    resolution: {integrity: sha512-aB2tBOfiRcM/WgXKVMy9WR65i8k+PTUj3rzwswwxwHotpnajGrAq1Dyo0g4Q0rLjVnBj/TWSX6gRPvL0ebeAmg==, tarball: file:.sfs-deps/effect-spec-runtime-1.0.1.tgz}
+    resolution: {integrity: sha512-jDQl3G7nnzaWIQtGGZ1JtBa2ZD6TXw0bt8FTVnPQcfg9wHgCH4iTfJzChXJ36KGFlotofmXR6LZGTidVO58ufg==, tarball: file:.sfs-deps/effect-spec-runtime-1.0.1.tgz}
     version: 1.0.1
     peerDependencies:
       '@systemfsoftware/vitest': ^2.0.0
@@ -2885,7 +2885,7 @@ packages:
       effect: ^4.0.0
 
   '@systemfsoftware/trace-spec@file:.sfs-deps/trace-spec-1.0.1.tgz':
-    resolution: {integrity: sha512-myJkkwCgV0rYegMA3AXxYyu7Oh2WQ0lSiLpUCsFbgxkMJrOdEgHuWbdzY1OP+gm0XitR41AGWoJayICDbidD1A==, tarball: file:.sfs-deps/trace-spec-1.0.1.tgz}
+    resolution: {integrity: sha512-VFgoqDmOgWLNG+l8Y/L93XhoPm/kSncJh3TRSKf6nqXlpPamYyojWphjtHy7QAUYwwPyhJEJMORuul1o/ga4pg==, tarball: file:.sfs-deps/trace-spec-1.0.1.tgz}
     version: 1.0.1
     peerDependencies:
       '@systemfsoftware/vitest': ^2.0.0
@@ -2903,7 +2903,7 @@ packages:
     version: 2.0.1
 
   '@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz':
-    resolution: {integrity: sha512-0x9oGBUs9z6TsQMiIkEIlkBCgc2cfHSl5D0kM+iMBO18MdU+uxz4pnjonZYGJGoXf9Qy1+rsI83Mx5ocwjuzMg==, tarball: file:.sfs-deps/vitest-2.0.0.tgz}
+    resolution: {integrity: sha512-90PnxjSsJHEbGYQ0yVgDz708eqpkHpvB24OiiXxs5FZxLnf2ER+T6Q65WgNshsQDBhg5jLKe2fGiUgw0J6eQ1A==, tarball: file:.sfs-deps/vitest-2.0.0.tgz}
     version: 2.0.0
     peerDependencies:
       effect: ^4
