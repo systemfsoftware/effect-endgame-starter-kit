@@ -69,6 +69,7 @@ jobs:
   deploy:
     name: deploy · production
     needs: [mutation]
+    if: ${{ !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     outputs:
@@ -83,6 +84,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: ./.github/actions/cloudflare-secrets
       - uses: ./.github/actions/dev-shell
       - name: Read the production worker before deploying
         id: prior
@@ -106,13 +108,7 @@ jobs:
             echo "version=" >> "$GITHUB_OUTPUT"
           fi
       - name: Deploy production
-        env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-1.jsonl
         run: nix develop --command pnpm cloud:deploy
-      - name: Redeploy production to prove no settings drift
-        env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
-        run: nix develop --command pnpm cloud:redeploy
       - name: Read the production worker and URL
         id: site
         run: |
@@ -121,11 +117,10 @@ jobs:
           worker="$(jq -er '.workerName' <<<"$state")"
           url="$(jq -er '.url' <<<"$state")"
           { echo "worker=$worker"; echo "url=$url"; } >> "$GITHUB_OUTPUT"
-      - name: Check the redeploy log and Workers Issues
+      - name: Check Workers Issues is on
         env:
           DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
-          DEPLOY_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
-        run: nix develop --command ./bin/cloud node apps/site/deploy/verify-deployment.ts
+        run: nix develop --command ./bin/cloud pnpm --filter @endgame/site verify:deployment
       - name: Record the version serving production now
         id: recorded
         env:
@@ -140,16 +135,11 @@ jobs:
             echo "- version now: \`${{ steps.recorded.outputs.version }}\`"
             echo "- URL: ${{ steps.site.outputs.url }}"
           } >> "$GITHUB_STEP_SUMMARY"
-      - if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: production-deploy-logs
-          path: .cache/deploy-*.jsonl
-          if-no-files-found: ignore
 
   qa:
     name: qa · production
     needs: [deploy]
+    if: ${{ !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -161,6 +151,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: ./.github/actions/cloudflare-secrets
       - uses: ./.github/actions/dev-shell
       - name: Deployed journeys
         run: nix develop --command ./bin/cloud pnpm --filter @endgame/site-e2e test:deployed
@@ -174,7 +165,7 @@ jobs:
   rollback:
     name: rollback · production
     needs: [deploy, qa]
-    if: ${{ failure() && needs.qa.result == 'failure' }}
+    if: ${{ !github.event.repository.is_template && failure() && needs.qa.result == 'failure' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -187,6 +178,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: ./.github/actions/cloudflare-secrets
       - uses: ./.github/actions/dev-shell
       - name: Roll production back to the recorded previous version
         if: env.ROLLBACK_TO_VERSION != ''

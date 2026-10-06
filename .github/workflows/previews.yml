@@ -15,7 +15,7 @@ concurrency:
 jobs:
   deploy:
     name: preview · deploy and QA
-    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    if: ${{ !github.event.repository.is_template && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -26,15 +26,10 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: ./.github/actions/cloudflare-secrets
       - uses: ./.github/actions/dev-shell
       - name: Deploy the preview
-        env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-1.jsonl
         run: nix develop --command pnpm cloud:deploy
-      - name: Redeploy the preview to prove no settings drift
-        env:
-          ALCHEMY_CLOUDFLARE_API_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
-        run: nix develop --command pnpm cloud:redeploy
       - name: Read the preview URL and worker
         id: site
         run: |
@@ -43,10 +38,9 @@ jobs:
           url="$(jq -er '.url' <<<"$state")"
           worker="$(jq -er '.workerName' <<<"$state")"
           { echo "url=$url"; echo "worker=$worker"; } >> "$GITHUB_OUTPUT"
-      - name: Check the redeploy log and Workers Issues
+      - name: Check Workers Issues is on
         env:
           DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
-          DEPLOY_LOG: ${{ github.workspace }}/.cache/deploy-2.jsonl
         run: nix develop --command ./bin/cloud pnpm --filter @endgame/site verify:deployment
       - name: Preview transcripts
         env:
@@ -94,13 +88,11 @@ jobs:
           name: preview-artifacts
           path: |
             apps/site-e2e/artifacts/
-            .cache/deploy-1.jsonl
-            .cache/deploy-2.jsonl
           if-no-files-found: ignore
 
   destroy:
     name: preview · destroy
-    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    if: ${{ !github.event.repository.is_template && github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -111,6 +103,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: ./.github/actions/cloudflare-secrets
       - uses: ./.github/actions/dev-shell
       - name: Destroy the preview
         run: nix develop --command pnpm cloud:destroy

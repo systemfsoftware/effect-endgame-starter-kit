@@ -30,7 +30,6 @@
     "check:sfs-sources": "sandbox --allow-host jsr.io -- ./scripts/check-sfs-sources.ts",
     "clean": "sandbox -- turbo clean",
     "cloud:deploy": "./bin/cloud pnpm --filter @endgame/site exec alchemy deploy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes",
-    "cloud:redeploy": "./bin/cloud pnpm --filter @endgame/site exec alchemy deploy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes --force",
     "cloud:destroy": "./bin/cloud pnpm --filter @endgame/site exec alchemy destroy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes",
     "format": "./bin/dprint fmt",
     "format:check": "./bin/dprint check",

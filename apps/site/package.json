@@ -15,6 +15,7 @@
     "@babel/core": "catalog:",
     "@cloudflare/vite-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
+    "@distilled.cloud/cloudflare": "catalog:",
     "@effect/platform-node": "catalog:",
     "@mdx-js/mdx": "catalog:",
     "@rolldown/plugin-babel": "catalog:",

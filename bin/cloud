@@ -21,9 +21,7 @@ exec sandbox \
   "${site[@]}" \
   --pass-env CLOUDFLARE_API_TOKEN \
   --pass-env CLOUDFLARE_ACCOUNT_ID \
-  --pass-env ALCHEMY_CLOUDFLARE_API_LOG \
   --pass-env DEPLOY_WORKER \
-  --pass-env DEPLOY_LOG \
   --pass-env ROLLBACK_WORKER \
   --pass-env ROLLBACK_FROM_VERSION \
   --pass-env ROLLBACK_TO_VERSION \

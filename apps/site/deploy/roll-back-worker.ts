@@ -1,11 +1,11 @@
+import * as Credentials from '@distilled.cloud/cloudflare/Credentials'
+import * as workers from '@distilled.cloud/cloudflare/workers'
 import { NodeRuntime } from '@effect/platform-node'
-import { Config, ConfigProvider, Console, Effect, Match, Redacted } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientRequest, HttpIncomingMessage } from 'effect/http'
+import { Config, ConfigProvider, Console, Effect, Redacted } from 'effect'
+import { FetchHttpClient } from 'effect/http'
 import * as S from 'effect/Schema'
 
-import { CreateDeployment, DeploymentResponse, WorkerName, WorkerVersionId } from './worker-deployment.schema.ts'
-
-const API_BASE_URL = 'https://api.cloudflare.com/client/v4'
+import { WorkerName, WorkerVersionId } from './worker-deployment.schema.ts'
 
 class RollbackRejected extends S.TaggedError<RollbackRejected>()('RollbackRejected', {
   worker: S.String,
@@ -28,34 +28,17 @@ const rollbackConfig = Config.all({
 
 const rollBack = Effect.gen(function*() {
   const config = yield* rollbackConfig.parse(ConfigProvider.fromEnv())
-  const client = yield* HttpClient.HttpClient
-  const request = yield* HttpClientRequest.schemaBodyJson(CreateDeployment)(
-    HttpClientRequest.bearerToken(
-      HttpClientRequest.post(
-        `${API_BASE_URL}/accounts/${config.accountId}/workers/scripts/${config.worker}/deployments`,
-      ),
-      Redacted.value(config.token),
+  const deployment = yield* workers.createScriptDeployment({
+    accountId: config.accountId,
+    scriptName: config.worker,
+    strategy: 'percentage',
+    versions: [{ versionId: config.to, percentage: 100 }],
+    annotations: { workersMessage: `rollback: QA failed on ${config.from}` },
+  }).pipe(
+    Effect.mapError((error) =>
+      new RollbackRejected({ worker: config.worker, from: config.from, to: config.to, reason: error.message })
     ),
-    {
-      strategy: 'percentage',
-      versions: [{ version_id: config.to, percentage: 100 }],
-      annotations: { 'workers/message': `rollback: QA failed on ${config.from}` },
-    },
-  )
-  const response = yield* client.execute(request)
-  const outcome = yield* HttpIncomingMessage.schemaBodyJson(DeploymentResponse)(response)
-  const deployment = yield* Match.value(outcome).pipe(
-    Match.when({ success: true }, (accepted) => Effect.succeed(accepted.result)),
-    Match.when({ success: false }, (rejected) =>
-      Effect.fail(
-        new RollbackRejected({
-          worker: config.worker,
-          from: config.from,
-          to: config.to,
-          reason: rejected.errors.map((error) => `${error.code} ${error.message}`).join('; '),
-        }),
-      )),
-    Match.exhaustive,
+    Effect.provide(Credentials.fromApiToken({ apiToken: Redacted.value(config.token) })),
   )
   yield* Console.log(
     [
