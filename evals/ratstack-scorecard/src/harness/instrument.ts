@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path'
 import type { CellProvenance, Side } from '../model/cell.ts'
-import { optionalEntriesAt, stringAt } from './decode.ts'
+import { type JsonValue, optionalEntriesAt, parseJson, stringAt } from './decode.ts'
 import { type Launcher, runSandboxed } from './sandbox.ts'
 
 export interface Pin {
@@ -26,12 +26,12 @@ export interface Instrument {
 
 const decoder = new TextDecoder()
 
+const present = (value: string | undefined): value is string => value !== undefined && value !== ''
+
 const required = (name: string): string => {
   const value = Deno.env.get(name)
-  if (value === undefined || value === '') {
-    throw new Error(`${name} is unset: run the scorecard through the flake's \`scorecard\` package`)
-  }
-  return value
+  if (present(value)) return value
+  throw new Error(`${name} is unset: run the scorecard through the flake's \`scorecard\` package`)
 }
 
 export const git = async (cwd: string, args: readonly string[]): Promise<Uint8Array> => {
@@ -43,23 +43,34 @@ export const git = async (cwd: string, args: readonly string[]): Promise<Uint8Ar
 const gitText = async (cwd: string, args: readonly string[]): Promise<string> =>
   decoder.decode(await git(cwd, args)).trim()
 
-const readJson = async (path: string): Promise<unknown> => JSON.parse(await Deno.readTextFile(path))
+const readJson = async (path: string): Promise<JsonValue> => parseJson(await Deno.readTextFile(path))
 
-const nixpkgsRevOf = (lock: unknown): string => stringAt(lock, ['nodes', 'nixpkgs', 'locked', 'rev'], 'flake.lock')
+const nixpkgsRevOf = (lock: JsonValue): string => stringAt(lock, ['nodes', 'nixpkgs', 'locked', 'rev'], 'flake.lock')
 
-const pinOf = (pin: unknown): Pin => ({
+const pinOf = (pin: JsonValue): Pin => ({
   owner: stringAt(pin, ['owner'], 'ratstack.pin.json'),
   repo: stringAt(pin, ['repo'], 'ratstack.pin.json'),
   commit: stringAt(pin, ['commit'], 'ratstack.pin.json'),
   narHash: stringAt(pin, ['narHash'], 'ratstack.pin.json'),
 })
 
-const dependencyVersions = (manifest: unknown): Record<string, string> =>
-  Object.fromEntries(optionalEntriesAt(manifest, ['dependencies']).map(([name, version]) => [name, String(version)]))
+const dependencyVersion = (name: string, version: JsonValue): string => {
+  if (typeof version === 'string') return version
+  throw new Error(`package.json dependency ${name} is not a string`)
+}
+
+const dependencyVersions = (manifest: JsonValue): Record<string, string> =>
+  Object.fromEntries(
+    optionalEntriesAt(manifest, ['dependencies']).map(([name, version]) => [name, dependencyVersion(name, version)]),
+  )
+
+const runnerName = (): string => Deno.env.get('RUNNER_NAME') ?? Deno.hostname()
+
+const checkoutOf = (arg: string | undefined): string => arg ?? Deno.cwd()
 
 export const loadInstrument = async (checkoutArg: string | undefined): Promise<Instrument> => {
   const dir = required('SCORECARD_INSTRUMENT')
-  const checkout = await gitText(checkoutArg ?? Deno.cwd(), ['rev-parse', '--show-toplevel'])
+  const checkout = await gitText(checkoutOf(checkoutArg), ['rev-parse', '--show-toplevel'])
   return {
     dir,
     launcher: { executable: required('SCORECARD_SANDBOX'), path: required('SCORECARD_TOOL_PATH') },
@@ -69,7 +80,7 @@ export const loadInstrument = async (checkoutArg: string | undefined): Promise<I
     pin: pinOf(await readJson(join(dir, 'ratstack.pin.json'))),
     instrumentHash: await gitText(checkout, ['rev-parse', 'HEAD:evals/ratstack-scorecard']),
     nixpkgsRev: nixpkgsRevOf(await readJson(join(dir, 'flake.lock'))),
-    runner: Deno.env.get('RUNNER_NAME') ?? Deno.hostname(),
+    runner: runnerName(),
     starterCommit: await gitText(checkout, ['rev-parse', 'HEAD']),
     toolVersions: {
       ...dependencyVersions(await readJson(join(dir, 'package.json'))),
@@ -95,27 +106,39 @@ export const provenanceFor = (
   detail,
 })
 
+const entriesIn = async (dir: string): Promise<readonly Deno.DirEntry[]> => {
+  const entries: Deno.DirEntry[] = []
+  for await (const entry of Deno.readDir(dir)) entries.push(entry)
+  return entries
+}
+
+const joinPath = (prefix: string, name: string): string => (prefix === '' ? name : `${prefix}/${name}`)
+
+const copyEntry = async (from: string, to: string, file: string): Promise<void> => {
+  const target = join(to, file)
+  await Deno.mkdir(dirname(target), { recursive: true })
+  const info = await Deno.lstat(join(from, file))
+  if (info.isSymlink) await Deno.symlink(await Deno.readLink(join(from, file)), target)
+  else await Deno.copyFile(join(from, file), target)
+}
+
 const copyTracked = async (from: string, to: string, files: readonly string[]): Promise<void> => {
-  for (const file of files) {
-    const target = join(to, file)
-    await Deno.mkdir(dirname(target), { recursive: true })
-    const info = await Deno.lstat(join(from, file))
-    if (info.isSymlink) await Deno.symlink(await Deno.readLink(join(from, file)), target)
-    else await Deno.copyFile(join(from, file), target)
-  }
+  await Promise.all(files.map((file) => copyEntry(from, to, file)))
 }
 
 export const trackedFiles = async (checkout: string): Promise<readonly string[]> =>
   decoder.decode(await git(checkout, ['ls-files', '-z'])).split('\0').filter((file) => file !== '')
 
+const walkEntry = async (root: string, prefix: string, entry: Deno.DirEntry): Promise<readonly string[]> => {
+  const path = joinPath(prefix, entry.name)
+  if (entry.isDirectory) return await walkFiles(root, path)
+  return [path]
+}
+
 export const walkFiles = async (root: string, prefix = ''): Promise<readonly string[]> => {
-  const found: string[] = []
-  for await (const entry of Deno.readDir(join(root, prefix))) {
-    const path = prefix === '' ? entry.name : `${prefix}/${entry.name}`
-    if (entry.isDirectory) found.push(...await walkFiles(root, path))
-    else found.push(path)
-  }
-  return found.sort()
+  const entries = await entriesIn(join(root, prefix))
+  const nested = await Promise.all(entries.map((entry) => walkEntry(root, prefix, entry)))
+  return nested.flat().sort()
 }
 
 export const materializeStarter = async (instrument: Instrument, work: string): Promise<string> => {
@@ -130,15 +153,16 @@ export const materializeRatstack = async (instrument: Instrument, work: string):
   return target
 }
 
+const toolFiles = ['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml'] as const
+
 export const prepareTools = async (instrument: Instrument, work: string): Promise<string> => {
   const tools = join(work, 'tools')
   await Deno.mkdir(join(tools, 'src/tools'), { recursive: true })
-  for (const file of ['package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml']) {
-    await Deno.copyFile(join(instrument.dir, file), join(tools, file))
-  }
-  for await (const entry of Deno.readDir(join(instrument.dir, 'src/tools'))) {
-    await Deno.copyFile(join(instrument.dir, 'src/tools', entry.name), join(tools, 'src/tools', entry.name))
-  }
+  await Promise.all(toolFiles.map((file) => Deno.copyFile(join(instrument.dir, file), join(tools, file))))
+  const names = (await entriesIn(join(instrument.dir, 'src/tools'))).map((entry) => entry.name)
+  await Promise.all(
+    names.map((name) => Deno.copyFile(join(instrument.dir, 'src/tools', name), join(tools, 'src/tools', name))),
+  )
   const install = await runSandboxed(instrument.launcher, {
     project: work,
     cwd: tools,

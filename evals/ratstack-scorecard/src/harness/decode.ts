@@ -1,41 +1,77 @@
-export const at = (value: unknown, key: string): unknown =>
-  typeof value === 'object' && value !== null && key in value
-    ? Object.getOwnPropertyDescriptor(value, key)?.value
-    : undefined
+export type JsonObject = { readonly [key: string]: JsonValue }
 
-const pathOf = (value: unknown, path: readonly string[]): unknown => path.reduce(at, value)
+export type JsonValue =
+  | null
+  | boolean
+  | number
+  | string
+  | readonly JsonValue[]
+  | JsonObject
 
-const refuse = (what: string, path: readonly string[], expected: string): never => {
-  throw new Error(`${what}: expected ${expected} at ${path.join('.') || '<root>'}`)
+const scalarTypes: Readonly<Record<string, true>> = { boolean: true, number: true, string: true }
+
+const isScalar = (value: unknown): value is null | boolean | number | string =>
+  value === null || scalarTypes[typeof value] === true
+
+const isObjectLike = (value: unknown): value is object => typeof value === 'object' && value !== null
+
+export const isJsonArray = (value: unknown): value is readonly JsonValue[] => Array.isArray(value)
+
+export const isJsonObject = (value: unknown): value is JsonObject => isObjectLike(value) && !isJsonArray(value)
+
+const arrayChildrenAreJson = (value: unknown): value is readonly JsonValue[] =>
+  isJsonArray(value) && value.every(isJsonValue)
+
+const objectChildrenAreJson = (value: unknown): value is JsonObject =>
+  isJsonObject(value) && Object.values(value).every(isJsonValue)
+
+const childrenAreJson = (value: unknown): value is JsonObject | readonly JsonValue[] =>
+  arrayChildrenAreJson(value) || objectChildrenAreJson(value)
+
+export const isJsonValue = (value: unknown): value is JsonValue => isScalar(value) || childrenAreJson(value)
+
+export const parseJson = (text: string): JsonValue => {
+  const found = [JSON.parse(text)].find(isJsonValue)
+  if (found !== undefined) return found
+  throw new Error('parseJson: the text is not a JSON value')
 }
 
-export const stringAt = (value: unknown, path: readonly string[], what: string): string => {
+export const at = (value: JsonValue, key: string): JsonValue | undefined => isJsonObject(value) ? value[key] : undefined
+
+const pathOf = (value: JsonValue, path: readonly string[]): JsonValue | undefined =>
+  path.reduce<JsonValue | undefined>((found, key) => (found === undefined ? undefined : at(found, key)), value)
+
+const refusal = (what: string, path: readonly string[], expected: string): Error =>
+  new Error(`${what}: expected ${expected} at ${path.join('.') || '<root>'}`)
+
+export const stringAt = (value: JsonValue, path: readonly string[], what: string): string => {
   const found = pathOf(value, path)
-  return typeof found === 'string' ? found : refuse(what, path, 'a string')
+  if (typeof found === 'string') return found
+  throw refusal(what, path, 'a string')
 }
 
-export const numberAt = (value: unknown, path: readonly string[], what: string): number => {
+export const numberAt = (value: JsonValue, path: readonly string[], what: string): number => {
   const found = pathOf(value, path)
-  return typeof found === 'number' ? found : refuse(what, path, 'a number')
+  if (typeof found === 'number') return found
+  throw refusal(what, path, 'a number')
 }
 
-export const arrayAt = (value: unknown, path: readonly string[], what: string): readonly unknown[] => {
+export const arrayAt = (value: JsonValue, path: readonly string[], what: string): readonly JsonValue[] => {
   const found = pathOf(value, path)
-  return Array.isArray(found) ? found : refuse(what, path, 'an array')
+  if (isJsonArray(found)) return found
+  throw refusal(what, path, 'an array')
 }
 
-export const entriesAt = (
-  value: unknown,
+export const objectAt = (value: JsonValue, path: readonly string[], what: string): JsonObject => {
+  const found = pathOf(value, path)
+  if (isJsonObject(found)) return found
+  throw refusal(what, path, 'an object')
+}
+
+export const optionalEntriesAt = (
+  value: JsonValue,
   path: readonly string[],
-  what: string,
-): readonly (readonly [string, unknown])[] => {
+): readonly (readonly [string, JsonValue])[] => {
   const found = pathOf(value, path)
-  return typeof found === 'object' && found !== null && !Array.isArray(found)
-    ? Object.entries(found)
-    : refuse(what, path, 'an object')
-}
-
-export const optionalEntriesAt = (value: unknown, path: readonly string[]): readonly (readonly [string, unknown])[] => {
-  const found = pathOf(value, path)
-  return typeof found === 'object' && found !== null && !Array.isArray(found) ? Object.entries(found) : []
+  return isJsonObject(found) ? Object.entries(found) : []
 }

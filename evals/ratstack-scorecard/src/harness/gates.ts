@@ -50,12 +50,19 @@ async () => {
   return result.code
 }
 
+const envOr = (name: string, fallback: string): string => Deno.env.get(name) ?? fallback
+
+const hostEnvironment = (): Readonly<Record<string, string>> => ({
+  PATH: envOr('PATH', ''),
+  HOME: envOr('HOME', '/tmp'),
+})
+
 const hostStep = (root: string, label: string, args: readonly string[]): () => Promise<number> => async () => {
   const result = await new Deno.Command('deno', {
     args: [...args],
     cwd: root,
     clearEnv: true,
-    env: { PATH: Deno.env.get('PATH') ?? '', HOME: Deno.env.get('HOME') ?? '/tmp' },
+    env: hostEnvironment(),
     stdout: 'piped',
     stderr: 'piped',
   }).output()

@@ -1,6 +1,6 @@
 import { join, relative } from 'node:path'
 import { measureStatic } from './families/static.ts'
-import { arrayAt, at, stringAt } from './harness/decode.ts'
+import { arrayAt, at, type JsonValue, objectAt, parseJson, stringAt } from './harness/decode.ts'
 import { git, type Instrument, walkFiles } from './harness/instrument.ts'
 import { runSandboxed } from './harness/sandbox.ts'
 
@@ -29,8 +29,8 @@ export interface LauncherRecord {
   readonly wallMs: number
 }
 
-const journeyEntry = (value: unknown): JourneyEntry => {
-  const produce = at(value, 'produce')
+const journeyEntry = (value: JsonValue): JourneyEntry => {
+  const produce = objectAt(value, ['produce'], 'journey')
   const failingTool = at(produce, 'failingTool')
   return {
     id: stringAt(value, ['id'], 'journey'),
@@ -78,13 +78,19 @@ const gitRepoFrom = async (tree: string, target: string): Promise<string> => {
   return target
 }
 
+const skipOverlay = (file: string): boolean =>
+  file.startsWith('node_modules/') || file.startsWith('journeys/__records__/')
+
+const overlayFile = async (instrument: Instrument, dir: string, file: string): Promise<void> => {
+  const target = join(dir, file)
+  await Deno.mkdir(join(target, '..'), { recursive: true })
+  await Deno.copyFile(join(instrument.dir, file), target)
+}
+
 const overlayWithFailingTool = async (instrument: Instrument, work: string, tool: string): Promise<string> => {
   const dir = join(work, 'instrument')
-  for (const file of await walkFiles(instrument.dir)) {
-    if (file.startsWith('node_modules/') || file.startsWith('journeys/__records__/')) continue
-    await Deno.mkdir(join(dir, file, '..'), { recursive: true })
-    await Deno.copyFile(join(instrument.dir, file), join(dir, file))
-  }
+  const files = (await walkFiles(instrument.dir)).filter((file) => !skipOverlay(file))
+  await Promise.all(files.map((file) => overlayFile(instrument, dir, file)))
   const failing = join(dir, 'src/tools', tool)
   await Deno.remove(failing)
   await Deno.writeTextFile(failing, 'Deno.exit(3)\n')
@@ -126,18 +132,31 @@ const produce = async (instrument: Instrument, root: string, entry: JourneyEntry
   }
 }
 
-export const runJourneys = async (instrument: Instrument, root: string): Promise<number> => {
-  const manifest = arrayAt(JSON.parse(await Deno.readTextFile(join(root, 'journeys/manifest.json'))), [
-    'journeys',
-  ], 'journeys/manifest.json').map(journeyEntry)
-  const records = join(root, 'journeys/__records__')
-  await Deno.remove(records, { recursive: true }).catch(() => undefined)
-  await Deno.mkdir(records, { recursive: true })
-  for (const entry of manifest) {
+const recordsOf = async (
+  instrument: Instrument,
+  root: string,
+  records: string,
+  entries: readonly JourneyEntry[],
+): Promise<void> => {
+  for (const entry of entries) {
     const record = await produce(instrument, root, entry)
     await Deno.writeTextFile(join(records, `${entry.id}.json`), `${JSON.stringify(record, null, 2)}\n`)
     console.error(`journeys: produced ${entry.id} in ${record.wallMs} ms`)
   }
+}
+
+const relativeTo = (root: string): string => relative(Deno.cwd(), root) || '.'
+
+export const runJourneys = async (instrument: Instrument, root: string): Promise<number> => {
+  const manifest = arrayAt(
+    parseJson(await Deno.readTextFile(join(root, 'journeys/manifest.json'))),
+    ['journeys'],
+    'journeys/manifest.json',
+  ).map(journeyEntry)
+  const records = join(root, 'journeys/__records__')
+  await Deno.remove(records, { recursive: true }).catch(() => undefined)
+  await Deno.mkdir(records, { recursive: true })
+  await recordsOf(instrument, root, records, manifest)
   const install = await runSandboxed(instrument.launcher, {
     project: root,
     cwd: root,
@@ -155,6 +174,6 @@ export const runJourneys = async (instrument: Instrument, root: string): Promise
   })
   await Deno.stdout.write(encoder.encode(vitest.stdout))
   await Deno.stderr.write(encoder.encode(vitest.stderr))
-  console.error(`journeys: vitest exited ${vitest.code} (${relative(Deno.cwd(), root) || '.'})`)
+  console.error(`journeys: vitest exited ${vitest.code} (${relativeTo(root)})`)
   return vitest.code
 }
