@@ -16,6 +16,9 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: denoland/setup-deno@v2
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
+        with:
+          install: "false"
       - name: Require a changeset for publishable-package changes
-        run: ./scripts/check-changeset.ts ${{ github.event.pull_request.base.sha }}
+        run: nix develop --command sandbox --allow-host jsr.io -- ./scripts/check-changeset.ts ${{ github.event.pull_request.base.sha }}

@@ -47,16 +47,9 @@ jobs:
       OXLINT_FORMAT: github
     steps:
       - uses: actions/checkout@v7
-      - uses: cachix/install-nix-action@v31
-      - name: dprint from the flake
-        run: echo "$(nix build --no-link --print-out-paths .#dprint)/bin" >> "$GITHUB_PATH"
-      # pnpm/setup replaces pnpm/action-setup for pnpm v11+ and folds
-      # actions/setup-node into the same step. The node version lives here now.
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Turbo cache
         uses: actions/cache@v6
         with:
@@ -65,11 +58,8 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-dist-
             turbo-${{ runner.os }}-
-      - name: Lift the ubuntu-24.04 AppArmor block on user namespaces for the network-denied stack check
-        if: matrix.leg == 'local-stack'
-        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Gate
-        run: ${{ matrix.gate }}
+        run: nix develop --command ${{ matrix.gate }}
 
   stack:
     name: stack
@@ -79,14 +69,9 @@ jobs:
       CI: "true"
     steps:
       - uses: actions/checkout@v7
-      - uses: cachix/install-nix-action@v31
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
-      - name: Realise the dev shell and local stack
-        run: nix develop --command true
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Local stack journeys
         run: nix develop --command pnpm stack:ci
       - name: Local stack report

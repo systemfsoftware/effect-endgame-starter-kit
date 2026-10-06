@@ -1,0 +1,26 @@
+name: Dev shell and sandbox
+description: >-
+  Installs Nix, lets the sandbox create user namespaces on ubuntu-24.04,
+  creates .cache/ (where sandboxed steps leave files for the host, since
+  the runner's $GITHUB_OUTPUT and /tmp are outside the sandbox), and
+  installs the workspace through the sandbox, offline from the Nix pnpm
+  store.
+inputs:
+  install:
+    description: Install the workspace through the sandbox
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - uses: cachix/install-nix-action@v31
+    - name: Lift the ubuntu-24.04 AppArmor block on user namespaces
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+    - name: Create the sandbox's output directory
+      shell: bash
+      run: mkdir -p .cache
+    - name: Install through the sandbox, offline from the Nix pnpm store
+      if: inputs.install == 'true'
+      shell: bash
+      run: nix develop --command pnpm bootstrap
