@@ -1,0 +1,121 @@
+name: Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: preview · deploy and QA
+    if: github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ALCHEMY_STAGE: pr-${{ github.event.pull_request.number }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Realise the dev shell
+        run: nix develop --command true
+      - name: Deploy the preview
+        env:
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-1.jsonl
+        run: pnpm cloud:deploy
+      - name: Redeploy the preview to prove no settings drift
+        env:
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-2.jsonl
+        run: pnpm cloud:redeploy
+      - name: Read the preview URL and worker
+        id: site
+        run: |
+          state="$(pnpm --filter @endgame/site exec alchemy state cat "Endgame/${ALCHEMY_STAGE}/Site")"
+          echo "url=$(jq -r '.url' <<<"$state")" >> "$GITHUB_OUTPUT"
+          echo "worker=$(jq -r '.workerName' <<<"$state")" >> "$GITHUB_OUTPUT"
+      - name: Check the redeploy log and Workers Issues
+        env:
+          DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
+          DEPLOY_LOG: ${{ runner.temp }}/deploy-2.jsonl
+        run: pnpm --filter @endgame/site verify:deployment
+      - name: Preview transcripts
+        env:
+          SITE_URL: ${{ steps.site.outputs.url }}
+        run: |
+          {
+            echo "### Preview \`${ALCHEMY_STAGE}\`"
+            echo
+            echo "URL: ${SITE_URL}"
+            echo
+            echo "#### Markdown (default)"
+            echo '```'
+            curl -sS "${SITE_URL}/"
+            echo '```'
+            echo "#### HTML (Accept: text/html)"
+            echo '```html'
+            curl -sS -H 'Accept: text/html' "${SITE_URL}/"
+            echo '```'
+            echo "#### /llms.txt"
+            echo '```'
+            curl -sS "${SITE_URL}/llms.txt"
+            echo '```'
+            echo "#### Response headers"
+            echo '```'
+            curl -sS -o /dev/null -D - "${SITE_URL}/"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Comment on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          SITE_URL: ${{ steps.site.outputs.url }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          body="$(printf '### Preview %s\n\n%s\n\n[Preview run](%s/%s/actions/runs/%s)\n' \
+            "$ALCHEMY_STAGE" "$SITE_URL" "${{ github.server_url }}" "${{ github.repository }}" "${{ github.run_id }}")"
+          gh pr comment "$PR" --edit-last --create-if-none --body "$body"
+      - name: Deployed journeys
+        env:
+          SITE_URL: ${{ steps.site.outputs.url }}
+        run: nix develop --command pnpm --filter @endgame/site-e2e test:deployed
+      - if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: preview-artifacts
+          path: |
+            apps/site-e2e/artifacts/
+            ${{ runner.temp }}/deploy-1.jsonl
+            ${{ runner.temp }}/deploy-2.jsonl
+          if-no-files-found: ignore
+
+  destroy:
+    name: preview · destroy
+    if: github.event.action == 'closed' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ALCHEMY_STAGE: pr-${{ github.event.pull_request.number }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Destroy the preview
+        run: pnpm cloud:destroy

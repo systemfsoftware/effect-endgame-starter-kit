@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "plugins": [{
+      "name": "@effect/language-service",
+      "allowedUnstableApis": [
+        "effect/http",
+        "effect/observability",
+        "effect/process/ChildProcess",
+        "effect/process/ChildProcessSpawner"
+      ]
+    }]
+  },
+  "include": [".", "../src/readme-opening.d.ts"]
+}
