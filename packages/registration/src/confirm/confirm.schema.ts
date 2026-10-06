@@ -1,6 +1,11 @@
 import * as S from 'effect/Schema'
 
-import { PersonId, Registration } from '../workshop.schema.ts'
+import { PersonId, Registration, RegistrationId } from '../workshop.schema.ts'
+
+export class ConfirmRequest extends S.Class<ConfirmRequest>('ConfirmRequest')({
+  registrationId: RegistrationId,
+  person: PersonId,
+}) {}
 
 export class RegistrationFound extends S.TaggedClass<RegistrationFound>()('RegistrationFound', {
   holder: PersonId,

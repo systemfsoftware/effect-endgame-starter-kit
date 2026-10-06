@@ -3,7 +3,7 @@ import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
-import { type Held, Instant, PersonId } from '../workshop.schema.ts'
+import { type Held, Instant, PersonId, RegistrationId } from '../workshop.schema.ts'
 import { type RegistrationFound, RegistrationLookup } from './confirm.schema.ts'
 
 const ConfirmSeatTypeId: unique symbol = Symbol.for('endgame/registration/ConfirmSeatDecision')
@@ -31,12 +31,27 @@ export class RegistrationUnknown extends S.TaggedClass<RegistrationUnknown>()('R
 export const ConfirmSeatDecision = S.Union([SeatConfirmed, NotHolder, HoldExpired, NotHeld, RegistrationUnknown])
 export type ConfirmSeatDecision = S.Schema.Type<typeof ConfirmSeatDecision>
 
+const decisionTags = {
+  SeatConfirmed: 'SeatConfirmed',
+  NotHolder: 'NotHolder',
+  HoldExpired: 'HoldExpired',
+  NotHeld: 'NotHeld',
+  RegistrationUnknown: 'RegistrationUnknown',
+} as const satisfies { readonly [K in ConfirmSeatDecision['_tag']]: K }
+
+export const ConfirmSeatDecisionTag = S.Literals(Object.values(decisionTags))
+
 export class ConfirmSeatCommand extends S.Class<ConfirmSeatCommand>('ConfirmSeatCommand')({
+  registrationId: RegistrationId,
   registration: RegistrationLookup,
   person: PersonId,
   now: Instant,
 }) {
-  static readonly [Workflow.InstrumentationBrand]: Record<never, never> = {}
+  static readonly [Workflow.InstrumentationBrand]: {
+    readonly registrationId: 'app.registration.registration_id'
+  } = {
+    registrationId: 'app.registration.registration_id',
+  }
 }
 
 const beforeDeadline = (command: ConfirmSeatCommand, held: Held): SeatConfirmed | HoldExpired =>

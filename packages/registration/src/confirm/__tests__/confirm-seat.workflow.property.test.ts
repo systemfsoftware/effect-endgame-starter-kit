@@ -3,7 +3,7 @@ import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
-import { Deadline, Held, HoldTtl, Instant, PersonId } from '../../workshop.schema.ts'
+import { Deadline, Held, HoldTtl, Instant, PersonId, RegistrationId } from '../../workshop.schema.ts'
 import {
   confirmSeat,
   ConfirmSeatCommand,
@@ -16,14 +16,18 @@ import {
 import { RegistrationFound, RegistrationLookup } from '../confirm.schema.ts'
 
 interface ConfirmationDraw {
+  readonly registrationId: RegistrationId
   readonly registration: RegistrationLookup
   readonly stranger: PersonId
   readonly confirmsOwn: boolean
   readonly now: Instant
 }
 
-const confirmationOf = ({ registration, stranger, confirmsOwn, now }: ConfirmationDraw): ConfirmSeatCommand =>
+const confirmationOf = (
+  { registrationId, registration, stranger, confirmsOwn, now }: ConfirmationDraw,
+): ConfirmSeatCommand =>
   ConfirmSeatCommand.make({
+    registrationId,
     registration,
     person: S.is(RegistrationFound)(registration) && confirmsOwn ? registration.holder : stranger,
     now,
@@ -43,7 +47,13 @@ describe('confirmSeat — a held seat confirmed by its holder before its deadlin
   it.prop(
     '∀c_RegistrationUnknown_≡Missing',
     {
-      of: { registration: RegistrationLookup, stranger: PersonId, confirmsOwn: S.Boolean, now: Instant },
+      of: {
+        registrationId: RegistrationId,
+        registration: RegistrationLookup,
+        stranger: PersonId,
+        confirmsOwn: S.Boolean,
+        now: Instant,
+      },
       subject: confirmSeat,
     },
     (subject, drawn) => {
@@ -55,7 +65,13 @@ describe('confirmSeat — a held seat confirmed by its holder before its deadlin
   it.prop(
     '∀c_NotHeld_≡StateNotHeld',
     {
-      of: { registration: RegistrationLookup, stranger: PersonId, confirmsOwn: S.Boolean, now: Instant },
+      of: {
+        registrationId: RegistrationId,
+        registration: RegistrationLookup,
+        stranger: PersonId,
+        confirmsOwn: S.Boolean,
+        now: Instant,
+      },
       subject: confirmSeat,
     },
     (subject, drawn) => {
@@ -67,7 +83,13 @@ describe('confirmSeat — a held seat confirmed by its holder before its deadlin
   it.prop(
     '∀c_NotHolder_≡HeldByAnother',
     {
-      of: { registration: RegistrationLookup, stranger: PersonId, confirmsOwn: S.Boolean, now: Instant },
+      of: {
+        registrationId: RegistrationId,
+        registration: RegistrationLookup,
+        stranger: PersonId,
+        confirmsOwn: S.Boolean,
+        now: Instant,
+      },
       subject: confirmSeat,
     },
     (subject, drawn) => {
@@ -79,12 +101,21 @@ describe('confirmSeat — a held seat confirmed by its holder before its deadlin
   it.prop(
     '∀h_HolderConfirmation_≡NowStrictlyBeforeExpiresAt',
     {
-      of: { holder: PersonId, now: Instant, lead: HoldTtl, lag: S.Natural, ahead: S.Boolean, exact: S.Boolean },
+      of: {
+        registrationId: RegistrationId,
+        holder: PersonId,
+        now: Instant,
+        lead: HoldTtl,
+        lag: S.Natural,
+        ahead: S.Boolean,
+        exact: S.Boolean,
+      },
       subject: confirmSeat,
     },
-    (subject, { holder, now, lead, lag, ahead, exact }) => {
+    (subject, { registrationId, holder, now, lead, lag, ahead, exact }) => {
       const expiresAt = ahead ? now + lead : now - (exact ? 0 : lag % (now + 1))
       const command = ConfirmSeatCommand.make({
+        registrationId,
         registration: RegistrationFound.make({ holder, state: Held.make({ expiresAt: Deadline.make(expiresAt) }) }),
         person: holder,
         now,

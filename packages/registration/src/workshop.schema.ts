@@ -49,8 +49,27 @@ export const WaitlistTail = S.Int.pipe(
 )
 export type WaitlistTail = S.Schema.Type<typeof WaitlistTail>
 
-export const PersonId = S.String.pipe(S.check(S.isPattern(/^[A-Za-z0-9_-]{1,64}$/)), S.brand('PersonId'))
+const URL_SAFE_ID = /^[A-Za-z0-9_-]{1,64}$/
+
+export const PersonId = S.String.pipe(S.check(S.isPattern(URL_SAFE_ID)), S.brand('PersonId'))
 export type PersonId = S.Schema.Type<typeof PersonId>
+
+export const SessionId = S.String.pipe(S.check(S.isPattern(URL_SAFE_ID)), S.brand('SessionId'))
+export type SessionId = S.Schema.Type<typeof SessionId>
+
+export const RegistrationId = S.Int.pipe(
+  S.check(S.isBetween({ minimum: 1, maximum: POSTGRES_INTEGER_MAX })),
+  S.brand('RegistrationId'),
+)
+export type RegistrationId = S.Schema.Type<typeof RegistrationId>
+
+export const AuditSeq = S.Int.pipe(
+  S.check(S.isBetween({ minimum: 1, maximum: POSTGRES_INTEGER_MAX })),
+  S.brand('AuditSeq'),
+)
+export type AuditSeq = S.Schema.Type<typeof AuditSeq>
+
+export class WorkshopPolicy extends S.Class<WorkshopPolicy>('WorkshopPolicy')({ cap: SeatCap, holdTtl: HoldTtl }) {}
 
 export class Held extends S.TaggedClass<Held>()('Held', { expiresAt: Deadline }) {}
 

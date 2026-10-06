@@ -2,9 +2,13 @@
   "description": "Workshop registration: seats held, waitlisted or refused by a per-person cap, decided as pure workflows",
   "dependencies": {
     "@systemfsoftware/effect-cell-types": "catalog:",
+    "@systemfsoftware/effect-unit-of-work": "catalog:",
+    "@systemfsoftware/trace-taxonomy": "catalog:",
     "effect": "catalog:"
   },
   "devDependencies": {
+    "@effect/platform-node": "catalog:",
+    "@systemfsoftware/effect-gherkin-spec": "catalog:",
     "@systemfsoftware/effect-schema-law": "catalog:",
     "@systemfsoftware/effect-schema-vite": "catalog:",
     "@systemfsoftware/oxlint-config-recommended": "catalog:",
@@ -12,6 +16,7 @@
     "@systemfsoftware/stryker-js": "catalog:",
     "@systemfsoftware/stryker-js-typescript-checker": "catalog:",
     "@systemfsoftware/stryker-js-vitest-runner": "catalog:",
+    "@systemfsoftware/trace-spec": "catalog:",
     "@systemfsoftware/tsconfig": "catalog:",
     "@systemfsoftware/vitest": "catalog:",
     "@types/node": "catalog:",
@@ -32,7 +37,7 @@
     "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
     "mutation": "stryker run",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit --incremental && effect-tsgo diagnostics --project tsconfig.json --format text --strict && tsc -p tsconfig.node.json --noEmit"
+    "typecheck": "tsc --noEmit --incremental && effect-tsgo diagnostics --project tsconfig.json --format text --strict && tsc -p tests/tsconfig.json --noEmit && effect-tsgo diagnostics --project tests/tsconfig.json --format text --strict && tsc -p tsconfig.node.json --noEmit"
   },
   "type": "module",
   "version": "0.0.0",

@@ -1,6 +1,12 @@
 import * as S from 'effect/Schema'
 
-import { SeatCount, WaitlistTail } from '../workshop.schema.ts'
+import { PersonId, RequestedSeats, SeatCount, SessionId, WaitlistTail } from '../workshop.schema.ts'
+
+export class RegisterRequest extends S.Class<RegisterRequest>('RegisterRequest')({
+  sessionId: SessionId,
+  person: PersonId,
+  requested: RequestedSeats,
+}) {}
 
 export class SessionFound extends S.TaggedClass<SessionFound>()('SessionFound', {
   capacity: SeatCount,

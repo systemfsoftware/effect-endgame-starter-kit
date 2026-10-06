@@ -3,7 +3,9 @@ import { defineConfig } from 'vitest/config'
 
 import { packageTestConfig } from '../../vitest.shared.ts'
 
+const entryPoint = new URL('./src/mod.ts', import.meta.url).pathname
+
 export default defineConfig({
-  ...packageTestConfig([]),
+  ...packageTestConfig([{ find: /^@endgame\/registration$/, replacement: entryPoint }]),
   plugins: [inlineSchemaTests()],
 })

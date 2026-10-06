@@ -3,7 +3,7 @@ import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
-import { HoldTtl, Instant, RequestedSeats, SeatCap, SeatCount } from '../../workshop.schema.ts'
+import { HoldTtl, Instant, PersonId, RequestedSeats, SeatCap, SeatCount, SessionId } from '../../workshop.schema.ts'
 import {
   CapReached,
   registerSeats,
@@ -50,12 +50,25 @@ const freeSeats = (command: RegisterSeatsCommand): number =>
 const capRoom = (command: RegisterSeatsCommand): number => Math.max(0, command.cap - command.personSeats)
 
 interface SeatableDraw {
+  readonly sessionId: SessionId
+  readonly person: PersonId
   readonly session: SessionFound
   readonly cap: SeatCap
   readonly personSeats: SeatCount
   readonly requested: RequestedSeats
   readonly now: Instant
   readonly holdTtl: HoldTtl
+}
+
+const seatableDraw = {
+  sessionId: SessionId,
+  person: PersonId,
+  session: SessionFound,
+  cap: SeatCap,
+  personSeats: SeatCount,
+  requested: RequestedSeats,
+  now: Instant,
+  holdTtl: HoldTtl,
 }
 
 const underCap = (drawn: SeatableDraw): RegisterSeatsCommand =>
@@ -89,6 +102,8 @@ describe('registerSeats — seats held, waitlisted or refused by the cap', () =>
     { of: { drawn: RegisterSeatsCommand, atCap: S.Boolean }, subject: registerSeats },
     (subject, { drawn, atCap }) => {
       const command = RegisterSeatsCommand.make({
+        sessionId: drawn.sessionId,
+        person: drawn.person,
         session: drawn.session,
         personSeats: atCap ? SeatCount.make(drawn.cap) : drawn.personSeats,
         cap: drawn.cap,
@@ -103,17 +118,7 @@ describe('registerSeats — seats held, waitlisted or refused by the cap', () =>
 
   it.prop(
     '∀s_Granted_=Min(Requested,CapRoom)',
-    {
-      of: {
-        session: SessionFound,
-        cap: SeatCap,
-        personSeats: SeatCount,
-        requested: RequestedSeats,
-        now: Instant,
-        holdTtl: HoldTtl,
-      },
-      subject: registerSeats,
-    },
+    { of: seatableDraw, subject: registerSeats },
     (subject, drawn) => {
       const command = underCap(drawn)
       const { held, waitlisted } = outcomeOf(command, subject(command))
@@ -123,17 +128,7 @@ describe('registerSeats — seats held, waitlisted or refused by the cap', () =>
 
   it.prop(
     '∀s_Waitlisted_→NoSeatFree',
-    {
-      of: {
-        session: SessionFound,
-        cap: SeatCap,
-        personSeats: SeatCount,
-        requested: RequestedSeats,
-        now: Instant,
-        holdTtl: HoldTtl,
-      },
-      subject: registerSeats,
-    },
+    { of: seatableDraw, subject: registerSeats },
     (subject, drawn) => {
       const command = underCap(drawn)
       const { held, waitlisted } = outcomeOf(command, subject(command))
@@ -143,17 +138,7 @@ describe('registerSeats — seats held, waitlisted or refused by the cap', () =>
 
   it.prop(
     '∀s_NextPosition_=WaitlistTailPlusOne',
-    {
-      of: {
-        session: SessionFound,
-        cap: SeatCap,
-        personSeats: SeatCount,
-        requested: RequestedSeats,
-        now: Instant,
-        holdTtl: HoldTtl,
-      },
-      subject: registerSeats,
-    },
+    { of: seatableDraw, subject: registerSeats },
     (subject, drawn) => {
       const command = underCap(drawn)
       const { decision } = outcomeOf(command, subject(command))
@@ -163,17 +148,7 @@ describe('registerSeats — seats held, waitlisted or refused by the cap', () =>
 
   it.prop(
     '∀s_ExpiresAt_=NowPlusHoldTtl',
-    {
-      of: {
-        session: SessionFound,
-        cap: SeatCap,
-        personSeats: SeatCount,
-        requested: RequestedSeats,
-        now: Instant,
-        holdTtl: HoldTtl,
-      },
-      subject: registerSeats,
-    },
+    { of: seatableDraw, subject: registerSeats },
     (subject, drawn) => {
       const command = underCap(drawn)
       const { decision } = outcomeOf(command, subject(command))

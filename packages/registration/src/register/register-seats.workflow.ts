@@ -4,7 +4,17 @@ import * as Num from 'effect/Number'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
-import { Deadline, HoldTtl, Instant, RequestedSeats, SeatCap, SeatCount, WaitlistPosition } from '../workshop.schema.ts'
+import {
+  Deadline,
+  HoldTtl,
+  Instant,
+  PersonId,
+  RequestedSeats,
+  SeatCap,
+  SeatCount,
+  SessionId,
+  WaitlistPosition,
+} from '../workshop.schema.ts'
 import { type SessionFound, SessionLookup } from './register.schema.ts'
 
 const RegisterSeatsTypeId: unique symbol = Symbol.for('endgame/registration/RegisterSeatsDecision')
@@ -30,7 +40,17 @@ export class SessionUnknown extends S.TaggedClass<SessionUnknown>()('SessionUnkn
 export const RegisterSeatsDecision = S.Union([Seated, CapReached, SessionUnknown])
 export type RegisterSeatsDecision = S.Schema.Type<typeof RegisterSeatsDecision>
 
+const decisionTags = {
+  Seated: 'Seated',
+  CapReached: 'CapReached',
+  SessionUnknown: 'SessionUnknown',
+} as const satisfies { readonly [K in RegisterSeatsDecision['_tag']]: K }
+
+export const RegisterSeatsDecisionTag = S.Literals(Object.values(decisionTags))
+
 export class RegisterSeatsCommand extends S.Class<RegisterSeatsCommand>('RegisterSeatsCommand')({
+  sessionId: SessionId,
+  person: PersonId,
   session: SessionLookup,
   personSeats: SeatCount,
   cap: SeatCap,
@@ -38,7 +58,11 @@ export class RegisterSeatsCommand extends S.Class<RegisterSeatsCommand>('Registe
   now: Instant,
   holdTtl: HoldTtl,
 }) {
-  static readonly [Workflow.InstrumentationBrand]: { readonly requested: 'app.registration.requested_seats' } = {
+  static readonly [Workflow.InstrumentationBrand]: {
+    readonly sessionId: 'app.registration.session_id'
+    readonly requested: 'app.registration.requested_seats'
+  } = {
+    sessionId: 'app.registration.session_id',
     requested: 'app.registration.requested_seats',
   }
 }
