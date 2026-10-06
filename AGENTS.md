@@ -14,12 +14,13 @@ Starter template for TypeScript / Effect libraries and tools.
 
 ## Definition of Done
 
-| ID        | Rule                                                | Gate                |
-| --------- | --------------------------------------------------- | ------------------- |
-| `START-1` | Formatting passes dprint with no diffs              | `pnpm format:check` |
-| `START-2` | Typechecking succeeds workspace-wide with no errors | `pnpm typecheck`    |
-| `START-3` | All test suites pass                                | `pnpm test`         |
-| `START-4` | Full CI validation passes before completion         | `pnpm check:ci`     |
+| ID        | Rule                                                                                                 | Gate                      |
+| --------- | ---------------------------------------------------------------------------------------------------- | ------------------------- |
+| `START-1` | Formatting passes dprint with no diffs                                                               | `pnpm format:check`       |
+| `START-2` | Typechecking succeeds workspace-wide with no errors                                                  | `pnpm typecheck`          |
+| `START-3` | All test suites pass                                                                                 | `pnpm test`               |
+| `START-4` | Full CI validation passes before completion                                                          | `pnpm check:ci`           |
+| `START-5` | A launcher change counts as done only when its darwin path has run a real offline pnpm install in CI | `check (macos)` job in CI |
 
 Workspace roots: `packages/` holds libraries, `apps/` holds publishable
 applications — both are workspace globs in `pnpm-workspace.yaml`. Turbo declares
