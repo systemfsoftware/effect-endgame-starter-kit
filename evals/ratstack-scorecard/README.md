@@ -19,13 +19,12 @@ The scorecard measures the starter against [rat-stack](https://github.com/joelho
 
 ## Running it
 
-Everything that loads third-party code runs inside the sandbox launcher from `systemfsoftware/pnpm-release-management` (`packages.<system>.sandbox`), with this directory as the sandbox project:
+Everything that loads third-party code runs inside the sandbox launcher from `systemfsoftware/pnpm-release-management` (`packages.<system>.sandbox`), with this directory as the sandbox project. The instrument's own flake (`flake.nix`) pins nixpkgs (pnpm 12.9.0, Node 24) and the launcher, and builds the tools' pnpm store from `pnpm-lock.yaml` as a fixed-output derivation (`tools-store`). The install is offline from that store; the sandbox gets no network at all.
 
 ```sh
 cd evals/ratstack-scorecard
-export SANDBOX_PROJECT=$PWD
-sandbox --allow-host registry.npmjs.org -- pnpm install --frozen-lockfile
-sandbox -- pnpm vitest run --project model
+nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox --pnpm-store "$SANDBOX_PNPM_STORE" -- pnpm install --frozen-lockfile'
+nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox -- pnpm vitest run --project model'
 ```
 
 The decision modules (`src/model/*.workflow.ts`) and the orchestrator import only Deno APIs, `node:` builtins and each other, so `deno check src/` type-checks them without any third-party code.

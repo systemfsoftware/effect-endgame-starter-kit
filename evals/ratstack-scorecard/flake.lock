@@ -1,0 +1,94 @@
+{
+  "nodes": {
+    "comment-checker": {
+      "inputs": {
+        "nixpkgs": [
+          "pnpm-release-management",
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1788142907,
+        "narHash": "sha256-arhhsgBbDTOTtnG9gphKARLXkCj3emOZUm3sP0a0jnI=",
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "rev": "60e60bbedb2686c807a9ca64a31f7bba4e75b97b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1791179034,
+        "narHash": "sha256-Ni0LBydzaCi8oek12r4mVreuFHqYlM1eTD6SfiENKfw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "494ce7fd23ff6a5dff39e1fb11e9b6f2ac74bf25",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "494ce7fd23ff6a5dff39e1fb11e9b6f2ac74bf25",
+        "type": "github"
+      }
+    },
+    "pnpm-release-management": {
+      "inputs": {
+        "comment-checker": "comment-checker",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791237748,
+        "narHash": "sha256-IWdNptNMXzjs2yG3DRQJKUkRcOmVvyDQ0x0dN2maEVU=",
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "180122866dd537fa728b5563fb1820fbd2af88cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "180122866dd537fa728b5563fb1820fbd2af88cc",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "pnpm-release-management": "pnpm-release-management"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "pnpm-release-management",
+          "comment-checker",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787367552,
+        "narHash": "sha256-YT4Fs2k7bi+7YzuLt93EtIRgjpwHK5ZfsQEIh5dEQSk=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "fd2ebb9cc4323d0c5a1336138dab5c3c5a5d8bd9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
