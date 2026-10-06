@@ -15,9 +15,9 @@
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
       pin = builtins.fromJSON (builtins.readFile ./ratstack.pin.json);
       toolsStoreHash = {
-        x86_64-linux = "sha256-jUyIV2ysOxkIij/Ff5VGuIADTibbY0SsCPGglmIvdn0=";
-        aarch64-linux = "sha256-jUyIV2ysOxkIij/Ff5VGuIADTibbY0SsCPGglmIvdn0=";
-        aarch64-darwin = "sha256-XWYBTy3xZbQwJxdGbAK4+R69XNmL3RRyXu6+nY+XPXc=";
+        x86_64-linux = "sha256-6VGGHRgFjm5/RJ9ZY+39KMiFHsuWX+by37oWW6fQq/w=";
+        aarch64-linux = "sha256-6VGGHRgFjm5/RJ9ZY+39KMiFHsuWX+by37oWW6fQq/w=";
+        aarch64-darwin = "sha256-vCwExwVl5WmwbuhB7HxbZD0F7WSE7fS6PTXm4SJcn2U=";
       };
     in
     {
@@ -30,7 +30,7 @@
             src = self;
             pname = "ratstack-scorecard";
             pnpm = pkgs.pnpm_12;
-            hash = "sha256-9/W9Q1CNzoBbRBhd+qdu7TfR8xk/7mjoiEOkOLwSRpU=";
+            hash = toolsStoreHash.${system};
           }).pnpm-store;
           ratstack-src = pkgs.fetchFromGitHub {
             inherit (pin) owner repo;
