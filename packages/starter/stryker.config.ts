@@ -1,5 +1,7 @@
 import { defineConfig, type StrykerConfig } from '@systemfsoftware/stryker-js/config'
 
+import manifest from './package.json' with { type: 'json' }
+
 const config: StrykerConfig = defineConfig({
   checkers: [{ plugin: '@systemfsoftware/stryker-js-typescript-checker' }],
   coverageAnalysis: 'perTest',
@@ -10,7 +12,7 @@ const config: StrykerConfig = defineConfig({
   incrementalFile: 'reports/stryker-incremental.json',
   ignorers: ['@systemfsoftware/stryker-ignorer-effect-schema-declarations'],
   jsonReporter: { fileName: 'reports/mutation-report.json' },
-  mutate: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/*.d.ts'],
+  mutate: [...manifest.stryker.mutate],
   packageManager: 'pnpm',
   reporters: ['progress', 'html', 'json', 'progress-stream'],
   testRunner: {
