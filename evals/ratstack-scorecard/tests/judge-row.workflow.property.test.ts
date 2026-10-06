@@ -1,8 +1,8 @@
 import { fc, test } from '@fast-check/vitest'
 import { describe } from 'vitest'
-import type { Cell, RowDefinition } from './cell.ts'
-import { judgeRow } from './judge-row.workflow.ts'
-import { cell, definition, runsFor, sha } from './scorecard.arbitrary.ts'
+import type { Cell, RowDefinition } from '../src/model/cell.ts'
+import { judgeRow } from '../src/model/judge-row.workflow.ts'
+import { cell, definition, runsFor, sha } from '../src/model/scorecard.arbitrary.ts'
 
 const measured = (runs: readonly number[]): Cell => ({ _tag: 'Measured', runs })
 

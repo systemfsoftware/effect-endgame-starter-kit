@@ -1,9 +1,9 @@
 import { fc, test } from '@fast-check/vitest'
 import { describe } from 'vitest'
-import type { Cell, Row } from './cell.ts'
-import { compareWithMain } from './compare-with-main.workflow.ts'
-import { verdictOf } from './judge-row.workflow.ts'
-import { row, runsFor, sha } from './scorecard.arbitrary.ts'
+import type { Cell, Row } from '../src/model/cell.ts'
+import { compareWithMain } from '../src/model/compare-with-main.workflow.ts'
+import { verdictOf } from '../src/model/judge-row.workflow.ts'
+import { row, runsFor, sha } from '../src/model/scorecard.arbitrary.ts'
 
 const measured = (runs: readonly number[]): Cell => ({ _tag: 'Measured', runs })
 

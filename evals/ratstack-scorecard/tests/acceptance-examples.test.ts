@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
-import type { Cell, MeasuredCell, Row, RowDefinition } from './cell.ts'
-import { compareWithMain } from './compare-with-main.workflow.ts'
-import { judgeRow } from './judge-row.workflow.ts'
+import type { Cell, MeasuredCell, Row, RowDefinition } from '../src/model/cell.ts'
+import { compareWithMain } from '../src/model/compare-with-main.workflow.ts'
+import { judgeRow } from '../src/model/judge-row.workflow.ts'
 
 const lcp: RowDefinition = {
   id: 'M3.lcp',

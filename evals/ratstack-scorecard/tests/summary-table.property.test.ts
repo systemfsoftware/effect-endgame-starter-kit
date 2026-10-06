@@ -1,8 +1,8 @@
 import { test } from '@fast-check/vitest'
 import { describe } from 'vitest'
-import { assembleScorecard } from './scorecard-document.ts'
-import { assembleInput } from './scorecard.arbitrary.ts'
-import { renderSummary } from './summary-table.ts'
+import { assembleScorecard } from '../src/model/scorecard-document.ts'
+import { assembleInput } from '../src/model/scorecard.arbitrary.ts'
+import { renderSummary } from '../src/model/summary-table.ts'
 
 const stepSummaryLimit = 1024 * 1024
 
