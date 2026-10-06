@@ -25,6 +25,11 @@ Workspace roots: `packages/` holds libraries, `apps/` holds publishable
 applications — both are workspace globs in `pnpm-workspace.yaml`. Turbo declares
 `dist/**` as each package's build output; `pnpm gate:dist` runs that build.
 
+## CI
+
+- Every job runs on GitHub-hosted runners: `ubuntu-latest`, and `macos-latest` for the macOS `check:ci` leg. This repository is public, and the org's self-hosted fleet runner group admits only private repositories (fork safety), so a `[self-hosted, systemfsoftware-runner, *]` job here queues forever. Gate: review of the workflow diff.
+- Heavy suites split across parallel hosted jobs instead of a larger runner: Linux `check:ci` runs as one job per part (format, lint, typecheck, test, dist), and mutation on `main` runs one job per package. Gate: review of the workflow diff.
+
 ## End of Session
 
 Commit changes using conventional commits (`<type>(<scope>): <subject>`). Ensure the working tree is clean and `pnpm check:ci` passes.
