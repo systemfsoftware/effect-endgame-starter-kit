@@ -13,8 +13,8 @@ piece must answer "does a good starter need this?". If not, it is out.
 
 ## In
 
-1. Toolchain: Nix devshell, pnpm 12, Effect 4 at exact pins (effect / @effect/* / effect-agent in
-   minimumReleaseAgeExclude), TypeScript 7 (tsgo), oxlint with the published systemfsoftware presets, dprint,
+1. Toolchain: Nix devshell, pnpm 12, Effect 4 at exact pins (effect / @effect/* in minimumReleaseAgeExclude),
+   TypeScript 7 (tsgo), oxlint with the published systemfsoftware presets, dprint,
    @systemfsoftware/vitest, constitution subtree, commitlint + changesets as today. Mutation testing (Stryker)
    runs only on push to main.
 2. App: one Cloudflare Worker serving a TanStack Start site, defined and deployed with Alchemy v2. HTTP API with
@@ -23,8 +23,9 @@ piece must answer "does a good starter need this?". If not, it is out.
 4. Tests: unit and property tests; end-to-end journeys in a real browser against the local app. CI runs the gate
    and the journeys on every PR (Linux and macOS).
 5. Safety: all dependency code (install, build, test, dev) runs in the Nix sandbox launcher; strict CSP.
-6. Deploy: `pnpm deploy` through Alchemy. Deploy and preview workflows exist for adopters' copies and never run
-   in the template (`if: !github.event.repository.is_template`). No credentials in the template, ever.
+6. Deploy: `pnpm run deploy` through Alchemy (bare `pnpm deploy` is pnpm's own built-in command). Deploy and
+   preview workflows exist for adopters' copies and never run in the template
+   (`if: !github.event.repository.is_template`). No credentials in the template, ever.
 7. One small example feature end to end (a pure decision function, one HttpApi endpoint, one page, its tests)
    that an adopter can delete in one step.
 8. Distribution of our own packages through the systemfsoftware Nix flake (Ryan's npm rule).
