@@ -32,7 +32,7 @@
         let
           inherit (pkgs) lib;
           system = pkgs.stdenv.hostPlatform.system;
-          dprint = pkgs.callPackage ./nix/dprint.nix { };
+          dprint = pkgs.callPackage ./nix/dprint.nix { dprintConfig = ./dprint.json; };
           unwrapped = pkgs.callPackage ./nix/comment-checker.nix {
             hashes = "${comment-checker}/nix/release-hashes.json";
           };
