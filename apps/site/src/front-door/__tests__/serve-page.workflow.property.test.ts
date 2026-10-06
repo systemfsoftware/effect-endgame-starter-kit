@@ -56,6 +56,7 @@ describe('servePage — Accept negotiation', () => {
         path: command.path,
         accept: [...withoutHtml, MediaPreference.make({ pattern: 'text/html', q: 0 })],
         origin: command.origin,
+        nonce: command.nonce,
       })
       return observedTag(subject(zeroed)) !== 'ServeHtmlPage'
     },
