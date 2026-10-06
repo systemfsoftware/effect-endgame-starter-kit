@@ -1,14 +1,21 @@
 import { Cause, Duration, Effect, Schedule, Schema } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientRequest } from 'effect/http'
-import { readdir, readFile, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from 'effect/http'
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { parseArgs } from 'node:util'
+import { inflateRawSync } from 'node:zlib'
 import { rowDefinitions } from '../src/metrics/registry.ts'
 import type { Family, FamilyResult, MainBaseline, MeasuredCell, Side, SideCell } from '../src/model/cell.ts'
 import { planPinBump } from '../src/model/plan-pin-bump.workflow.ts'
 import { assembleScorecard, type CellsByRow } from '../src/model/scorecard-document.ts'
 import { renderSummary } from '../src/model/summary-table.ts'
-import { FamilyResultSchema, GitRefSchema, ScorecardDocumentSchema, WorkflowRunsSchema } from './schema.ts'
+import {
+  ArtifactsSchema,
+  FamilyResultSchema,
+  GitRefSchema,
+  ScorecardDocumentSchema,
+  WorkflowRunsSchema,
+} from './schema.ts'
 
 class MalformedInput extends Schema.TaggedError<MalformedInput>()('MalformedInput', {
   what: Schema.String,
@@ -39,7 +46,11 @@ const readText = (path: string) =>
     catch: (error) => new MalformedInput({ what: path, issue: String(error) }),
   })
 
-const writeText = (path: string, text: string) => Effect.promise(() => writeFile(path, text))
+const writeText = (path: string, text: string) =>
+  Effect.promise(async () => {
+    await mkdir(dirname(path), { recursive: true })
+    await writeFile(path, text)
+  })
 
 const decodeFile = <A>(schema: Schema.Codec<A>, path: string) =>
   readText(path).pipe(
@@ -137,24 +148,34 @@ const cacheCheck = (args: readonly string[]) =>
     }
   })
 
-const github = (path: string) =>
+const githubGet = (path: string) =>
   Effect.gen(function*() {
     const client = (yield* HttpClient.HttpClient).pipe(
-      HttpClient.filterStatusOk,
       HttpClient.retryTransient({ schedule: Schedule.exponential(Duration.seconds(1)), times: 3 }),
     )
     const token = process.env['GITHUB_TOKEN']
-    const request = HttpClientRequest.get(`https://api.github.com${path}`).pipe(
-      HttpClientRequest.acceptJson,
+    const request = HttpClientRequest.get(path.startsWith('https://') ? path : `https://api.github.com${path}`).pipe(
       (r) => token === undefined || token === '' ? r : HttpClientRequest.bearerToken(r, token),
     )
-    return yield* client.execute(request).pipe(
-      Effect.flatMap((response) => response.json),
-      Effect.timeout(Duration.seconds(15)),
-    )
+    return yield* client.execute(request).pipe(Effect.timeout(Duration.seconds(15)))
   }).pipe(
     Effect.mapError((error) => new GithubApiError({ request: `GET ${path}`, cause: String(error) })),
     Effect.provide(FetchHttpClient.layer),
+  )
+
+const ok = (path: string) =>
+(
+  response: HttpClientResponse.HttpClientResponse,
+): Effect.Effect<HttpClientResponse.HttpClientResponse, GithubApiError> =>
+  response.status >= 200 && response.status < 300
+    ? Effect.succeed(response)
+    : Effect.fail(new GithubApiError({ request: `GET ${path}`, cause: `status ${response.status}` }))
+
+const github = (path: string) =>
+  githubGet(path).pipe(
+    Effect.flatMap(ok(path)),
+    Effect.flatMap((response) => response.json),
+    Effect.mapError((error) => new GithubApiError({ request: `GET ${path}`, cause: String(error) })),
   )
 
 const decodeBody = <A>(schema: Schema.Codec<A>, what: string) => (body: unknown) =>
@@ -162,14 +183,70 @@ const decodeBody = <A>(schema: Schema.Codec<A>, what: string) => (body: unknown)
     Effect.mapError((error) => new GithubApiError({ request: what, cause: String(error) })),
   )
 
-const latestMainRun = (args: readonly string[]) =>
+const zipEntry = (zip: Buffer, name: string) =>
+  Effect.try({
+    try: () => {
+      const end = zip.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]))
+      const count = zip.readUInt16LE(end + 10)
+      let entry = zip.readUInt32LE(end + 16)
+      for (let index = 0; index < count; index++) {
+        const nameLength = zip.readUInt16LE(entry + 28)
+        const extraLength = zip.readUInt16LE(entry + 30)
+        const commentLength = zip.readUInt16LE(entry + 32)
+        if (zip.toString('utf8', entry + 46, entry + 46 + nameLength) === name) {
+          const method = zip.readUInt16LE(entry + 10)
+          const size = zip.readUInt32LE(entry + 20)
+          const local = zip.readUInt32LE(entry + 42)
+          const start = local + 30 + zip.readUInt16LE(local + 26) + zip.readUInt16LE(local + 28)
+          const data = zip.subarray(start, start + size)
+          return (method === 8 ? inflateRawSync(data) : data).toString('utf8')
+        }
+        entry += 46 + nameLength + extraLength + commentLength
+      }
+      throw new Error(`no ${name} in the archive`)
+    },
+    catch: (error) => new GithubApiError({ request: `unzip ${name}`, cause: String(error) }),
+  })
+
+const mainScorecard = (args: readonly string[]) =>
   Effect.gen(function*() {
-    const { values } = parseArgs({ args: [...args], options: { repository: { type: 'string' } }, strict: true })
+    const { values } = parseArgs({
+      args: [...args],
+      options: { repository: { type: 'string' }, out: { type: 'string' } },
+      strict: true,
+    })
     const repository = yield* required(values.repository, '--repository')
-    const path =
+    const out = yield* required(values.out, '--out')
+    const runsPath =
       `/repos/${repository}/actions/workflows/scorecard.yml/runs?branch=main&event=push&status=success&per_page=1`
-    const runs = yield* github(path).pipe(Effect.flatMap(decodeBody(WorkflowRunsSchema, `GET ${path}`)))
-    yield* Effect.sync(() => process.stdout.write(`${runs.workflow_runs.map((run) => run.id).join('')}\n`))
+    const listing = yield* githubGet(runsPath)
+    if (listing.status === 404) return yield* Effect.log('main has no scorecard workflow yet: first baseline')
+    const runs = yield* ok(runsPath)(listing).pipe(
+      Effect.flatMap((response) => response.json),
+      Effect.mapError((error) => new GithubApiError({ request: `GET ${runsPath}`, cause: String(error) })),
+      Effect.flatMap(decodeBody(WorkflowRunsSchema, `GET ${runsPath}`)),
+    )
+    const run = runs.workflow_runs[0]
+    if (run === undefined) return yield* Effect.log('no successful scorecard run on main: first baseline')
+    const artifactsPath = `/repos/${repository}/actions/runs/${run.id}/artifacts?name=scorecard`
+    const artifacts = yield* github(artifactsPath).pipe(Effect.flatMap(decodeBody(ArtifactsSchema, artifactsPath)))
+    const artifact = artifacts.artifacts[0]
+    if (artifact === undefined) {
+      return yield* new GithubApiError({ request: artifactsPath, cause: `run ${run.id} has no scorecard artifact` })
+    }
+    const zip = yield* githubGet(artifact.archive_download_url).pipe(
+      Effect.flatMap(ok(artifact.archive_download_url)),
+      Effect.flatMap((response) => response.arrayBuffer),
+      Effect.mapError((error) => new GithubApiError({ request: 'artifact download', cause: String(error) })),
+    )
+    const text = yield* zipEntry(Buffer.from(zip), 'scorecard.json')
+    yield* Schema.decodeUnknownEffect(Schema.fromJsonString(ScorecardDocumentSchema))(text).pipe(
+      Effect.mapError((error) =>
+        new MalformedInput({ what: `main's scorecard (run ${run.id})`, issue: String(error) })
+      ),
+    )
+    yield* writeText(out, text)
+    yield* Effect.log(`main's scorecard from run ${run.id} (${run.head_sha})`)
   })
 
 const pinCheck = (args: readonly string[]) =>
@@ -196,7 +273,7 @@ const required = (value: string | undefined, flag: string) =>
 const commands: Readonly<Record<string, (args: readonly string[]) => Effect.Effect<void, unknown>>> = {
   'aggregate': aggregate,
   'cache-check': cacheCheck,
-  'latest-main-run': latestMainRun,
+  'main-scorecard': mainScorecard,
   'pin-check': pinCheck,
 }
 

@@ -53,6 +53,23 @@ const pinFile = struct({ owner: string, repo: string, commit: string, narHash: s
 
 const manifest = struct({ dependencies: record(string) })
 
+const sha256Bytes = async (bytes: BufferSource): Promise<string> =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('')
+
+const sha256 = (text: string): Promise<string> => sha256Bytes(new TextEncoder().encode(text))
+
+const generated = ['node_modules/', '.cache/', 'journeys/__records__/']
+
+const instrumentTreeHash = async (dir: string): Promise<string> => {
+  const files = (await walkFiles(dir)).filter((file) => !generated.some((prefix) => file.startsWith(prefix))).sort()
+  const parts = await Promise.all(
+    files.map(async (file) => `${file}\0${await sha256Bytes(await Deno.readFile(join(dir, file)))}`),
+  )
+  return sha256(parts.join('\n'))
+}
+
 export const loadInstrument = async (checkoutArg: string | undefined): Promise<Instrument> => {
   const dir = required('SCORECARD_INSTRUMENT')
   const checkout = await gitText(checkoutArg ?? Deno.cwd(), ['rev-parse', '--show-toplevel'])
@@ -63,7 +80,7 @@ export const loadInstrument = async (checkoutArg: string | undefined): Promise<I
     ratstackSrc: required('SCORECARD_RATSTACK_SRC'),
     checkout,
     pin: await readJson(pinFile, join(dir, 'ratstack.pin.json')),
-    instrumentHash: await gitText(checkout, ['rev-parse', 'HEAD:evals/ratstack-scorecard']),
+    instrumentHash: await instrumentTreeHash(dir),
     nixpkgsRev: (await readJson(flakeLock, join(dir, 'flake.lock'))).nodes.nixpkgs.locked.rev,
     runner: Deno.env.get('RUNNER_NAME') ?? Deno.hostname(),
     starterCommit: await gitText(checkout, ['rev-parse', 'HEAD']),
@@ -90,11 +107,6 @@ export const provenanceFor = (
   tools: instrument.toolVersions,
   detail,
 })
-
-const sha256 = async (text: string): Promise<string> =>
-  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))]
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('')
 
 export const definitionHashesFor = async (
   instrument: Instrument,

@@ -55,6 +55,16 @@
         "src",
         "decide"
       ]
+    },
+    {
+      "id": "instrument-ref",
+      "produce": {
+        "kind": "instrument-ref"
+      },
+      "inputs": [
+        "ci/instrument-ref.sh",
+        "src/journeys.ts"
+      ]
     }
   ]
 }
