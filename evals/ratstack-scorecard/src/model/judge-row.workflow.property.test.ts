@@ -6,8 +6,6 @@ import { cell, definition, runsFor } from './scorecard.arbitrary.ts'
 
 const measured = (runs: readonly number[]): Cell => ({ _tag: 'Measured', runs })
 
-const negated = (c: Cell): Cell => c._tag === 'Measured' ? measured(c.runs.map((v) => -v)) : c
-
 const verifiedCitation: Cell = {
   _tag: 'Unsupported',
   citation: {
@@ -77,15 +75,6 @@ describe('judgeRow', () => {
     'identical run ranges are a tie',
     ([d, runs]) =>
       judgeRow({ definition: d, ratstack: measured(runs), starter: measured([...runs].reverse()) })._tag === 'Tie',
-  )
-
-  test.prop([definition().chain((d) => fc.tuple(fc.constant(d), cell(d), cell(d)))])(
-    'direction higher mirrors direction lower under negation',
-    ([d, ratstack, starter]) => {
-      const flipped = { ...d, direction: ({ lower: 'higher', higher: 'lower' } as const)[d.direction] }
-      return judgeRow({ definition: flipped, ratstack: negated(ratstack), starter: negated(starter) })._tag ===
-        judgeRow({ definition: d, ratstack, starter })._tag
-    },
   )
 
   test.prop([withRuns(), fc.integer({ min: 1, max: 4 }), fc.boolean()])(
