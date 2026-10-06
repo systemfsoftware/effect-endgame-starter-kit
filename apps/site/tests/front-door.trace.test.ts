@@ -227,6 +227,69 @@ const overBodyCapContract = Contract.of(frontDoorTaxonomy).pipe(
   ),
 )
 
+const refusedReportContract = Contract.of(frontDoorTaxonomy).pipe(
+  Contract.stimulate(reportStimulus),
+  Contract.holds(
+    Rel.all(
+      Rel.exists(RecordCspReport),
+      Rel.attrs(RecordCspReport, { 'app.csp.report.outcome': 'refused' }),
+      Rel.forall(
+        RecordCspReport,
+        (node) => {
+          const reason = node.attrs['app.csp.report.reason']
+          return typeof reason === 'string' && reason.includes('could not be decoded')
+        },
+        'the refusal reason is on the span',
+      ),
+      Rel.absent(RecordCspViolation),
+    ),
+  ),
+)
+
+const failingReportStimulus = Stimulus.make<Record<string, never>, void, never, HtmlPort>({
+  name: 'site.csp_report_failing',
+  run: ({ traceparent }) =>
+    Effect.gen(function*() {
+      const port = yield* HtmlPort
+      const context = yield* Effect.context<HtmlPort>()
+      const handler = frontDoorHandlerWith(Context.make(HtmlPort, port))
+      const body = new ReadableStream<Uint8Array>({
+        start: (controller) => controller.error(new Error('body unavailable')),
+      })
+      const init = {
+        method: 'POST' as const,
+        headers: { 'content-type': 'application/csp-report', traceparent },
+        body,
+        duplex: 'half' as const,
+      }
+      yield* Effect.promise(() =>
+        handler(
+          new Request('https://site.example/csp-report', init),
+          context,
+        )
+      )
+    }),
+})
+
+const failedReportContract = Contract.of(frontDoorTaxonomy).pipe(
+  Contract.stimulate(failingReportStimulus),
+  Contract.holds(
+    Rel.all(
+      Rel.exists(RecordCspReport),
+      Rel.attrs(RecordCspReport, { 'app.csp.report.outcome': 'failed' }),
+      Rel.forall(
+        RecordCspReport,
+        (node) => {
+          const reason = node.attrs['app.csp.report.reason']
+          return typeof reason === 'string' && reason.includes('could not be recorded')
+        },
+        'the failure reason is on the span',
+      ),
+      Rel.absent(RecordCspViolation),
+    ),
+  ),
+)
+
 Suite.make({ it })('front door span graph')
   .withScenarioLayer(harness)
   .live('the failure dump writes the decoded graph through the real Node file system')
@@ -276,4 +339,12 @@ Suite.make({ it })('front door span graph')
     Case('a posted report over the body cap is refused for size before decoding', overBodyCapContract, {
       body: padToBytes(homeReport, 64 * 1024 + 1),
     })
+    Case('a posted report that does not decode is refused with its reason on the span', refusedReportContract, {
+      body: '{not json',
+    })
+    Case(
+      'a posted report the pipeline cannot read is failed with its reason on the span',
+      failedReportContract,
+      {},
+    )
   })
