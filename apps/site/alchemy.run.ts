@@ -38,6 +38,6 @@ export default Alchemy.Stack(
   { providers: Cloudflare.providers(), state: stateOfStage },
   Effect.gen(function*() {
     const site = yield* Site
-    return { url: site.url }
+    return { url: site.url, workerName: site.workerName }
   }),
 )

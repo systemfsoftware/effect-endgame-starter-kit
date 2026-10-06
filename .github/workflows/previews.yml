@@ -43,9 +43,10 @@ jobs:
       - name: Read the preview URL and worker
         id: site
         run: |
-          state="$(pnpm --filter @endgame/site exec alchemy state cat "Endgame/${ALCHEMY_STAGE}/Site")"
-          echo "url=$(jq -r '.url' <<<"$state")" >> "$GITHUB_OUTPUT"
-          echo "worker=$(jq -r '.workerName' <<<"$state")" >> "$GITHUB_OUTPUT"
+          state="$(pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/${ALCHEMY_STAGE}/output")"
+          echo "$state"
+          echo "url=$(jq -er '.url' <<<"$state")" >> "$GITHUB_OUTPUT"
+          echo "worker=$(jq -er '.workerName' <<<"$state")" >> "$GITHUB_OUTPUT"
       - name: Check the redeploy log and Workers Issues
         env:
           DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
