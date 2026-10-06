@@ -2,7 +2,7 @@ import { join } from 'node:path'
 import { walkFiles } from './harness/instrument.ts'
 
 const importPattern =
-  /(?:^|\n)\s*(?:import|export)\b[^'"]*?from\s*['"]([^'"]+)['"]|(?:^|\n)\s*import\s*['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/gu
+  /(?:^|\n)\s*(?:import|export)\s+(?!type\b)[^'"]*?from\s*['"]([^'"]+)['"]|(?:^|\n)\s*import\s*['"]([^'"]+)['"]|import\(\s*['"]([^'"]+)['"]\s*\)/gu
 
 const captured = (match: RegExpMatchArray): readonly (string | undefined)[] => [match[1], match[2], match[3]]
 

@@ -56,10 +56,15 @@ const sha256 = (data: Uint8Array): Effect.Effect<string, PlatformError, Crypto.C
 const filesUnder = (path: string): Effect.Effect<readonly string[], PlatformError, FileSystem.FileSystem> =>
   Effect.gen(function*() {
     const fs = yield* FileSystem.FileSystem
-    const info = yield* fs.stat(`${instrument}/${path}`)
+    const root = `${instrument}/${path}`
+    const info = yield* fs.stat(root)
     if (info.type === 'File') return [path]
-    const entries = yield* fs.readDirectory(`${instrument}/${path}`, { recursive: true })
-    return entries.map((entry) => `${path}/${entry}`)
+    const entries = yield* fs.readDirectory(root, { recursive: true })
+    const named = yield* Effect.forEach(
+      entries,
+      (entry) => Effect.map(fs.stat(`${root}/${entry}`), (entryInfo) => ({ entry, entryInfo })),
+    )
+    return named.filter(({ entryInfo }) => entryInfo.type === 'File').map(({ entry }) => `${path}/${entry}`)
   })
 
 const inputHashOf = (

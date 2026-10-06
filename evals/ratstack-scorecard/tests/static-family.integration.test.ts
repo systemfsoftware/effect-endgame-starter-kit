@@ -20,6 +20,7 @@ const familyOf = (record: LauncherRecord) =>
   Schema.decodeEffect(Schema.fromJsonString(Family))(record.files['family.json'] ?? 'null')
 
 Feature('Measuring the static family through the launcher')
+  .live('the launcher reads its record and fixtures from disk')
   .withScenarioLayer(NodeServices.layer)
   .body(({ scenario }) => {
     scenario(
