@@ -1,23 +1,15 @@
 import { NodeServices } from '@effect/platform-node'
 import { Gherkin, Given, it, makeFeature, Then, When } from '@systemfsoftware/effect-gherkin-spec'
 import { Effect, Schema } from 'effect'
+import { InstrumentRefJson } from './__fixtures__/instrument-ref.schema.ts'
 import { launcherRun } from './__fixtures__/launcher-run.ts'
 
 const Feature = makeFeature({ it })
 
-const Selection = Schema.Struct({
-  code: Schema.Number,
-  stdout: Schema.String,
-  stderr: Schema.String,
-  base: Schema.String,
-  head: Schema.String,
-  graded: Schema.NullOr(Schema.String),
-})
-
 const selections = (names: readonly string[]) =>
   Effect.gen(function*() {
     const run = yield* launcherRun('instrument-ref')
-    const decode = Schema.decodeEffect(Schema.fromJsonString(Selection))
+    const decode = Schema.decodeEffect(InstrumentRefJson)
     return yield* Effect.forEach(names, (name) => decode(run.files[`${name}.json`] ?? 'null'))
   })
 

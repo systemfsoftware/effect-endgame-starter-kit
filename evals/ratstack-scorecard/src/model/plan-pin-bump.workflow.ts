@@ -1,16 +1,35 @@
-import { firstRule } from './dispatch.ts'
+import { Workflow } from '@systemfsoftware/effect-cell-types'
+import { Match, Result, Schema as S } from 'effect'
 
-export interface PlanPinBumpInput {
-  readonly pinned: string
-  readonly remoteHead: string
+const PinPlanTypeId: unique symbol = Symbol.for('@starter/ratstack-scorecard/PinPlan')
+
+export class PinCurrent extends S.TaggedClass<PinCurrent>()('PinCurrent', { commit: S.String }) {
+  readonly [PinPlanTypeId] = PinPlanTypeId
 }
 
-export type PinPlan =
-  | { readonly _tag: 'PinCurrent'; readonly commit: string }
-  | { readonly _tag: 'PinMoved'; readonly from: string; readonly to: string }
+export class PinMoved extends S.TaggedClass<PinMoved>()('PinMoved', { from: S.String, to: S.String }) {
+  readonly [PinPlanTypeId] = PinPlanTypeId
+}
 
-export const planPinBump = (input: PlanPinBumpInput): PinPlan =>
-  firstRule<PinPlan>(
-    [[input.remoteHead === input.pinned, () => ({ _tag: 'PinCurrent', commit: input.pinned })]],
-    () => ({ _tag: 'PinMoved', from: input.pinned, to: input.remoteHead }),
+export class PlanPinBump extends S.TaggedClass<PlanPinBump>()('PlanPinBump', {
+  pinned: S.String,
+  remoteHead: S.String,
+}) {
+  static readonly [Workflow.InstrumentationBrand] = { pinned: 'app.scorecard.plan.pin' } as const
+}
+
+const pass = (plan: PinCurrent | PinMoved): Result.Result<PinCurrent | PinMoved, never> => Result.succeed(plan)
+
+const decide = ({ pinned, remoteHead }: PlanPinBump): Result.Result<PinCurrent | PinMoved, never> =>
+  Match.value(remoteHead === pinned).pipe(
+    Match.when(true, () => pass(new PinCurrent({ commit: pinned }))),
+    Match.when(false, () => pass(new PinMoved({ from: pinned, to: remoteHead }))),
+    Match.exhaustive,
   )
+
+export const planPinBump = Workflow.make({
+  command: PlanPinBump,
+  decision: S.Union([PinCurrent, PinMoved]),
+  error: S.Never,
+  decide,
+})

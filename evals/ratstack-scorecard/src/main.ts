@@ -30,16 +30,26 @@ const fail = (message: string): never => {
   throw new Error(`${message}\n${usage}`)
 }
 
+const required = (value: string | undefined, message: string): string => value ?? fail(message)
+
 const writeOut = async (path: string | undefined, text: string): Promise<void> => {
   if (path === undefined) await Deno.stdout.write(new TextEncoder().encode(text))
   else await Deno.writeTextFile(path, text)
 }
 
-const sidesOf = (side: string | undefined): readonly Side[] => {
-  if (side === undefined) return ['ratstack', 'starter']
-  if (side === 'ratstack' || side === 'starter') return [side]
-  return fail(`unknown side ${side}`)
+const sideSets: Readonly<Record<string, readonly Side[]>> = {
+  'ratstack': ['ratstack'],
+  'starter': ['starter'],
+  'all': ['ratstack', 'starter'],
 }
+
+const sideSet = (key: string): readonly Side[] => sideSets[key] ?? fail(`unknown side ${key}`)
+
+const sidesOf = (side: string | undefined): readonly Side[] => sideSet(side ?? 'all')
+
+const findRunner = (family: string): FamilyRunner | undefined => familyRunners.find(([name]) => name === family)?.[1]
+
+const runnerFor = (family: string): FamilyRunner => findRunner(family) ?? fail(`unknown or unbuilt family ${family}`)
 
 const measure = async (args: readonly string[]): Promise<void> => {
   const { values } = parseArgs({
@@ -52,8 +62,8 @@ const measure = async (args: readonly string[]): Promise<void> => {
     },
     strict: true,
   })
-  const family = values.family ?? fail('--family is required')
-  const run = familyRunners.find(([name]) => name === family)?.[1] ?? fail(`unknown or unbuilt family ${family}`)
+  const family = required(values.family, '--family is required')
+  const run = runnerFor(family)
   const instrument = await loadInstrument(values.checkout)
   const work = await Deno.makeTempDir({ prefix: `scorecard-${family}-` })
   try {
@@ -82,6 +92,10 @@ const exists = (path: string): Promise<boolean> => Deno.stat(path).then(() => tr
 const copyInto = async (from: string, to: string): Promise<void> => {
   await Deno.mkdir(join(to, '..'), { recursive: true })
   await Deno.copyFile(from, to)
+}
+
+const copyIfExists = async (from: string, to: string): Promise<void> => {
+  if (await exists(from)) await copyInto(from, to)
 }
 
 const withDecide = async <T>(instrument: Instrument, run: (work: DecideWork) => Promise<T>): Promise<T> => {
@@ -115,6 +129,10 @@ const aggregateIn = (work: DecideWork, instrument: Instrument, main: boolean): P
     { github: false },
   )
 
+const copyFamilies = async (families: string, work: string): Promise<void> => {
+  for (const file of await walkFiles(families)) await copyInto(join(families, file), join(work, 'families', file))
+}
+
 const aggregate = async (args: readonly string[]): Promise<void> => {
   const { values } = parseArgs({
     args: [...args],
@@ -126,21 +144,17 @@ const aggregate = async (args: readonly string[]): Promise<void> => {
     },
     strict: true,
   })
-  const families = values.families ?? fail('--families is required')
-  const out = values.out ?? fail('--out is required')
-  const summary = values.summary ?? fail('--summary is required')
+  const families = required(values.families, '--families is required')
+  const out = required(values.out, '--out is required')
+  const summary = required(values.summary, '--summary is required')
   const instrument = await loadInstrument(undefined)
   Deno.exit(
     await withDecide(instrument, async (work) => {
-      for (const file of await walkFiles(families)) {
-        await copyInto(join(families, file), join(work.work, 'families', file))
-      }
+      await copyFamilies(families, work.work)
       if (values.main !== undefined) await copyInto(values.main, join(work.work, 'main/scorecard.json'))
       const code = await aggregateIn(work, instrument, values.main !== undefined)
-      if (await exists(join(work.work, 'out/scorecard.json'))) {
-        await copyInto(join(work.work, 'out/scorecard.json'), out)
-      }
-      if (await exists(join(work.work, 'out/summary.md'))) await copyInto(join(work.work, 'out/summary.md'), summary)
+      await copyIfExists(join(work.work, 'out/scorecard.json'), out)
+      await copyIfExists(join(work.work, 'out/summary.md'), summary)
       return code
     }),
   )
@@ -154,6 +168,12 @@ const cacheKeyFile = (instrument: Instrument, family: Family): string =>
     nixpkgsRev: instrument.nixpkgsRev,
   }).replaceAll('/', '__') + '.json'
 
+const cacheCheckFile = (family: Family): readonly string[] => [
+  'cache-check',
+  '--file',
+  `families/ratstack-${family}.json`,
+]
+
 const cachedRatstack = async (
   work: DecideWork,
   instrument: Instrument,
@@ -164,7 +184,7 @@ const cachedRatstack = async (
   const cached = join(cache, cacheKeyFile(instrument, family))
   if (!await exists(cached)) return false
   await copyInto(cached, ratstackFile)
-  return await decide(work, ['cache-check', '--file', `families/ratstack-${family}.json`], { github: false }) === 0
+  return await decide(work, cacheCheckFile(family), { github: false }) === 0
 }
 
 const measureInto = async (
@@ -182,6 +202,45 @@ const measureInto = async (
   }
 }
 
+const keepRatstack = async (
+  work: DecideWork,
+  instrument: Instrument,
+  family: Family,
+  cache: string,
+  ratstackFile: string,
+): Promise<void> => {
+  const usable = await decide(work, cacheCheckFile(family), { github: false }) === 0
+  if (usable) await copyInto(ratstackFile, join(cache, cacheKeyFile(instrument, family)))
+}
+
+const saveRatstack = async (
+  work: DecideWork,
+  instrument: Instrument,
+  family: Family,
+  cache: string,
+  ratstackFile: string,
+  pullRequest: boolean,
+): Promise<void> => {
+  if (pullRequest) return
+  await keepRatstack(work, instrument, family, cache, ratstackFile)
+}
+
+const measureFamily = async (
+  work: DecideWork,
+  instrument: Instrument,
+  family: Family,
+  run: FamilyRunner,
+  cache: string,
+  pullRequest: boolean,
+): Promise<void> => {
+  const families = join(work.work, 'families')
+  const ratstackFile = join(families, `ratstack-${family}.json`)
+  if (await cachedRatstack(work, instrument, family, cache, ratstackFile)) return
+  await measureInto(instrument, run, family, ['ratstack'], ratstackFile)
+  await saveRatstack(work, instrument, family, cache, ratstackFile, pullRequest)
+  await measureInto(instrument, run, family, ['starter'], join(families, `starter-${family}.json`))
+}
+
 const measureFamilies = async (
   work: DecideWork,
   instrument: Instrument,
@@ -190,42 +249,69 @@ const measureFamilies = async (
 ): Promise<readonly string[]> => {
   const families = join(work.work, 'families')
   await Deno.mkdir(families, { recursive: true })
-  const keys: string[] = []
   for (const [family, run] of familyRunners) {
-    keys.push(cacheKeyFile(instrument, family))
-    const ratstackFile = join(families, `ratstack-${family}.json`)
-    if (!await cachedRatstack(work, instrument, family, cache, ratstackFile)) {
-      await measureInto(instrument, run, family, ['ratstack'], ratstackFile)
-      const savable = !pullRequest &&
-        (await decide(work, ['cache-check', '--file', `families/ratstack-${family}.json`], { github: false })) === 0
-      if (savable) await copyInto(ratstackFile, join(cache, cacheKeyFile(instrument, family)))
-    }
-    await measureInto(instrument, run, family, ['starter'], join(families, `starter-${family}.json`))
+    await measureFamily(work, instrument, family, run, cache, pullRequest)
   }
-  return keys
+  return familyRunners.map(([family]) => cacheKeyFile(instrument, family))
 }
+
+const stale = (keys: readonly string[], file: string): boolean => !keys.includes(file)
 
 const pruneCache = async (cache: string, keys: readonly string[]): Promise<void> => {
-  for (const file of await walkFiles(cache)) {
-    if (!keys.includes(file)) await Deno.remove(join(cache, file))
-  }
+  const files = (await walkFiles(cache)).filter((file) => stale(keys, file))
+  await Promise.all(files.map((file) => Deno.remove(join(cache, file))))
 }
 
-const mainBaselineIn = async (work: DecideWork, main: string | undefined): Promise<boolean> => {
-  if (main !== undefined) {
-    await copyInto(main, join(work.work, 'main/scorecard.json'))
-    return true
-  }
+const copyMain = async (main: string, work: DecideWork): Promise<boolean> => {
+  await copyInto(main, join(work.work, 'main/scorecard.json'))
+  return true
+}
+
+const repositoryOf = (): string => Deno.env.get('GITHUB_REPOSITORY') ?? fail('GITHUB_REPOSITORY is unset')
+
+const fetchMain = async (work: DecideWork): Promise<boolean> => {
   await Deno.mkdir(join(work.work, 'main'), { recursive: true })
   const code = await decide(work, [
     'main-scorecard',
     '--repository',
-    Deno.env.get('GITHUB_REPOSITORY') ?? fail('GITHUB_REPOSITORY is unset'),
+    repositoryOf(),
     '--out',
     'main/scorecard.json',
   ], { github: true })
   if (code !== 0) fail("finding main's scorecard failed")
   return await exists(join(work.work, 'main/scorecard.json'))
+}
+
+const mainBaselineIn = (work: DecideWork, main: string | undefined): Promise<boolean> =>
+  main === undefined ? fetchMain(work) : copyMain(main, work)
+
+const copyOutputs = async (work: DecideWork, out: string): Promise<void> => {
+  await Deno.mkdir(out, { recursive: true })
+  const names = ['scorecard.json', 'summary.md']
+  await Promise.all(names.map((name) => copyIfExists(join(work.work, 'out', name), join(out, name))))
+}
+
+const collect = (instrument: Instrument, cache: string, out: string, main: string | undefined, pr: boolean) =>
+  withDecide(instrument, async (work) => {
+    const keys = await measureFamilies(work, instrument, cache, pr)
+    if (!pr) await pruneCache(cache, keys)
+    const verdict = await aggregateIn(work, instrument, await mainBaselineIn(work, main))
+    await copyOutputs(work, out)
+    return verdict
+  })
+
+const summaryTitle = (title: string | undefined): string => title === undefined ? '' : `## ${title}\n\n`
+
+const appendSummary = async (summaryFile: string, out: string, title: string | undefined): Promise<void> => {
+  if (!await exists(join(out, 'summary.md'))) return
+  const text = await Deno.readTextFile(join(out, 'summary.md'))
+  await Deno.writeTextFile(summaryFile, `${summaryTitle(title)}${text}\n`, { append: true })
+}
+
+const writeSummary = async (out: string, title: string | undefined): Promise<void> => {
+  const summaryFile = Deno.env.get('GITHUB_STEP_SUMMARY')
+  if (summaryFile === undefined) return
+  await appendSummary(summaryFile, out, title)
 }
 
 const ci = async (args: readonly string[]): Promise<void> => {
@@ -240,31 +326,52 @@ const ci = async (args: readonly string[]): Promise<void> => {
     },
     strict: true,
   })
-  const cache = values.cache ?? fail('--cache is required')
-  const out = values.out ?? fail('--out is required')
+  const cache = required(values.cache, '--cache is required')
+  const out = required(values.out, '--out is required')
   const pullRequest = Deno.env.get('GITHUB_EVENT_NAME') === 'pull_request'
   const instrument = await loadInstrument(values.checkout)
   await Deno.mkdir(cache, { recursive: true })
-  const code = await withDecide(instrument, async (work) => {
-    const keys = await measureFamilies(work, instrument, cache, pullRequest)
-    if (!pullRequest) await pruneCache(cache, keys)
-    const main = await mainBaselineIn(work, values.main)
-    const verdict = await aggregateIn(work, instrument, main)
-    await Deno.mkdir(out, { recursive: true })
-    for (const file of ['scorecard.json', 'summary.md']) {
-      if (await exists(join(work.work, 'out', file))) await copyInto(join(work.work, 'out', file), join(out, file))
-    }
-    return verdict
-  })
-  const summaryFile = Deno.env.get('GITHUB_STEP_SUMMARY')
-  if (summaryFile !== undefined && await exists(join(out, 'summary.md'))) {
-    const title = values.title === undefined ? '' : `## ${values.title}\n\n`
-    await Deno.writeTextFile(summaryFile, `${title}${await Deno.readTextFile(join(out, 'summary.md'))}\n`, {
-      append: true,
-    })
-  }
+  const code = await collect(instrument, cache, out, values.main, pullRequest)
+  await writeSummary(out, values.title)
   Deno.exit(code)
 }
+
+const pinFileName = (instrument: Instrument): string =>
+  join(instrument.checkout, 'evals/ratstack-scorecard/ratstack.pin.json')
+
+interface PinValues {
+  readonly commit?: string
+  readonly 'nar-hash'?: string
+  readonly checkout?: string
+}
+
+const writePin = async (instrument: Instrument, values: PinValues): Promise<void> => {
+  const pin = {
+    ...instrument.pin,
+    commit: required(values.commit, '--commit is required'),
+    narHash: required(values['nar-hash'], '--nar-hash is required'),
+  }
+  await Deno.writeTextFile(pinFileName(instrument), `${JSON.stringify(pin, null, 2)}\n`)
+}
+
+const checkPin = async (instrument: Instrument): Promise<void> => {
+  const { owner, repo, commit } = instrument.pin
+  Deno.exit(
+    await withDecide(
+      instrument,
+      (work) => decide(work, ['pin-check', '--owner', owner, '--repo', repo, '--pinned', commit], { github: true }),
+    ),
+  )
+}
+
+const pinActions = (instrument: Instrument, values: PinValues): Readonly<Record<string, () => Promise<void>>> => ({
+  'check': () => checkPin(instrument),
+  'write': () => writePin(instrument, values),
+})
+
+const unknownAction = (action: string | undefined): () => Promise<void> => () => fail(`unknown pin action ${action}`)
+
+const actionKey = (action: string | undefined): string => action ?? ''
 
 const pinCommand = async (args: readonly string[]): Promise<void> => {
   const [action, ...rest] = args
@@ -274,26 +381,8 @@ const pinCommand = async (args: readonly string[]): Promise<void> => {
     strict: true,
   })
   const instrument = await loadInstrument(values.checkout)
-  if (action === 'check') {
-    const { owner, repo, commit } = instrument.pin
-    Deno.exit(
-      await withDecide(
-        instrument,
-        (work) => decide(work, ['pin-check', '--owner', owner, '--repo', repo, '--pinned', commit], { github: true }),
-      ),
-    )
-  }
-  if (action === 'write') {
-    const pin = {
-      ...instrument.pin,
-      commit: values.commit ?? fail('--commit is required'),
-      narHash: values['nar-hash'] ?? fail('--nar-hash is required'),
-    }
-    const path = join(instrument.checkout, 'evals/ratstack-scorecard/ratstack.pin.json')
-    await Deno.writeTextFile(path, `${JSON.stringify(pin, null, 2)}\n`)
-    return
-  }
-  fail(`unknown pin action ${action}`)
+  const actions = pinActions(instrument, values)
+  await (actions[actionKey(action)] ?? unknownAction(action))()
 }
 
 const commands: Readonly<Record<string, (args: readonly string[]) => Promise<void>>> = {

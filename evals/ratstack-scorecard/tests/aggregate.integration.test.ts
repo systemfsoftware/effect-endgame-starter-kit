@@ -1,16 +1,16 @@
 import { NodeServices } from '@effect/platform-node'
 import { Gherkin, Given, it, makeFeature, Then, When } from '@systemfsoftware/effect-gherkin-spec'
 import Ajv from 'ajv'
-import { Effect, Schema } from 'effect'
+import { Schema } from 'effect'
 import schema from '../scorecard.schema.json' with { type: 'json' }
 import { type LauncherRecord, launcherRun } from './__fixtures__/launcher-run.ts'
+import { ScorecardJson } from './__fixtures__/scorecard-json.schema.ts'
 
 const Feature = makeFeature({ it })
 const validate = new Ajv({ allErrors: true, strict: true }).compile(schema)
-const documents = Schema.fromJsonString(Schema.Unknown)
 
 const writtenOf = (record: LauncherRecord) =>
-  Schema.decodeEffect(documents)(record.files['scorecard.json'] ?? 'null')
+  Schema.decodeEffect(ScorecardJson)(record.files['scorecard.json'] ?? 'null')
 
 Feature('Aggregating the families through the launcher')
   .live('the launcher reads its aggregate record and fixtures from disk')

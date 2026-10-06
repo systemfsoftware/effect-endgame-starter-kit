@@ -1,3 +1,5 @@
+export { ratstackCacheKey } from './model/cache-key.ts'
+export type { RatstackCacheInputs } from './model/cache-key.ts'
 export type {
   Cell,
   CellProvenance,

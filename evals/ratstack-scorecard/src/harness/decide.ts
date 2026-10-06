@@ -1,6 +1,6 @@
 import { dirname, join } from 'node:path'
 import { type Instrument, walkFiles } from './instrument.ts'
-import { runSandboxed } from './sandbox.ts'
+import { runSandboxed, type SandboxRequest } from './sandbox.ts'
 
 const generated = ['node_modules/', '.cache/', 'journeys/__records__/']
 
@@ -11,13 +11,21 @@ export interface DecideWork {
   readonly work: string
 }
 
+const isGenerated = (file: string): boolean => generated.some((prefix) => file.startsWith(prefix))
+
+const copyFile = async (dir: string, copy: string, file: string): Promise<void> => {
+  await Deno.mkdir(dirname(join(copy, file)), { recursive: true })
+  await Deno.writeFile(join(copy, file), await Deno.readFile(join(dir, file)))
+}
+
+const copyInstrument = async (dir: string, copy: string): Promise<void> => {
+  const files = (await walkFiles(dir)).filter((file) => !isGenerated(file))
+  await Promise.all(files.map((file) => copyFile(dir, copy, file)))
+}
+
 export const prepareDecide = async (instrument: Instrument, work: string): Promise<DecideWork> => {
   const copy = join(work, 'instrument')
-  for (const file of await walkFiles(instrument.dir)) {
-    if (generated.some((prefix) => file.startsWith(prefix))) continue
-    await Deno.mkdir(dirname(join(copy, file)), { recursive: true })
-    await Deno.writeFile(join(copy, file), await Deno.readFile(join(instrument.dir, file)))
-  }
+  await copyInstrument(instrument.dir, copy)
   const install = await runSandboxed(instrument.launcher, {
     project: work,
     cwd: copy,
@@ -29,18 +37,24 @@ export const prepareDecide = async (instrument: Instrument, work: string): Promi
   return { instrument, work }
 }
 
+const tokenOption = (token: string | undefined): Pick<SandboxRequest, 'env'> =>
+  token === undefined ? {} : { env: { GITHUB_TOKEN: token } }
+
+const decideOptions = (
+  github: boolean,
+  token: string | undefined,
+): Pick<SandboxRequest, 'allowHosts' | 'env'> => github ? { allowHosts: githubHosts, ...tokenOption(token) } : {}
+
 export const decide = async (
   { instrument, work }: DecideWork,
   args: readonly string[],
   options: { readonly github: boolean },
 ): Promise<number> => {
-  const token = Deno.env.get('GITHUB_TOKEN')
   const result = await runSandboxed(instrument.launcher, {
     project: work,
     cwd: work,
     command: ['node', 'instrument/decide/main.ts', ...args],
-    ...(options.github ? { allowHosts: githubHosts } : {}),
-    ...(options.github && token !== undefined ? { env: { GITHUB_TOKEN: token } } : {}),
+    ...decideOptions(options.github, Deno.env.get('GITHUB_TOKEN')),
     deadlineMs: 5 * 60_000,
   })
   await Deno.stdout.write(new TextEncoder().encode(result.stdout))

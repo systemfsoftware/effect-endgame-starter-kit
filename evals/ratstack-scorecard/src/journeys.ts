@@ -39,10 +39,10 @@ export interface LauncherRecord {
   readonly wallMs: number
 }
 
-const optionalString = (produce: JsonValue, key: string, what: string): string | null => {
-  const value = at(produce, key)
-  return value === null ? null : stringAt(produce, [key], what)
-}
+const isAbsent = (value: JsonValue | undefined): boolean => value === null || value === undefined
+
+const optionalString = (produce: JsonValue, key: string, what: string): string | null =>
+  isAbsent(at(produce, key)) ? null : stringAt(produce, [key], what)
 
 const staticProduceOf = (produce: JsonValue): MeasureStatic => ({
   kind: 'measure-static',
@@ -57,11 +57,21 @@ const aggregateProduceOf = (produce: JsonValue): Aggregate => ({
   main: optionalString(produce, 'main', 'journey produce'),
 })
 
-const produceOf = (produce: JsonValue): MeasureStatic | Aggregate | InstrumentRef => {
-  const kind = stringAt(produce, ['kind'], 'journey produce')
-  if (kind === 'aggregate') return aggregateProduceOf(produce)
-  return kind === 'instrument-ref' ? { kind: 'instrument-ref' } : staticProduceOf(produce)
+const producers: Readonly<Record<string, (produce: JsonValue) => MeasureStatic | Aggregate | InstrumentRef>> = {
+  'aggregate': aggregateProduceOf,
+  'instrument-ref': () => ({ kind: 'instrument-ref' }),
+  'measure-static': staticProduceOf,
 }
+
+const unknownKind = (kind: string): never => {
+  throw new Error(`journey produce: unknown kind ${kind}`)
+}
+
+const producerFor = (kind: string): (produce: JsonValue) => MeasureStatic | Aggregate | InstrumentRef =>
+  producers[kind] ?? unknownKind(kind)
+
+const produceOf = (produce: JsonValue): MeasureStatic | Aggregate | InstrumentRef =>
+  producerFor(stringAt(produce, ['kind'], 'journey produce'))(produce)
 
 const journeyEntry = (value: JsonValue): JourneyEntry => ({
   id: stringAt(value, ['id'], 'journey'),
@@ -74,10 +84,11 @@ const encoder = new TextEncoder()
 const hex = (bytes: ArrayBuffer): string =>
   [...new Uint8Array(bytes)].map((b) => b.toString(16).padStart(2, '0')).join('')
 
+const under = (path: string, file: string): string => `${path}/${file}`
+
 const filesUnder = async (root: string, path: string): Promise<readonly string[]> => {
   const info = await Deno.stat(join(root, path))
-  if (info.isFile) return [path]
-  return (await walkFiles(join(root, path))).map((file) => `${path}/${file}`)
+  return info.isFile ? [path] : (await walkFiles(join(root, path))).map((file) => under(path, file))
 }
 
 export const inputHashOf = async (root: string, inputs: readonly string[], launcher: string): Promise<string> => {
@@ -123,20 +134,26 @@ const overlayWithFailingTool = async (instrument: Instrument, work: string, tool
   return dir
 }
 
-const aggregateArgv = (root: string, spec: Aggregate): readonly string[] => [
+const aggregateArgv = (root: string, out: string, spec: Aggregate): readonly string[] => [
   'aggregate',
   '--families',
   join(root, spec.families),
   ...(spec.main === null ? [] : ['--main', join(root, spec.main)]),
+  '--out',
+  join(out, 'scorecard.json'),
+  '--summary',
+  join(out, 'summary.md'),
 ]
 
+const fileOrUndefined = async (out: string, name: string): Promise<readonly [string, string] | undefined> => {
+  const text = await Deno.readTextFile(join(out, name)).catch(() => undefined)
+  return text === undefined ? undefined : [name, text] as const
+}
+
 const producedFiles = async (out: string): Promise<Readonly<Record<string, string>>> => {
-  const files: Record<string, string> = {}
-  for (const name of ['scorecard.json', 'summary.md']) {
-    const text = await Deno.readTextFile(join(out, name)).catch(() => undefined)
-    if (text !== undefined) files[name] = text
-  }
-  return files
+  const names = ['scorecard.json', 'summary.md']
+  const found = await Promise.all(names.map((name) => fileOrUndefined(out, name)))
+  return Object.fromEntries(found.filter((entry): entry is readonly [string, string] => entry !== undefined))
 }
 
 const producedArgv = (
@@ -154,7 +171,7 @@ const produceAggregate = async (
   const out = await Deno.makeTempDir({ dir: join(root, '.cache'), prefix: `journey-${entry.id}-` })
   const started = performance.now()
   try {
-    const argv = aggregateArgv(root, spec)
+    const argv = aggregateArgv(root, out, spec)
     const run = await new Deno.Command(Deno.execPath(), {
       args: [
         'run',
@@ -187,6 +204,9 @@ const produceAggregate = async (
   }
 }
 
+const instrumentFor = async (instrument: Instrument, work: string, spec: MeasureStatic): Promise<string> =>
+  spec.failingTool === null ? instrument.dir : await overlayWithFailingTool(instrument, work, spec.failingTool)
+
 const produceStatic = async (
   instrument: Instrument,
   root: string,
@@ -200,9 +220,7 @@ const produceStatic = async (
     const checkout = await gitRepoFrom(join(root, spec.starterRepo), join(work, 'sources/starter-checkout'))
     const project = join(work, 'project')
     await Deno.mkdir(project)
-    const dir = spec.failingTool === null
-      ? instrument.dir
-      : await overlayWithFailingTool(instrument, work, spec.failingTool)
+    const dir = await instrumentFor(instrument, work, spec)
     const subject: Instrument = {
       ...instrument,
       dir,
@@ -227,17 +245,33 @@ const produceStatic = async (
   }
 }
 
+const writeEntry = async (repo: string, path: string, content: string | null): Promise<void> => {
+  if (content === null) return await Deno.remove(join(repo, path), { recursive: true })
+  await Deno.mkdir(join(repo, path, '..'), { recursive: true })
+  await Deno.writeTextFile(join(repo, path), content)
+}
+
 const commitTree = async (repo: string, files: Readonly<Record<string, string | null>>, message: string) => {
-  for (const [path, content] of Object.entries(files)) {
-    if (content === null) await Deno.remove(join(repo, path), { recursive: true })
-    else {
-      await Deno.mkdir(join(repo, path, '..'), { recursive: true })
-      await Deno.writeTextFile(join(repo, path), content)
-    }
-  }
+  await Promise.all(Object.entries(files).map(([path, content]) => writeEntry(repo, path, content)))
   await git(repo, ['add', '-A'])
   await git(repo, [...journeyIdentity, 'commit', '-q', '--allow-empty', '-m', message])
   return new TextDecoder().decode(await git(repo, ['rev-parse', 'HEAD'])).trim()
+}
+
+const refOf = (stdout: string): string | undefined => /^ref=(\S+)$/mu.exec(stdout)?.[1]
+
+const readGraded = async (repo: string, ref: string): Promise<string | null> => {
+  const show = await new Deno.Command('git', {
+    args: ['show', `${ref}:evals/ratstack-scorecard/verdict`],
+    cwd: repo,
+    stdout: 'piped',
+  }).output()
+  return show.success ? new TextDecoder().decode(show.stdout).trim() : null
+}
+
+const gradedOf = async (repo: string, stdout: string): Promise<string | null> => {
+  const ref = refOf(stdout)
+  return ref === undefined ? null : await readGraded(repo, ref)
 }
 
 const instrumentRefCase = async (
@@ -254,14 +288,6 @@ const instrumentRefCase = async (
     stderr: 'piped',
   }).output()
   const stdout = new TextDecoder().decode(run.stdout)
-  const ref = /^ref=(\S+)$/mu.exec(stdout)?.[1]
-  const show = ref === undefined
-    ? undefined
-    : await new Deno.Command('git', {
-      args: ['show', `${ref}:evals/ratstack-scorecard/verdict`],
-      cwd: repo,
-      stdout: 'piped',
-    }).output()
   return [
     `${name}.json`,
     JSON.stringify({
@@ -270,7 +296,7 @@ const instrumentRefCase = async (
       stderr: new TextDecoder().decode(run.stderr),
       base,
       head,
-      graded: show?.success === true ? new TextDecoder().decode(show.stdout).trim() : null,
+      graded: await gradedOf(repo, stdout),
     }),
   ]
 }
@@ -330,13 +356,23 @@ const produceInstrumentRef = async (root: string, entry: JourneyEntry): Promise<
   }
 }
 
+const produceMeasured = (
+  instrument: Instrument,
+  root: string,
+  entry: JourneyEntry,
+  spec: MeasureStatic | Aggregate,
+): Promise<LauncherRecord> =>
+  spec.kind === 'aggregate'
+    ? produceAggregate(instrument, root, entry, spec)
+    : produceStatic(instrument, root, entry, spec)
+
+const produceRecord = (instrument: Instrument, root: string, entry: JourneyEntry): Promise<LauncherRecord> =>
+  entry.produce.kind === 'instrument-ref'
+    ? produceInstrumentRef(root, entry)
+    : produceMeasured(instrument, root, entry, entry.produce)
+
 const produce = async (instrument: Instrument, root: string, entry: JourneyEntry): Promise<LauncherRecord> => {
-  const spec = entry.produce
-  const record = spec.kind === 'aggregate'
-    ? await produceAggregate(instrument, root, entry, spec)
-    : spec.kind === 'instrument-ref'
-    ? await produceInstrumentRef(root, entry)
-    : await produceStatic(instrument, root, entry, spec)
+  const record = await produceRecord(instrument, root, entry)
   return { ...record, inputHash: await inputHashOf(root, entry.inputs, instrument.launcher.executable) }
 }
 
