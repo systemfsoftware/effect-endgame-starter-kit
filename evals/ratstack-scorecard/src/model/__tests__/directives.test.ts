@@ -1,6 +1,6 @@
 import { fc, test } from '@fast-check/vitest'
 import { describe } from 'vitest'
-import { type DirectiveFamily, directivesIn, totalDirectives, vendoredRootsOf } from '../src/model/directives.ts'
+import { type DirectiveFamily, directivesIn, totalDirectives, vendoredRootsOf } from '../directives.ts'
 
 const directiveText: Readonly<Record<DirectiveFamily, fc.Arbitrary<string>>> = {
   'oxlint': fc.constantFrom('oxlint-disable', 'oxlint-disable-next-line', 'oxlint-disable-line'),

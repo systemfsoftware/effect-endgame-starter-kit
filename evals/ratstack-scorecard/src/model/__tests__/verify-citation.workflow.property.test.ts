@@ -1,6 +1,6 @@
 import { fc, test } from '@fast-check/vitest'
 import { describe } from 'vitest'
-import { verifyCitation } from '../src/model/verify-citation.workflow.ts'
+import { verifyCitation } from '../verify-citation.workflow.ts'
 
 const line = fc.stringMatching(/^[a-z ]{0,40}$/)
 const claim = fc.stringMatching(/^[A-Z][A-Z ]{8,30}[A-Z]$/)

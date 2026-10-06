@@ -1,9 +1,9 @@
 import { test } from '@fast-check/vitest'
 import Ajv from 'ajv'
 import { describe } from 'vitest'
-import schema from '../scorecard.schema.json' with { type: 'json' }
-import { assembleScorecard } from '../src/model/scorecard-document.ts'
-import { assembleInput } from '../src/model/scorecard.arbitrary.ts'
+import schema from '../../../scorecard.schema.json' with { type: 'json' }
+import { assembleScorecard } from '../scorecard-document.ts'
+import { assembleInput } from '../scorecard.arbitrary.ts'
 
 const validate = new Ajv({ allErrors: true, strict: true }).compile(schema)
 
