@@ -16,15 +16,6 @@ const TIMEFRAME_LOOKBACK_MS = 600_000
 const RAY_ID_KEY = '$metadata.rayId'
 const TRACE_ID_KEY = '$metadata.traceId'
 
-const RESERVED_EVENT_KEYS: Record<string, true> = {
-  '$metadata': true,
-  '$containers': true,
-  '$workers': true,
-  dataset: true,
-  source: true,
-  timestamp: true,
-}
-
 export interface CloudflareAccess {
   readonly accountId: string
   readonly token: Redacted.Redacted<string>
@@ -94,9 +85,8 @@ const TelemetryMetadata = S.Struct({
   service: S.optional(S.String),
 })
 
-const TelemetryEventFields = S.Struct({ '$metadata': TelemetryMetadata })
-const TelemetryEventExtras = S.Record(S.String, S.Json)
-const TelemetryEvent = S.StructWithRest(TelemetryEventFields, [TelemetryEventExtras])
+const TelemetrySource = S.Union([S.String, S.Record(S.String, S.Json)])
+const TelemetryEvent = S.Struct({ '$metadata': TelemetryMetadata, source: S.optional(TelemetrySource) })
 type TelemetryEvent = S.Schema.Type<typeof TelemetryEvent>
 
 const TelemetryError = S.Struct({ message: S.String })
@@ -125,10 +115,18 @@ const rayIdWithoutColo = (cfRay: string): string => cfRay.split('-')[0] ?? cfRay
 const eventsOf = (result: S.Schema.Type<typeof TelemetryResult>): ReadonlyArray<TelemetryEvent> =>
   result.events?.events ?? []
 
-const attributesOf = (event: TelemetryEvent): Readonly<Record<string, S.Json>> =>
-  Object.fromEntries(
-    Object.entries(event).filter((entry): entry is [string, S.Json] => !Object.hasOwn(RESERVED_EVENT_KEYS, entry[0])),
+const isJsonObject = (value: S.Json): value is S.JsonObject =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+
+const flattenedAttributes = (prefix: string, value: S.JsonObject): ReadonlyArray<readonly [string, S.Json]> =>
+  Object.entries(value).flatMap(([key, nested]) =>
+    isJsonObject(nested)
+      ? flattenedAttributes(`${prefix}${key}.`, nested)
+      : [[`${prefix}${key}`, nested] as const]
   )
+
+const attributesOf = (event: TelemetryEvent): Readonly<Record<string, S.Json>> =>
+  typeof event.source === 'object' ? Object.fromEntries(flattenedAttributes('', event.source)) : {}
 
 const spansOf = (events: ReadonlyArray<TelemetryEvent>): ReadonlyArray<TraceSpan> =>
   events.flatMap((event) => {
