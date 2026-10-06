@@ -13,6 +13,7 @@
   "devDependencies": {
     "@alchemy.run/frontend-frameworks": "catalog:",
     "@babel/core": "catalog:",
+    "@cloudflare/vite-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@effect/platform-node": "catalog:",
     "@mdx-js/mdx": "catalog:",
@@ -34,10 +35,12 @@
     "@vitejs/plugin-react": "catalog:",
     "alchemy": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
+    "miniflare": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "wrangler": "catalog:"
   },
   "exports": {
     ".": {
