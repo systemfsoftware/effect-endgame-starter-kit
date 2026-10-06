@@ -9,6 +9,6 @@ export default defineConfig({
     include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
   },
   resolve: {
-    alias: [{ find: /^@TODO\/starter$/, replacement: srcUrl('index.ts') }],
+    alias: [{ find: /^@todo/starter$/, replacement: srcUrl('index.ts') }],
   },
 })
