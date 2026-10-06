@@ -40,7 +40,10 @@
     "vitest": "catalog:"
   },
   "exports": {
-    ".": { "@systemfsoftware/source": "./src/mod.ts", "default": "./src/mod.ts" }
+    ".": {
+      "@systemfsoftware/source": "./src/mod.ts",
+      "default": "./src/mod.ts"
+    }
   },
   "license": "Apache-2.0",
   "name": "@endgame/site",
@@ -54,5 +57,12 @@
     "typecheck": "tsr generate && tsc --noEmit --incremental && tsc -p tsconfig.node.json --noEmit"
   },
   "type": "module",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "stryker": {
+    "mutate": [
+      "src/**/*.workflow.ts",
+      "readme-opening-plugin.ts",
+      "!src/**/*.test.ts"
+    ]
+  }
 }
