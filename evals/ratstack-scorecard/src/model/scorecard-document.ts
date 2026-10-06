@@ -6,6 +6,7 @@ import type {
   MeasuredCell,
   Row,
   RowDefinition,
+  RowId,
   ScorecardDocument,
   Side,
 } from './cell.ts'
@@ -18,17 +19,17 @@ export interface DefinedRow {
 }
 
 export interface SideCell {
-  readonly id: string
+  readonly id: RowId
   readonly side: Side
   readonly measured: MeasuredCell
 }
 
 export interface RowFlag {
-  readonly id: string
+  readonly id: RowId
   readonly flag: Flag
 }
 
-export type CellsByRow = Readonly<Record<string, Readonly<Partial<Record<Side, MeasuredCell>>>>>
+export type CellsByRow = Readonly<Record<RowId, Readonly<Partial<Record<Side, MeasuredCell>>>>>
 
 export interface AssembleInput {
   readonly rows: readonly DefinedRow[]
@@ -38,7 +39,7 @@ export interface AssembleInput {
   readonly main: MainBaseline
 }
 
-const missingCell = (provenance: DocumentProvenance, id: string, side: Side): MeasuredCell => ({
+const missingCell = (provenance: DocumentProvenance, id: RowId, side: Side): MeasuredCell => ({
   cell: { _tag: 'InstrumentError', error: `no ${side} cell was produced for ${id}` },
   provenance: {
     side,
@@ -51,7 +52,7 @@ const missingCell = (provenance: DocumentProvenance, id: string, side: Side): Me
   },
 })
 
-const cellFor = (input: AssembleInput, id: string, side: Side): MeasuredCell =>
+const cellFor = (input: AssembleInput, id: RowId, side: Side): MeasuredCell =>
   input.cells[id]?.[side] ?? missingCell(input.provenance, id, side)
 
 const rowOf = (input: AssembleInput, defined: DefinedRow): Row => {

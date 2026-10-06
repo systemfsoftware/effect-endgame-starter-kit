@@ -2,6 +2,9 @@ export type Side = 'ratstack' | 'starter'
 export type Direction = 'lower' | 'higher'
 export type Kind = 'count' | 'measurement'
 
+export type MetricId = `M${number}`
+export type RowId = MetricId | `${MetricId}.${string}`
+
 export type Family =
   | 'static'
   | 'cold-path'
@@ -11,8 +14,8 @@ export type Family =
   | 'networked'
 
 export interface RowDefinition {
-  readonly id: string
-  readonly metric: string
+  readonly id: RowId
+  readonly metric: MetricId
   readonly bin: string
   readonly label: string
   readonly unit: string
@@ -89,13 +92,13 @@ export interface JudgedRow extends Row {
 }
 
 export type RowOutcome =
-  | { readonly _tag: 'Held'; readonly id: string }
-  | { readonly _tag: 'New'; readonly id: string }
-  | { readonly _tag: 'ReBaselined'; readonly id: string }
-  | { readonly _tag: 'Neutral'; readonly id: string; readonly cause: CellTag }
-  | { readonly _tag: 'InstrumentError'; readonly id: string; readonly error: string }
-  | { readonly _tag: 'LostBeaten'; readonly id: string; readonly ratstack: CellTag; readonly starter: CellTag }
-  | { readonly _tag: 'Regressed'; readonly id: string; readonly main: string; readonly pr: string }
+  | { readonly _tag: 'Held'; readonly id: RowId }
+  | { readonly _tag: 'New'; readonly id: RowId }
+  | { readonly _tag: 'ReBaselined'; readonly id: RowId }
+  | { readonly _tag: 'Neutral'; readonly id: RowId; readonly cause: CellTag }
+  | { readonly _tag: 'InstrumentError'; readonly id: RowId; readonly error: string }
+  | { readonly _tag: 'LostBeaten'; readonly id: RowId; readonly ratstack: CellTag; readonly starter: CellTag }
+  | { readonly _tag: 'Regressed'; readonly id: RowId; readonly main: string; readonly pr: string }
 
 export type RowOutcomeTag = RowOutcome['_tag']
 

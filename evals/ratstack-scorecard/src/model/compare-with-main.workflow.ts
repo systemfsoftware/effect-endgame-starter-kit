@@ -1,4 +1,4 @@
-import type { Cell, Direction, MainBaseline, Ratchet, Row, RowOutcome, Verdict } from './cell.ts'
+import type { Cell, Direction, MainBaseline, Ratchet, Row, RowId, RowOutcome, Verdict } from './cell.ts'
 import { firstRule, matchBaseline, matchCell, matchOutcome, matchVerdict } from './dispatch.ts'
 import { verdictOf } from './judge-row.workflow.ts'
 import { median, smallerIsBetter } from './runs.ts'
@@ -8,7 +8,7 @@ export interface CompareWithMainInput {
   readonly main: MainBaseline
 }
 
-const held = (id: string): RowOutcome => ({ _tag: 'Held', id })
+const held = (id: RowId): RowOutcome => ({ _tag: 'Held', id })
 
 const beatenWeight = (verdict: Verdict): number =>
   matchVerdict(verdict, { Beaten: () => 1, NotBeaten: () => 0, Tie: () => 0, InstrumentError: () => 0 })

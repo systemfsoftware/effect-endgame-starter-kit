@@ -1,15 +1,31 @@
 import fc from 'fast-check'
-import type { Cell, CellProvenance, DocumentProvenance, Flag, MeasuredCell, Row, RowDefinition, Side } from './cell.ts'
+import type {
+  Cell,
+  CellProvenance,
+  DocumentProvenance,
+  Flag,
+  MeasuredCell,
+  MetricId,
+  Row,
+  RowDefinition,
+  RowId,
+  Side,
+} from './cell.ts'
 import type { AssembleInput } from './scorecard-document.ts'
 
 export const sha = fc.stringMatching(/^[0-9a-f]{40}$/)
 const text = fc.string({ minLength: 1, maxLength: 400 })
 const value = fc.double({ min: -1e6, max: 1e6, noNaN: true, noDefaultInfinity: true })
 
+const metricId: fc.Arbitrary<MetricId> = fc.integer({ min: 1, max: 99 }).map((n): MetricId => `M${n}`)
+const rowId: fc.Arbitrary<RowId> = fc.tuple(metricId, fc.stringMatching(/^[a-z0-9]{1,8}$/)).map((
+  [metric, suffix],
+): RowId => `${metric}.${suffix}`)
+
 export const definition = (overrides: Partial<RowDefinition> = {}): fc.Arbitrary<RowDefinition> =>
   fc.record({
-    id: fc.stringMatching(/^M[0-9]{1,2}(\.[a-z0-9]{1,8})?$/),
-    metric: fc.stringMatching(/^M[0-9]{1,2}$/),
+    id: fc.oneof(metricId, rowId),
+    metric: metricId,
     bin: text,
     label: text,
     unit: text,
