@@ -34,6 +34,9 @@ jobs:
           - leg: dist
             runs-on: ubuntu-latest
             gate: pnpm gate:dist
+          - leg: local-stack
+            runs-on: ubuntu-latest
+            gate: pnpm check:ci-run
           - leg: macos
             runs-on: macos-latest
             gate: pnpm check:ci
