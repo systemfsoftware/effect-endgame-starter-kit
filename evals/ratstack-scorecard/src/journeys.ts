@@ -184,7 +184,7 @@ const produceAggregate = async (
         join(root, 'src/main.ts'),
         ...argv,
       ],
-      env: { ...Deno.env.toObject(), DENO_NO_PACKAGE_JSON: '1' },
+      env: { ...Deno.env.toObject(), DENO_NO_PACKAGE_JSON: '1', GITHUB_EVENT_NAME: 'push' },
       stdout: 'piped',
       stderr: 'piped',
     }).output()

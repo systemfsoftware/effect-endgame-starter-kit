@@ -14,8 +14,6 @@ const usage = [
   '  scorecard ci [--checkout <dir>] --cache <dir> --out <dir> [--main <scorecard.json>] [--title <text>]',
   '  scorecard measure --family <family> [--side ratstack|starter] [--out <file>] [--checkout <dir>]',
   '  scorecard aggregate --families <dir> [--main <scorecard.json>] --out <scorecard.json> --summary <file>',
-  '  scorecard pin check',
-  '  scorecard pin write --commit <sha> --nar-hash <hash> [--checkout <dir>]',
   '  scorecard journeys [--checkout <dir>]',
   '  scorecard check [--checkout <dir>]   (import-graph rules, then journeys)',
 ].join('\n')
@@ -336,60 +334,10 @@ const ci = async (args: readonly string[]): Promise<void> => {
   Deno.exit(code)
 }
 
-const pinFileName = (instrument: Instrument): string =>
-  join(instrument.checkout, 'evals/ratstack-scorecard/ratstack.pin.json')
-
-interface PinValues {
-  readonly commit?: string
-  readonly 'nar-hash'?: string
-  readonly checkout?: string
-}
-
-const writePin = async (instrument: Instrument, values: PinValues): Promise<void> => {
-  const pin = {
-    ...instrument.pin,
-    commit: required(values.commit, '--commit is required'),
-    narHash: required(values['nar-hash'], '--nar-hash is required'),
-  }
-  await Deno.writeTextFile(pinFileName(instrument), `${JSON.stringify(pin, null, 2)}\n`)
-}
-
-const checkPin = async (instrument: Instrument): Promise<void> => {
-  const { owner, repo, commit } = instrument.pin
-  Deno.exit(
-    await withDecide(
-      instrument,
-      (work) => decide(work, ['pin-check', '--owner', owner, '--repo', repo, '--pinned', commit], { github: true }),
-    ),
-  )
-}
-
-const pinActions = (instrument: Instrument, values: PinValues): Readonly<Record<string, () => Promise<void>>> => ({
-  'check': () => checkPin(instrument),
-  'write': () => writePin(instrument, values),
-})
-
-const unknownAction = (action: string | undefined): () => Promise<void> => () => fail(`unknown pin action ${action}`)
-
-const actionKey = (action: string | undefined): string => action ?? ''
-
-const pinCommand = async (args: readonly string[]): Promise<void> => {
-  const [action, ...rest] = args
-  const { values } = parseArgs({
-    args: rest,
-    options: { 'commit': { type: 'string' }, 'nar-hash': { type: 'string' }, 'checkout': { type: 'string' } },
-    strict: true,
-  })
-  const instrument = await loadInstrument(values.checkout)
-  const actions = pinActions(instrument, values)
-  await (actions[actionKey(action)] ?? unknownAction(action))()
-}
-
 const commands: Readonly<Record<string, (args: readonly string[]) => Promise<void>>> = {
   'ci': ci,
   'measure': measure,
   'aggregate': aggregate,
-  'pin': pinCommand,
   'journeys': journeys,
   'check': check,
 }

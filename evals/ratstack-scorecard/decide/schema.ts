@@ -148,8 +148,6 @@ export const WorkflowRunsSchema = Schema.Struct({
   workflow_runs: Schema.Array(Schema.Struct({ id: Schema.Finite, head_sha: Sha })),
 })
 
-export const GitRefSchema = Schema.Struct({ object: Schema.Struct({ sha: Sha }) })
-
 export const ArtifactsSchema = Schema.Struct({
   artifacts: Schema.Array(Schema.Struct({ id: Schema.Finite, archive_download_url: Schema.String })),
 })

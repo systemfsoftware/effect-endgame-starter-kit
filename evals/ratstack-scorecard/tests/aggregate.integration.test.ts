@@ -32,12 +32,16 @@ Feature('Aggregating the families through the launcher')
     )
 
     scenario(
-      'Without a main artifact the same families are a passing first baseline',
+      'Without a main artifact a push run is a passing first baseline',
       Gherkin.Do.pipe(
         Given('the aggregate-first-baseline launcher record')('record', () => launcherRun('aggregate-first-baseline')),
         When('the written scorecard is read')('document', (scope) => writtenOf(scope.record)),
-        Then('the job passed and the scorecard validates')((scope, expect) =>
-          expect({ code: scope.record.code, valid: validate(scope.document) }).toEqual({ code: 0, valid: true })
+        Then('the job passed with a first-baseline ratchet and the scorecard validates')((scope, expect) =>
+          expect({
+            code: scope.record.code,
+            ratchet: (scope.record.files['summary.md'] ?? '').includes('first baseline (no `main` artifact)'),
+            valid: validate(scope.document),
+          }).toEqual({ code: 0, ratchet: true, valid: true })
         ),
       ),
     )

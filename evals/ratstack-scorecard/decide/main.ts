@@ -1,4 +1,4 @@
-import { Cause, Duration, Effect, Exit, Match, Result, Schedule, Schema } from 'effect'
+import { Cause, Duration, Effect, Exit, Match, Option, Schedule, Schema } from 'effect'
 import { FetchHttpClient, HttpClient, HttpClientRequest, type HttpClientResponse } from 'effect/http'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -6,7 +6,6 @@ import { parseArgs } from 'node:util'
 import { inflateRawSync } from 'node:zlib'
 import { rowDefinitions } from '../src/metrics/registry.ts'
 import type { MainBaseline, MeasuredCell, Side } from '../src/model/cell.ts'
-import { PlanPinBump, planPinBump } from '../src/model/plan-pin-bump.workflow.ts'
 import {
   assembleScorecard,
   type CellsByRow,
@@ -14,13 +13,8 @@ import {
   type SideCell,
 } from '../src/model/scorecard-document.ts'
 import { renderSummary } from '../src/model/summary-table.ts'
-import {
-  ArtifactsSchema,
-  FamilyResultSchema,
-  GitRefSchema,
-  ScorecardDocumentSchema,
-  WorkflowRunsSchema,
-} from './schema.ts'
+import { mainBaselineOf, type WorkflowRun } from './main-scorecard.ts'
+import { ArtifactsSchema, FamilyResultSchema, ScorecardDocumentSchema, WorkflowRunsSchema } from './schema.ts'
 
 class MalformedInput extends Schema.TaggedError<MalformedInput>()('MalformedInput', {
   what: Schema.String,
@@ -225,8 +219,6 @@ const zipEntry = (zip: Buffer, name: string) =>
     catch: (cause) => apiError(`unzip ${name}`, issueOf(cause instanceof Error ? cause : unknownFailure)),
   })
 
-type WorkflowRun = { readonly id: number; readonly head_sha: string }
-
 const artifactText = (run: WorkflowRun, repository: string) =>
   Effect.gen(function*() {
     const artifactsPath = `/repos/${repository}/actions/runs/${run.id}/artifacts?name=scorecard`
@@ -246,14 +238,14 @@ const artifactText = (run: WorkflowRun, repository: string) =>
     return yield* zipEntry(Buffer.from(zip), 'scorecard.json')
   })
 
-const latestRun = (repository: string) =>
+const successfulRuns = (repository: string): Effect.Effect<readonly WorkflowRun[] | undefined, GithubApiError> =>
   Effect.gen(function*() {
     const runsPath =
       `/repos/${repository}/actions/workflows/scorecard.yml/runs?branch=main&event=push&status=success&per_page=1`
     const listing = yield* githubGet(runsPath)
-    if (listing.status === 404) return yield* Effect.log('main has no scorecard workflow yet: first baseline')
+    if (listing.status === 404) return undefined
     const runs = yield* githubJson(WorkflowRunsSchema, runsPath)
-    return runs.workflow_runs[0]
+    return runs.workflow_runs
   })
 
 const mainScorecard = (args: readonly string[]) =>
@@ -265,9 +257,11 @@ const mainScorecard = (args: readonly string[]) =>
     })
     const repository = yield* required(values.repository, '--repository')
     const out = yield* required(values.out, '--out')
-    const run = yield* latestRun(repository)
-    if (run === undefined) return yield* Effect.log('no successful scorecard run on main: first baseline')
-    const text = yield* artifactText(run, repository)
+    const runs = yield* successfulRuns(repository)
+    if (runs === undefined) return yield* Effect.log('main has no scorecard workflow yet: first baseline')
+    const baseline = yield* mainBaselineOf(runs, (run) => artifactText(run, repository))
+    if (Option.isNone(baseline)) return yield* Effect.log('no successful scorecard run on main: first baseline')
+    const { run, text } = Option.getOrThrow(baseline)
     yield* Schema.decodeUnknownEffect(Schema.fromJsonString(ScorecardDocumentSchema))(text).pipe(
       Effect.mapError((cause) =>
         malformed(`main's scorecard (run ${run.id})`, issueOf(cause instanceof Error ? cause : unknownFailure))
@@ -275,24 +269,6 @@ const mainScorecard = (args: readonly string[]) =>
     )
     yield* writeText(out, text)
     yield* Effect.log(`main's scorecard from run ${run.id} (${run.head_sha})`)
-  })
-
-const pinCheck = (args: readonly string[]) =>
-  Effect.gen(function*() {
-    const { values } = parseArgs({
-      args: [...args],
-      options: { owner: { type: 'string' }, repo: { type: 'string' }, pinned: { type: 'string' } },
-      strict: true,
-    })
-    const path = `/repos/${yield* required(values.owner, '--owner')}/${yield* required(
-      values.repo,
-      '--repo',
-    )}/git/ref/heads/main`
-    const ref = yield* githubJson(GitRefSchema, path)
-    const plan = Result.getOrThrow(
-      planPinBump(new PlanPinBump({ pinned: yield* required(values.pinned, '--pinned'), remoteHead: ref.object.sha })),
-    )
-    yield* Effect.sync(() => process.stdout.write(`${JSON.stringify(plan)}\n`))
   })
 
 const required = (value: string | undefined, flag: string) =>
@@ -304,7 +280,6 @@ const commands: Readonly<Record<string, (args: readonly string[]) => Effect.Effe
   'aggregate': aggregate,
   'cache-check': cacheCheck,
   'main-scorecard': mainScorecard,
-  'pin-check': pinCheck,
 }
 
 const [command = '', ...rest] = process.argv.slice(2)
