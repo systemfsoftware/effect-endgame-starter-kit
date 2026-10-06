@@ -5,6 +5,13 @@ interface Outcome {
 
 const decoder = new TextDecoder()
 
+const MACHINE_INDEPENDENT_IDENTITY = {
+  GIT_AUTHOR_NAME: 'Hook Sandbox Proof',
+  GIT_AUTHOR_EMAIL: 'hook-sandbox-proof@example.invalid',
+  GIT_COMMITTER_NAME: 'Hook Sandbox Proof',
+  GIT_COMMITTER_EMAIL: 'hook-sandbox-proof@example.invalid',
+}
+
 const run = async (
   command: string,
   args: readonly string[],
@@ -13,7 +20,7 @@ const run = async (
   const child = new Deno.Command(command, {
     args: [...args],
     cwd: options.cwd,
-    env: options.env,
+    env: { ...MACHINE_INDEPENDENT_IDENTITY, ...options.env },
     stdin: options.stdin === undefined ? 'null' : 'piped',
     stdout: 'piped',
     stderr: 'piped',
