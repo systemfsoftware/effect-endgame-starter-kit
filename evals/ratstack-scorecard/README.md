@@ -24,7 +24,7 @@ Everything that loads third-party code runs inside the sandbox launcher from `sy
 ```sh
 cd evals/ratstack-scorecard
 nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox --pnpm-store "$SANDBOX_PNPM_STORE" -- pnpm install --frozen-lockfile'
-nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox -- pnpm vitest run --project model'
+nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox -- pnpm vitest run'
 ```
 
 The decision modules (`src/model/*.workflow.ts`) and the orchestrator import only Deno APIs, `node:` builtins and each other, so `deno check src/` type-checks them without any third-party code.
