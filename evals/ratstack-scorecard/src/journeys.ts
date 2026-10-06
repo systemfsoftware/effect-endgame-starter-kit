@@ -308,12 +308,13 @@ const produceInstrumentRef = async (root: string, entry: JourneyEntry): Promise<
     await git(repo, ['init', '-q', '-b', 'main'])
     const workflow = '.github/workflows/scorecard.yml'
     const verdict = 'evals/ratstack-scorecard/verdict'
-    const baseWithout = await commitTree(repo, { 'README.md': 'starter\n' }, 'base without the scorecard')
-    const introduce = await commitTree(
+    const baseWithout = await commitTree(repo, { 'README.md': 'starter\n' }, 'base without the instrument')
+    const instrumentNoWorkflow = await commitTree(
       repo,
-      { [workflow]: 'name: Scorecard\n', [verdict]: 'green\n' },
-      'add scorecard',
+      { [verdict]: 'green\n' },
+      'base with the instrument and no workflow',
     )
+    await commitTree(repo, { [workflow]: 'name: Scorecard\n' }, 'add the workflow')
     const baseWith = await commitTree(repo, { [verdict]: 'red\n' }, 'main instrument grades the row red')
     const editsInstrument = await commitTree(repo, { [verdict]: 'green\n' }, 'PR edits the instrument to green')
     await git(repo, ['checkout', '-q', baseWith])
@@ -329,7 +330,8 @@ const produceInstrumentRef = async (root: string, entry: JourneyEntry): Promise<
       'PR deletes the workflow',
     )
     const cases: Readonly<Record<string, readonly [string, string]>> = {
-      'bootstrap': [baseWithout, introduce],
+      'bootstrap': [baseWithout, editsInstrument],
+      'base-instrument-no-workflow': [instrumentNoWorkflow, editsInstrument],
       'edits-instrument': [baseWith, editsInstrument],
       'deletes-instrument': [baseWith, deletesInstrument],
       'deletes-workflow': [baseWith, deletesWorkflow],

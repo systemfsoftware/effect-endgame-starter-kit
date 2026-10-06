@@ -17,7 +17,7 @@ git cat-file -e "${head}^{commit}" 2>/dev/null || {
   exit 1
 }
 
-if git cat-file -e "${base}:.github/workflows/scorecard.yml" 2>/dev/null; then
+if git cat-file -e "${base}:evals/ratstack-scorecard" 2>/dev/null; then
   echo "ref=${base}"
   echo "mode=base"
 else

@@ -34,6 +34,26 @@ Feature('Choosing the instrument that grades a pull request')
     )
 
     scenario(
+      'A base with the instrument and no workflow still grades every PR edit',
+      Gherkin.Do.pipe(
+        Given('the instrument-ref launcher record')('record', () => Effect.succeed('instrument-ref')),
+        When('the base-instrument-no-workflow selection is read')(
+          'selection',
+          () => selections(['base-instrument-no-workflow']),
+        ),
+        Then('it grades with the base instrument whose verdict stands')((scope, expect) => {
+          const first = scope.selection[0]
+          return expect({
+            code: first?.code,
+            mode: first?.stdout.split('\n')[1],
+            namesBase: first === undefined ? false : first.stdout.startsWith(`ref=${first.base}`),
+            graded: first?.graded,
+          }).toEqual({ code: 0, mode: 'mode=base', namesBase: true, graded: 'green' })
+        }),
+      ),
+    )
+
+    scenario(
       'When the base has the workflow the base instrument grades every PR edit',
       Gherkin.Do.pipe(
         Given('the instrument-ref launcher record')('record', () => Effect.succeed('instrument-ref')),

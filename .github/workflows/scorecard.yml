@@ -60,7 +60,7 @@ jobs:
         run: |
           banner="# ⚠️ BOOTSTRAP: SELF-GRADED, BASE HAD NO INSTRUMENT
 
-          The base commit has no \`.github/workflows/scorecard.yml\`, so this run grades the pull request with its own instrument. Every later pull request is graded by its base's instrument."
+          The base commit has no \`evals/ratstack-scorecard\`, so this run grades the pull request with its own instrument. Every later pull request is graded by its base's instrument."
           printf '%s\n\n' "$banner" >> "$GITHUB_STEP_SUMMARY"
           gh pr comment "$PR" --body "$banner"
       - uses: cachix/install-nix-action@v31
