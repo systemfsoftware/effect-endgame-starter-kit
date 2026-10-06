@@ -25,7 +25,7 @@
             src = self;
             pname = "ratstack-scorecard";
             pnpm = pkgs.pnpm_12;
-            hash = "sha256-1uk+a9MkcIEm8BohE8vKzI8FM9DfX6OU6gjgfZhpeqE=";
+            hash = "sha256-jUyIV2ysOxkIij/Ff5VGuIADTibbY0SsCPGglmIvdn0=";
           }).pnpm-store;
           ratstack-src = pkgs.fetchFromGitHub {
             inherit (pin) owner repo;
