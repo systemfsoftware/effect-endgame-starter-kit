@@ -71,6 +71,7 @@ minimumReleaseAgeExclude:
   - "@effect/*"
   - effect-agent
   - "@effect-agent/*"
+verifyDepsBeforeRun: warn
 overrides:
   workerd: 1.20261005.1
   "@systemfsoftware/effect-cell-types": "catalog:"

@@ -19,7 +19,7 @@ nix develop # or: direnv allow
 pnpm bootstrap
 ```
 
-Dependency code never runs on your machine directly. Installs, builds, tests and git hooks run inside the sandbox, which reaches only the network hosts a command declares and writes only inside the project. `pnpm bootstrap` installs offline from the Nix pnpm store, then runs the allowed build scripts and `prepare` inside the sandbox. A plain `pnpm install` runs no scripts at all (`ignoreScripts` in `pnpm-workspace.yaml`), so it leaves the tree without its builds and patches; run `pnpm bootstrap` instead.
+Dependency code never runs on your machine directly. Installs, builds, tests and git hooks run inside the sandbox, which reaches only the network hosts a command declares and writes only inside the project. `pnpm bootstrap` installs offline from the Nix pnpm store, then runs the allowed build scripts and `prepare` inside the sandbox. A plain `pnpm install` runs no scripts at all (`ignoreScripts` in `pnpm-workspace.yaml`), so it leaves the tree without its builds and patches; run `pnpm bootstrap` instead. pnpm never installs on its own before a script (`verifyDepsBeforeRun: warn`): when a script warns that your node_modules are out of sync with the lockfile, rerun `pnpm bootstrap`.
 
 ## Workflows and Commands
 
