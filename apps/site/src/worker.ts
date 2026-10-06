@@ -4,6 +4,7 @@ import { Context, Effect, Layer } from 'effect'
 import { FetchHttpClient } from 'effect/http'
 import { Otlp } from 'effect/observability'
 
+import type { CspNonce } from './front-door/content-security-policy.schema'
 import { frontDoorHandlerWith, HtmlPort } from './mod'
 
 interface Env {
@@ -21,7 +22,8 @@ const otlpLayer = (
 export default {
   fetch(request: Request, env: Env): Promise<Response> {
     const context = Context.make(HtmlPort, {
-      render: (web: Request) => Effect.promise(() => Promise.resolve(startHandler.fetch(web))),
+      render: (web: Request, nonce: CspNonce) =>
+        Effect.promise(() => Promise.resolve(startHandler.fetch(web, { context: { nonce } }))),
     })
     const handler = frontDoorHandlerWith(context)
     const layer = env.OTLP_BASE_URL === undefined ? cloudflareTracerLayer : otlpLayer(env.OTLP_BASE_URL)

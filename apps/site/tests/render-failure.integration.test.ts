@@ -20,6 +20,8 @@ const callPage = (path: string, accept?: string) =>
       status: response.status,
       contentType: response.headers.get('content-type'),
       vary: response.headers.get('vary'),
+      contentSecurityPolicy: response.headers.get('content-security-policy'),
+      reportingEndpoints: response.headers.get('reporting-endpoints'),
       body: yield* Effect.promise(() => response.text()),
     }
   })
@@ -34,11 +36,15 @@ Feature('Serving a page when the renderer is unavailable').withLayer(BrokenRende
         'response',
         () => callPage('/', BROWSER_ACCEPT),
       ),
-      Then('the browser receives an HTML internal error, not a rejection')((s, expect) =>
+      Then('the browser receives an HTML internal error under the strict policy, not a rejection')((s, expect) =>
         expect(s.response).toMatchObject({
           status: 500,
           contentType: 'text/html; charset=utf-8',
           vary: 'Accept',
+          contentSecurityPolicy: expect.stringMatching(
+            /script-src 'nonce-[A-Za-z0-9+/]{22}==' 'strict-dynamic'.*require-trusted-types-for 'script'/,
+          ),
+          reportingEndpoints: 'csp="/csp-report"',
         })
       ),
     ),
