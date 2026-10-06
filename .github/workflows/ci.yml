@@ -82,8 +82,13 @@ jobs:
           runtime: node@24
           cache: true
       - run: pnpm install --frozen-lockfile
+      - name: Realise the dev shell and local stack
+        run: nix develop --command true
       - name: Local stack journeys
         run: nix develop --command pnpm stack:ci
+      - name: Local stack report
+        if: failure() && hashFiles('local-stack/data/stack-report.md') != ''
+        run: cat local-stack/data/stack-report.md >> "$GITHUB_STEP_SUMMARY"
       - if: always()
         uses: actions/upload-artifact@v6
         with:
@@ -91,4 +96,5 @@ jobs:
           path: |
             apps/site-e2e/artifacts/
             local-stack/data/process-compose.log
+            local-stack/data/stack-report.md
           if-no-files-found: ignore
