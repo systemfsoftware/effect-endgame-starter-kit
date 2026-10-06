@@ -1,3 +1,4 @@
+export { cacheAccepted, cacheSave } from './harness/cache-policy.ts'
 export { ratstackCacheKey } from './model/cache-key.ts'
 export type { RatstackCacheInputs } from './model/cache-key.ts'
 export type {

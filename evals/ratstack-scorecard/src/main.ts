@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
 import { measureStatic } from './families/static.ts'
+import { cacheAccepted, cacheSave } from './harness/cache-policy.ts'
 import { decide, type DecideWork, prepareDecide } from './harness/decide.ts'
 import { runCheck } from './harness/gates.ts'
 import { type Instrument, loadInstrument, walkFiles } from './harness/instrument.ts'
@@ -184,7 +185,7 @@ const cachedRatstack = async (
   const cached = join(cache, cacheKeyFile(instrument, family))
   if (!await exists(cached)) return false
   await copyInto(cached, ratstackFile)
-  return await decide(work, cacheCheckFile(family), { github: false }) === 0
+  return cacheAccepted(await decide(work, cacheCheckFile(family), { github: false }))
 }
 
 const measureInto = async (
@@ -221,7 +222,7 @@ const saveRatstack = async (
   ratstackFile: string,
   pullRequest: boolean,
 ): Promise<void> => {
-  if (pullRequest) return
+  if (!cacheSave(pullRequest)) return
   await keepRatstack(work, instrument, family, cache, ratstackFile)
 }
 

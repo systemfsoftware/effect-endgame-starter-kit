@@ -1,4 +1,4 @@
-import { Cause, Duration, Effect, Exit, Match, Option, Schedule, Schema } from 'effect'
+import { Cause, Duration, Effect, Exit, Option, Schedule, Schema } from 'effect'
 import { FetchHttpClient, HttpClient, HttpClientRequest, type HttpClientResponse } from 'effect/http'
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
@@ -13,6 +13,7 @@ import {
   type SideCell,
 } from '../src/model/scorecard-document.ts'
 import { renderSummary } from '../src/model/summary-table.ts'
+import { cacheRefusal } from './cache-check.ts'
 import { mainBaselineOf, type WorkflowRun } from './main-scorecard.ts'
 import { ArtifactsSchema, FamilyResultSchema, ScorecardDocumentSchema, WorkflowRunsSchema } from './schema.ts'
 
@@ -139,24 +140,14 @@ const aggregate = (args: readonly string[]) =>
     }
   })
 
-const isInstrumentError = (cell: SideCell): boolean =>
-  Match.value(cell.measured.cell).pipe(
-    Match.tag('InstrumentError', () => true),
-    Match.orElse(() => false),
-  )
-
 const cacheCheck = (args: readonly string[]) =>
   Effect.gen(function*() {
     const { values } = parseArgs({ args: [...args], options: { file: { type: 'string' } }, strict: true })
     const result = yield* decodeFile(FamilyResultSchema, yield* required(values.file, '--file')).pipe(
       Effect.mapError((error) => new CacheUnusable({ reason: error.what })),
     )
-    const broken = result.cells.filter((cell) => cell.side === 'ratstack' && isInstrumentError(cell))
-    if (broken.length > 0) {
-      return yield* new CacheUnusable({
-        reason: `rat-stack instrument errors on ${broken.map((c) => c.id).join(', ')}`,
-      })
-    }
+    const reason = cacheRefusal(result.cells)
+    if (reason !== undefined) return yield* new CacheUnusable({ reason })
   })
 
 const apiError = (request: string, detail: string): GithubApiError => new GithubApiError({ request, detail })
