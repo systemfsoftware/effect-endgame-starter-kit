@@ -29,8 +29,14 @@ const cellTag = Schema.Literals([
 
 export const Sha = Schema.String.check(Schema.isPattern(/^[0-9a-f]{40}$/u))
 
-const metricId: Schema.Codec<MetricId> = Schema.TemplateLiteral(['M', Schema.Finite])
-const rowId: Schema.Codec<RowId> = Schema.Union([metricId, Schema.TemplateLiteral([metricId, '.', Schema.String])])
+const digitRun = Schema.String.check(Schema.isPattern(/^[0-9]+$/))
+const rowIdSuffix = Schema.String.check(Schema.isPattern(/^[a-z0-9-]+$/))
+
+const metricId: Schema.Codec<MetricId> = Schema.TemplateLiteral(['M', digitRun])
+const rowId: Schema.Codec<RowId> = Schema.Union([metricId, Schema.TemplateLiteral([metricId, '.', rowIdSuffix])])
+
+export const MetricIdSchema = metricId
+export const RowIdSchema = rowId
 
 const tagged = <const T extends string, F extends Schema.Struct.Fields>(tag: T, fields: F) =>
   Schema.Struct({ _tag: Schema.Literal(tag), ...fields })
