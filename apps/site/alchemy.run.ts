@@ -20,6 +20,7 @@ export const Site = Cloudflare.Website.Vite(
         headSamplingRate: 1,
         logs: { enabled: true, invocationLogs: true, headSamplingRate: 1, persist: true },
         traces: { enabled: true, headSamplingRate: 1, persist: true },
+        issues: { enabled: true },
       },
       ...(stage === 'prod' ? { domain: PRODUCTION_DOMAIN } : {}),
       ...(isCloudStage(stage) ? {} : { env: { OTLP_BASE_URL: LOCAL_OTLP_BASE_URL } }),

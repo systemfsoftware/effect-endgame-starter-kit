@@ -29,6 +29,7 @@
     "check:ci-run": "./bin/check-local-stack",
     "clean": "turbo clean",
     "cloud:deploy": "pnpm --filter @endgame/site exec alchemy deploy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes",
+    "cloud:redeploy": "pnpm --filter @endgame/site exec alchemy deploy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes --force",
     "cloud:destroy": "pnpm --filter @endgame/site exec alchemy destroy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. prod or pr-<N>}\" --no-input --yes",
     "format": "./bin/dprint fmt",
     "format:check": "./bin/dprint check",

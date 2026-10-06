@@ -61,3 +61,142 @@ jobs:
             apps/*/reports/mutation-report.*
             packages/*/reports/mutation-report.*
           if-no-files-found: ignore
+
+  deploy:
+    name: deploy · production
+    needs: [mutation]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      worker: ${{ steps.site.outputs.worker }}
+      previous_version: ${{ steps.previous.outputs.version }}
+      new_version: ${{ steps.recorded.outputs.version }}
+    env:
+      ALCHEMY_STAGE: prod
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Read the production worker before deploying
+        id: prior
+        run: |
+          state="$(pnpm --filter @endgame/site exec alchemy state cat "Endgame/prod/Site" 2>/dev/null || true)"
+          worker=""
+          if [ -n "$state" ]; then worker="$(jq -r '.workerName // empty' <<<"$state")"; fi
+          echo "worker=$worker" >> "$GITHUB_OUTPUT"
+      - name: Record the version serving production now
+        id: previous
+        env:
+          DEPLOY_WORKER: ${{ steps.prior.outputs.worker }}
+        run: |
+          if [ -n "$DEPLOY_WORKER" ]; then
+            echo "version=$(node apps/site/deploy/current-worker-version.ts)" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Deploy production
+        env:
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-1.jsonl
+        run: pnpm cloud:deploy
+      - name: Redeploy production to prove no settings drift
+        env:
+          ALCHEMY_CLOUDFLARE_API_LOG: ${{ runner.temp }}/deploy-2.jsonl
+        run: pnpm cloud:redeploy
+      - name: Read the production worker and URL
+        id: site
+        run: |
+          state="$(pnpm --filter @endgame/site exec alchemy state cat "Endgame/prod/Site")"
+          echo "worker=$(jq -r '.workerName' <<<"$state")" >> "$GITHUB_OUTPUT"
+          echo "url=$(jq -r '.url' <<<"$state")" >> "$GITHUB_OUTPUT"
+      - name: Check the redeploy log and Workers Issues
+        env:
+          DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
+          DEPLOY_LOG: ${{ runner.temp }}/deploy-2.jsonl
+        run: node apps/site/deploy/verify-deployment.ts
+      - name: Record the version serving production now
+        id: recorded
+        env:
+          DEPLOY_WORKER: ${{ steps.site.outputs.worker }}
+        run: echo "version=$(node apps/site/deploy/current-worker-version.ts)" >> "$GITHUB_OUTPUT"
+      - name: Deploy summary
+        run: |
+          {
+            echo "### Production deploy"
+            echo
+            echo "- version before: \`${{ steps.previous.outputs.version }}\`"
+            echo "- version now: \`${{ steps.recorded.outputs.version }}\`"
+            echo "- URL: ${{ steps.site.outputs.url }}"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: production-deploy-logs
+          path: ${{ runner.temp }}/deploy-*.jsonl
+          if-no-files-found: ignore
+
+  qa:
+    name: qa · production
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+      SITE_URL: https://endgame.systemfsoftware.com
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Realise the dev shell
+        run: nix develop --command true
+      - name: Deployed journeys
+        run: nix develop --command pnpm --filter @endgame/site-e2e test:deployed
+      - if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: production-qa-artifacts
+          path: apps/site-e2e/artifacts/
+          if-no-files-found: ignore
+
+  rollback:
+    name: rollback · production
+    needs: [deploy, qa]
+    if: ${{ failure() && needs.qa.result == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      ROLLBACK_WORKER: ${{ needs.deploy.outputs.worker }}
+      ROLLBACK_FROM_VERSION: ${{ needs.deploy.outputs.new_version }}
+      ROLLBACK_TO_VERSION: ${{ needs.deploy.outputs.previous_version }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Roll production back to the recorded previous version
+        if: env.ROLLBACK_TO_VERSION != ''
+        run: pnpm --filter @endgame/site rollback
+      - name: Rollback summary and red gate
+        if: always()
+        run: |
+          {
+            echo "### Production QA failed — Worker rolled back"
+            echo
+            echo "- failed version: \`${ROLLBACK_FROM_VERSION:-unknown}\`"
+            echo "- restored version: \`${ROLLBACK_TO_VERSION:-none}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
