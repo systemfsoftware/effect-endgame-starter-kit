@@ -122,6 +122,13 @@ const opaqueSchemeCase: ReportCase = {
   blocked: 'data',
 }
 
+const unknownOpaqueSchemeCase: ReportCase = {
+  directive: 'script-src',
+  blockedUri: 'web+evil:foo',
+  decision: 'RecordBlockedKeyword',
+  blocked: 'other',
+}
+
 const keywordCase: ReportCase = {
   directive: 'style-src',
   blockedUri: 'inline',
@@ -172,6 +179,11 @@ Suite.make({ it })('front door span graph')
       'a posted report of an opaque scheme records the scheme keyword',
       reportContract(opaqueSchemeCase),
       reportInput(opaqueSchemeCase),
+    )
+    Case(
+      'a posted report of an unknown opaque scheme records the bounded keyword other',
+      reportContract(unknownOpaqueSchemeCase),
+      reportInput(unknownOpaqueSchemeCase),
     )
     Case(
       'a posted report of an inline token records the keyword',
