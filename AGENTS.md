@@ -31,6 +31,8 @@ applications — both are workspace globs in `pnpm-workspace.yaml`. Turbo declar
 - This repo is a template and holds no credentials; CI proves everything locally. Gate: review of the workflow diff; a job that needs a secret carries `if: ${{ !github.event.repository.is_template }}`.
 - Every job runs on GitHub-hosted runners: `ubuntu-latest`, and `macos-latest` for the macOS `check:ci` leg. This repository is public, and the org's self-hosted fleet runner group admits only private repositories (fork safety), so a `[self-hosted, systemfsoftware-runner, *]` job here queues forever. Gate: review of the workflow diff.
 - Heavy suites split across parallel hosted jobs instead of a larger runner: Linux `check:ci` runs as one job per part (format, lint, typecheck, test, dist), and mutation on `main` runs one job per package. Gate: review of the workflow diff.
+- Previews (`.github/workflows/previews.yml`): a same-repo pull request deploys as its `pr-<N>` stage, gets its URL and curl transcripts in the job summary and one updated PR comment, runs the deployed journeys, and is destroyed when the PR closes; fork PRs get none. Gate: review of the workflow diff.
+- Release deploy (`.github/workflows/release-gate.yml`): after every mutation shard passes on `main`, production deploys and the deployed journeys run against `https://endgame.systemfsoftware.com`; a QA failure rolls back to the recorded previous version and fails red with both version IDs in the summary. Gate: review of the workflow diff.
 
 ## End of Session
 
