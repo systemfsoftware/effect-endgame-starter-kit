@@ -15,6 +15,7 @@ const ACCOUNT_ID = '0123456789abcdef0123456789abcdef'
 const API_TOKEN = 'fake-token'
 const STAGE = 'nodrift'
 const PUBLIC_SITE = new URL('..', import.meta.url).pathname
+const REPO_ROOT_GITIGNORE = new URL('../../../.gitignore', import.meta.url).pathname
 const ALCHEMY_BIN = new URL(import.meta.resolve('alchemy/bin/alchemy.js')).pathname
 
 const SCRIPT_PATH = /^\/accounts\/[^/]+\/workers\/scripts\/([^/]+)/
@@ -136,6 +137,7 @@ const makeProject = Effect.fn(function*() {
   const homeDir = path.join(rootDir, 'home')
   yield* fs.makeDirectory(projectDir, { recursive: true })
   yield* fs.makeDirectory(homeDir, { recursive: true })
+  yield* fs.copyFile(REPO_ROOT_GITIGNORE, path.join(rootDir, '.gitignore'))
   for (const entry of yield* fs.readDirectory(PUBLIC_SITE)) {
     if (entry === '.alchemy' || entry === 'dist') continue
     yield* fs.symlink(path.join(PUBLIC_SITE, entry), path.join(projectDir, entry))
