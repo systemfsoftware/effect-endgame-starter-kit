@@ -1,12 +1,49 @@
 import * as Arr from 'effect/Array'
 import * as Match from 'effect/Match'
+import * as Option from 'effect/Option'
 import * as S from 'effect/Schema'
 
-export const CspDirective = S.String.pipe(S.check(S.isPattern(/^[a-z]+(?:-[a-z]+)*$/)), S.brand('CspDirective'))
+const MAX_CSP_REPORT_ATTRIBUTE_LENGTH = 256
+
+export const CspAttributeText = S.String.pipe(S.check(S.isMaxLength(MAX_CSP_REPORT_ATTRIBUTE_LENGTH)))
+export type CspAttributeText = S.Schema.Type<typeof CspAttributeText>
+
+export const boundedCspAttributeText = (value: string): CspAttributeText =>
+  value.slice(0, MAX_CSP_REPORT_ATTRIBUTE_LENGTH)
+
+export const CspDirective = S.String.pipe(
+  S.check(S.isPattern(/^[a-z]+(?:-[a-z]+)*$/)),
+  S.check(S.isMaxLength(MAX_CSP_REPORT_ATTRIBUTE_LENGTH)),
+  S.brand('CspDirective'),
+)
 export type CspDirective = S.Schema.Type<typeof CspDirective>
 
+export const CspBlockedScheme = S.Literals([
+  'about',
+  'blob',
+  'data',
+  'eval',
+  'filesystem',
+  'http',
+  'https',
+  'inline',
+  'javascript',
+  'mediastream',
+  'report-sample',
+  'self',
+  'wasm-eval',
+  'other',
+])
+export type CspBlockedScheme = S.Schema.Type<typeof CspBlockedScheme>
+
+const blockedSchemeOf = (scheme: string): CspBlockedScheme =>
+  Option.getOrElse(
+    Arr.findFirst(CspBlockedScheme.literals, (known) => known === scheme),
+    (): CspBlockedScheme => 'other',
+  )
+
 export const BlockedOrigin = S.TaggedStruct('BlockedOrigin', { origin: S.String })
-export const BlockedOpaqueScheme = S.TaggedStruct('BlockedOpaqueScheme', { scheme: S.String })
+export const BlockedOpaqueScheme = S.TaggedStruct('BlockedOpaqueScheme', { scheme: CspBlockedScheme })
 export const BlockedToken = S.TaggedStruct('BlockedToken', { token: S.String })
 export const BlockedResource = S.Union([BlockedOrigin, BlockedOpaqueScheme, BlockedToken])
 export type BlockedResource = S.Schema.Type<typeof BlockedResource>
@@ -30,16 +67,18 @@ export type CspReportBody = S.Schema.Type<typeof CspReportBody>
 
 const urlResourceOf = (url: URL): BlockedResource =>
   Match.value(url.origin).pipe(
-    Match.when('null', (): BlockedResource => ({ _tag: 'BlockedOpaqueScheme', scheme: url.protocol.slice(0, -1) })),
-    Match.orElse((origin): BlockedResource => ({ _tag: 'BlockedOrigin', origin })),
+    Match.when('null', (): BlockedResource => ({
+      _tag: 'BlockedOpaqueScheme',
+      scheme: blockedSchemeOf(boundedCspAttributeText(url.protocol.slice(0, -1))),
+    })),
+    Match.orElse((origin): BlockedResource => ({ _tag: 'BlockedOrigin', origin: boundedCspAttributeText(origin) })),
   )
 
 const blockedResourceOf = (blockedUri: string): BlockedResource =>
-  Match.value(URL.canParse(blockedUri)).pipe(
-    Match.when(true, () => urlResourceOf(new URL(blockedUri))),
-    Match.when(false, (): BlockedResource => ({ _tag: 'BlockedToken', token: blockedUri })),
-    Match.exhaustive,
-  )
+  Option.match(Option.fromNullishOr(URL.parse(blockedUri)), {
+    onNone: (): BlockedResource => ({ _tag: 'BlockedToken', token: boundedCspAttributeText(blockedUri) }),
+    onSome: urlResourceOf,
+  })
 
 const fromReportingApi = (report: ReportingApiCspReport): CspViolation => ({
   directive: report.body.effectiveDirective,
