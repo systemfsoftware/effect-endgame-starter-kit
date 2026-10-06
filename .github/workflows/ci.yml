@@ -65,5 +65,8 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-dist-
             turbo-${{ runner.os }}-
+      - name: Lift the ubuntu-24.04 AppArmor block on user namespaces for the network-denied stack check
+        if: matrix.leg == 'local-stack'
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - name: Gate
         run: ${{ matrix.gate }}
