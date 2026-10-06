@@ -83,8 +83,11 @@ jobs:
           runtime: node@24
           cache: true
       - run: pnpm install --frozen-lockfile
+      - name: Chromium for the browser journeys (macOS; Linux takes it from the dev shell)
+        if: runner.os == 'macOS'
+        run: pnpm --filter @endgame/site-e2e exec playwright install chromium-headless-shell
       - name: Journeys against pnpm dev
-        run: pnpm journeys
+        run: nix develop --command pnpm journeys
       - if: always()
         uses: actions/upload-artifact@v6
         with:
