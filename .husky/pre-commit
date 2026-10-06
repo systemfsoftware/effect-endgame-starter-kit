@@ -5,4 +5,4 @@ if [ -e "$(git rev-parse --git-path MERGE_HEAD)" ]; then
   exit 0
 fi
 
-pnpm precommit
+sandbox --pass-env GIT_INDEX_FILE --pass-env GIT_DIR --pass-env GIT_WORK_TREE -- pnpm precommit

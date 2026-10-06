@@ -96,10 +96,13 @@ gh repo create my-effect-project --template systemfsoftware/starter --public
 cd my-effect-project
 ```
 
-### 2. Install Dependencies
+### 2. Enter the Dev Shell and Install
+
+Installs, builds, tests and git hooks run their dependency code inside a deny-by-default sandbox, never directly on your machine. The [Nix](https://nixos.org/download/) dev shell pins the toolchain and carries the sandbox ([prerequisites](CONTRIBUTING.md#prerequisites)):
 
 ```bash
-pnpm install
+nix develop # or: direnv allow
+pnpm bootstrap
 ```
 
 ### 3. Build and Verify

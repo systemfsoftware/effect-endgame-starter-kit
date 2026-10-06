@@ -16,14 +16,20 @@ jobs:
   plan:
     name: plan · mutation shards
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     outputs:
       packages: ${{ steps.shards.outputs.packages }}
     steps:
       - uses: actions/checkout@v7
-      - uses: denoland/setup-deno@v2
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
+        with:
+          install: "false"
       - id: shards
-        run: ./scripts/mutation-shards.ts --output "$GITHUB_OUTPUT"
+        run: |
+          nix develop --command sandbox --allow-host jsr.io -- ./scripts/mutation-shards.ts --output .cache/mutation-shards.out
+          cat .cache/mutation-shards.out >> "$GITHUB_OUTPUT"
 
   mutation:
     name: mutation · ${{ matrix.package }}
@@ -39,11 +45,9 @@ jobs:
       CI: "true"
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/setup@v2
         with:
-          runtime: node@24
-          cache: true
-      - run: pnpm install --frozen-lockfile
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
       - name: Stryker incremental cache
         uses: actions/cache@v6
         with:
@@ -53,7 +57,7 @@ jobs:
           key: stryker-${{ matrix.package }}-${{ github.sha }}
           restore-keys: stryker-${{ matrix.package }}-
       - name: Mutation at break 100
-        run: pnpm exec turbo run mutation --filter="${{ matrix.package }}"
+        run: nix develop --command sandbox -- turbo run mutation --filter="${{ matrix.package }}"
       - if: always()
         uses: actions/upload-artifact@v6
         with:

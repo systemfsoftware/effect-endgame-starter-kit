@@ -15,14 +15,28 @@ catalog:
   "@commitlint/types": 21.2.3
   "@effect/tsgo": 0.48.1
   "@rolldown/plugin-babel": 0.2.4
-  "@systemfsoftware/effect-gherkin-spec": 7.0.1
-  "@systemfsoftware/oxlint-config-recommended": 4.0.0
+  "@systemfsoftware/effect-cell-types": file:.sfs-deps/effect-cell-types-12.0.0.tgz
+  "@systemfsoftware/effect-gherkin-spec": file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz
+  "@systemfsoftware/effect-schema-discovery": file:.sfs-deps/effect-schema-discovery-2.0.0.tgz
+  "@systemfsoftware/effect-schema-law": file:.sfs-deps/effect-schema-law-5.0.1.tgz
+  "@systemfsoftware/effect-schema-recursion-budget": file:.sfs-deps/effect-schema-recursion-budget-2.0.0.tgz
+  "@systemfsoftware/effect-schema-vite": file:.sfs-deps/effect-schema-vite-3.0.1.tgz
+  "@systemfsoftware/effect-sim-kernel": file:.sfs-deps/effect-sim-kernel-1.0.0.tgz
+  "@systemfsoftware/effect-spec-runtime": file:.sfs-deps/effect-spec-runtime-1.0.1.tgz
+  "@systemfsoftware/oxlint-config-cell-architecture": file:.sfs-deps/oxlint-config-cell-architecture-4.0.0.tgz
+  "@systemfsoftware/oxlint-config-dmmf": file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz
+  "@systemfsoftware/oxlint-config-recommended": file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz
+  "@systemfsoftware/oxlint-plugin-cell-architecture": file:.sfs-deps/oxlint-plugin-cell-architecture-5.0.0.tgz
+  "@systemfsoftware/oxlint-plugin-dmmf-workflow": file:.sfs-deps/oxlint-plugin-dmmf-workflow-7.0.0.tgz
+  "@systemfsoftware/oxlint-plugin-effect-platform": file:.sfs-deps/oxlint-plugin-effect-platform-2.0.0.tgz
+  "@systemfsoftware/oxlint-plugin-effect-schema": file:.sfs-deps/oxlint-plugin-effect-schema-6.0.0.tgz
+  "@systemfsoftware/oxlint-plugin-test-discipline": file:.sfs-deps/oxlint-plugin-test-discipline-5.0.0.tgz
   "@systemfsoftware/stryker-ignorer-effect-schema-declarations": 0.2.0
   "@systemfsoftware/stryker-js": 15.0.1
   "@systemfsoftware/stryker-js-typescript-checker": 8.1.1
   "@systemfsoftware/stryker-js-vitest-runner": 8.0.3
-  "@systemfsoftware/tsconfig": 2.0.1
-  "@systemfsoftware/vitest": 2.0.0
+  "@systemfsoftware/tsconfig": file:.sfs-deps/tsconfig-2.0.1.tgz
+  "@systemfsoftware/vitest": file:.sfs-deps/vitest-2.0.0.tgz
   "@tanstack/react-router": 1.170.41
   "@tanstack/react-start": 1.168.60
   "@tanstack/router-cli": 1.167.40
@@ -33,7 +47,6 @@ catalog:
   alchemy: 2.0.0-beta.80
   babel-plugin-react-compiler: 1.0.0
   effect: 4.0.1
-  husky: 9.1.7
   lint-staged: 17.6.0
   oxlint: 1.82.0
   oxlint-tsgolint: 7.0.2001
@@ -46,37 +59,36 @@ catalog:
   vitest: 5.0.3
   wrangler: 4.147.0
 catalogMode: prefer
+ignoreScripts: true
 minimumReleaseAge: 1440
 minimumReleaseAgeExclude:
   - effect
   - "@effect/*"
-  - "@systemfsoftware/effect-cell-types@12.0.0"
-  - "@systemfsoftware/effect-gherkin-spec@7.0.1"
-  - "@systemfsoftware/effect-sim-kernel@1.0.0"
-  - "@systemfsoftware/effect-spec-runtime@1.0.1"
-  - "@systemfsoftware/oxlint-config-cell-architecture@4.0.0"
-  - "@systemfsoftware/oxlint-config-dmmf@2.0.0"
-  - "@systemfsoftware/oxlint-config-recommended@4.0.0"
-  - "@systemfsoftware/oxlint-plugin-cell-architecture@5.0.0"
-  - "@systemfsoftware/oxlint-plugin-dmmf-workflow@7.0.0"
-  - "@systemfsoftware/oxlint-plugin-effect-platform@2.0.0"
-  - "@systemfsoftware/oxlint-plugin-effect-schema@6.0.0"
-  - "@systemfsoftware/oxlint-plugin-test-discipline@5.0.0"
-  - "@systemfsoftware/stryker-framework-interface@0.0.0"
-  - "@systemfsoftware/stryker-ignorer-effect-schema-declarations@0.2.0"
-  - "@systemfsoftware/stryker-ignorer-interface@0.1.1"
-  - "@systemfsoftware/stryker-ignorer-kit@0.1.1"
-  - "@systemfsoftware/stryker-js-cli-contract@0.2.0"
-  - "@systemfsoftware/stryker-js-instrumenter@12.0.0"
-  - "@systemfsoftware/stryker-js-plugin-interface@12.0.0"
-  - "@systemfsoftware/stryker-js-plugin-runtime@7.0.0"
-  - "@systemfsoftware/stryker-js-typescript-checker@8.1.1"
-  - "@systemfsoftware/stryker-js-vitest-runner@8.0.3"
-  - "@systemfsoftware/stryker-js@15.0.1"
-  - "@systemfsoftware/tsconfig@2.0.1"
-  - "@systemfsoftware/vitest@2.0.0"
+verifyDepsBeforeRun: warn
 overrides:
   workerd: 1.20261005.1
+  "@systemfsoftware/effect-cell-types": "catalog:"
+  "@systemfsoftware/effect-gherkin-spec": "catalog:"
+  "@systemfsoftware/effect-schema-discovery": "catalog:"
+  "@systemfsoftware/effect-schema-law": "catalog:"
+  "@systemfsoftware/effect-schema-recursion-budget": "catalog:"
+  "@systemfsoftware/effect-schema-vite": "catalog:"
+  "@systemfsoftware/effect-sim-kernel": "catalog:"
+  "@systemfsoftware/effect-spec-runtime": "catalog:"
+  "@systemfsoftware/oxlint-config-cell-architecture": "catalog:"
+  "@systemfsoftware/oxlint-config-dmmf": "catalog:"
+  "@systemfsoftware/oxlint-config-recommended": "catalog:"
+  "@systemfsoftware/oxlint-plugin-cell-architecture": "catalog:"
+  "@systemfsoftware/oxlint-plugin-dmmf-workflow": "catalog:"
+  "@systemfsoftware/oxlint-plugin-effect-platform": "catalog:"
+  "@systemfsoftware/oxlint-plugin-effect-schema": "catalog:"
+  "@systemfsoftware/oxlint-plugin-test-discipline": "catalog:"
+  "@systemfsoftware/tsconfig": "catalog:"
+  "@systemfsoftware/vitest": "catalog:"
 packages:
   - apps/*
   - packages/*
+supportedArchitectures:
+  os: [linux, darwin]
+  cpu: [x64, arm64]
+  libc: [glibc]

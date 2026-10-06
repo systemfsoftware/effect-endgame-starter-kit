@@ -4,7 +4,13 @@
 # npm package cannot move a byte of formatted output. The SHA-256 sums are the
 # ones dprint publishes in its release notes:
 # https://github.com/dprint/dprint/releases/tag/0.54.0
-{ lib, stdenv, stdenvNoCC, fetchurl, unzip, autoPatchelfHook, xz }:
+#
+# Its plugins are WebAssembly that dprint would otherwise download at run time
+# from the URLs in dprint.json. Each one is fetched here against a pinned hash,
+# and the wrapper hands dprint the store copies, so formatting never reaches the
+# network and works inside the sandbox. A plugin URL without a hash below fails
+# evaluation.
+{ lib, stdenv, stdenvNoCC, fetchurl, unzip, autoPatchelfHook, xz, writeShellScriptBin, dprintConfig }:
 
 let
   version = "0.54.0";
@@ -30,8 +36,23 @@ let
 
   system = stdenvNoCC.hostPlatform.system;
   release = releases.${system} or (throw "dprint: no release archive pinned for ${system}");
-in
-stdenvNoCC.mkDerivation {
+
+  pluginHashes = {
+    "https://plugins.dprint.dev/typescript-0.96.1.wasm" = "sha256-nFIkTeLCWjOt3H3az/REMjSi3EtdPzQTEmLR4N81AHw=";
+    "https://plugins.dprint.dev/json-0.19.3.wasm" = "sha256-6JtfO11zcS8bHKAXvOnN9n3jCn0NukeAeAng0mKwH7k=";
+    "https://plugins.dprint.dev/markdown-0.17.8.wasm" = "sha256-PIEN9UnYC8doJpdzS7M6QEHQNQtj7WwXAgvewPsTjqs=";
+    "https://plugins.dprint.dev/toml-0.6.2.wasm" = "sha256-oEUfrvYkRgTsi/4Ea/wpOv9iUn0JMgz69TNw8RjAO80=";
+    "https://plugins.dprint.dev/g-plane/pretty_yaml-v0.5.0.wasm" = "sha256-6ua021G7ZW7Ciwy/OHXTA1Joj9PGEx3SZGtvaA//gzo=";
+  };
+
+  plugins = map
+    (url: fetchurl {
+      inherit url;
+      hash = pluginHashes.${url} or (throw "dprint: no pinned hash for plugin ${url}; add it to nix/dprint.nix");
+    })
+    (builtins.fromJSON (builtins.readFile dprintConfig)).plugins;
+
+  unwrapped = stdenvNoCC.mkDerivation {
   pname = "dprint";
   inherit version;
 
@@ -61,4 +82,11 @@ stdenvNoCC.mkDerivation {
     platforms = lib.attrNames releases;
     sourceProvenance = [ lib.sourceTypes.binaryNativeCode ];
   };
-}
+  };
+in
+# --plugins takes several values, so --config-discovery=true (dprint's default)
+# ends the list before the caller's own arguments.
+writeShellScriptBin "dprint" ''
+  if [ "$#" -eq 0 ]; then exec ${unwrapped}/bin/dprint; fi
+  exec ${unwrapped}/bin/dprint "$1" --plugins ${lib.escapeShellArgs plugins} --config-discovery=true "''${@:2}"
+''
