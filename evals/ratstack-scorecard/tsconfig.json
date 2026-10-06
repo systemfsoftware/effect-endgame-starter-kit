@@ -12,7 +12,7 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "types": ["node", "vitest/importMeta"]
   },
   "files": [".cache/types/deno.ns.d.ts"],
   "include": ["decide/**/*.ts", "journeys/**/*.ts", "src/**/*.ts", "tests/**/*.ts"]

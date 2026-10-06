@@ -27,6 +27,9 @@ importers:
       '@systemfsoftware/effect-cell-types':
         specifier: 12.0.0
         version: 12.0.0(effect@4.0.1)
+      '@systemfsoftware/effect-gherkin-spec':
+        specifier: 7.0.1
+        version: 7.0.1(@systemfsoftware/vitest@2.0.0(effect@4.0.1)(redis@6.3.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1)))
       '@systemfsoftware/oxlint-config-recommended':
         specifier: 3.4.0
         version: 3.4.0(effect@4.0.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)
@@ -550,6 +553,25 @@ packages:
     resolution: {integrity: sha512-KyUO/9yAxgoyTEpd76/mdjEQzIRk9pZgTRZuZOUtYkBfxeKcKJM0rX6wrIPZqwSNCBmxrRy/V7iGWDDvd1KRrA==}
     peerDependencies:
       effect: ^4
+
+  '@systemfsoftware/effect-gherkin-spec@7.0.1':
+    resolution: {integrity: sha512-ueMUWVEYDa7R9WMw6j2wY7NmTXaZDdWFRiTeSaJFhD1Ty4InGBxKazZ/svzghU7GaeDYHXzm7WjEhEuVW0QlSw==}
+    peerDependencies:
+      '@systemfsoftware/vitest': ^2.0.0
+      effect: ^4
+      vitest: ^5
+
+  '@systemfsoftware/effect-sim-kernel@1.0.0':
+    resolution: {integrity: sha512-8a4Fcyz0QmIos9AbzIEb59ggNsTdGhgPIACqXaX/WnGJNw/cz2qASEqIk++pH63dEMqPce4ikhGdupFSa2GkiA==}
+    peerDependencies:
+      effect: ^4
+
+  '@systemfsoftware/effect-spec-runtime@1.0.1':
+    resolution: {integrity: sha512-aB2tBOfiRcM/WgXKVMy9WR65i8k+PTUj3rzwswwxwHotpnajGrAq1Dyo0g4Q0rLjVnBj/TWSX6gRPvL0ebeAmg==}
+    peerDependencies:
+      '@systemfsoftware/vitest': ^2.0.0
+      effect: ^4
+      vitest: ^5
 
   '@systemfsoftware/oxlint-config-cell-architecture@3.1.0':
     resolution: {integrity: sha512-d942TLf0+4SDNWWWER6zXXdinvkGesVjJjo55wD2AQPupvVeRf5clJV6XC8sYMm2BEZk8fs6b1htyzatvAEKFw==}
@@ -1357,6 +1379,24 @@ snapshots:
   '@systemfsoftware/effect-cell-types@12.0.0(effect@4.0.1)':
     dependencies:
       effect: 4.0.1
+
+  '@systemfsoftware/effect-gherkin-spec@7.0.1(@systemfsoftware/vitest@2.0.0(effect@4.0.1)(redis@6.3.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1)))':
+    dependencies:
+      '@systemfsoftware/effect-spec-runtime': 1.0.1(@systemfsoftware/vitest@2.0.0(effect@4.0.1)(redis@6.3.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1)))
+      '@systemfsoftware/vitest': 2.0.0(effect@4.0.1)(redis@6.3.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1)))
+      effect: 4.0.1
+      vitest: 5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1))
+
+  '@systemfsoftware/effect-sim-kernel@1.0.0(effect@4.0.1)':
+    dependencies:
+      effect: 4.0.1
+
+  '@systemfsoftware/effect-spec-runtime@1.0.1(@systemfsoftware/vitest@2.0.0(effect@4.0.1)(redis@6.3.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1)))':
+    dependencies:
+      '@systemfsoftware/effect-sim-kernel': 1.0.0(effect@4.0.1)
+      '@systemfsoftware/vitest': 2.0.0(effect@4.0.1)(redis@6.3.0)(vitest@5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1)))
+      effect: 4.0.1
+      vitest: 5.0.3(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(yaml@2.9.1))
 
   '@systemfsoftware/oxlint-config-cell-architecture@3.1.0(effect@4.0.1)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)':
     dependencies:
