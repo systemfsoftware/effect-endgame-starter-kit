@@ -19,7 +19,10 @@
         "direction": "lower",
         "kind": "count",
         "runs": 3,
-        "family": "static"
+        "family": "static",
+        "ratstackSupport": {
+          "_tag": "Required"
+        }
       },
       "definitionHash": "h-m23",
       "ratstack": {
@@ -81,7 +84,10 @@
         "direction": "lower",
         "kind": "count",
         "runs": 3,
-        "family": "static"
+        "family": "static",
+        "ratstackSupport": {
+          "_tag": "Required"
+        }
       },
       "definitionHash": "h-m28",
       "ratstack": {

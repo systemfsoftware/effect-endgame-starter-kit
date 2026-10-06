@@ -91,15 +91,6 @@ export const provenanceFor = (
   detail,
 })
 
-const definitionInputs = (family: Family): readonly string[] => [
-  `src/families/${family}.ts`,
-  'src/sides',
-  'src/tools',
-  'src/harness',
-  'flake.lock',
-  'pnpm-lock.yaml',
-]
-
 const sha256 = async (text: string): Promise<string> =>
   [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))]
     .map((byte) => byte.toString(16).padStart(2, '0'))
@@ -109,15 +100,11 @@ export const definitionHashesFor = async (
   instrument: Instrument,
   family: Family,
 ): Promise<readonly { readonly id: string; readonly hash: string }[]> => {
-  const trees = await Promise.all(
-    definitionInputs(family).map(async (path) =>
-      `${path}=${await gitText(instrument.checkout, ['rev-parse', `HEAD:evals/ratstack-scorecard/${path}`])}`
-    ),
-  )
+  const measurement = await Deno.readTextFile(join(instrument.dir, 'src/families', `${family}.ts`))
   return await Promise.all(
     rowDefinitions
       .filter((row) => row.family === family)
-      .map(async (row) => ({ id: row.id, hash: await sha256(JSON.stringify({ row, trees })) })),
+      .map(async (row) => ({ id: row.id, hash: await sha256(JSON.stringify({ row, measurement })) })),
   )
 }
 

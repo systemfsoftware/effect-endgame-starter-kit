@@ -5,12 +5,16 @@ import type {
   Flag,
   MeasuredCell,
   Ratchet,
+  RatstackSupport,
   Row,
   RowDefinition,
   RowOutcome,
   ScorecardDocument,
+  Side,
+  SideCell,
   Verdict,
 } from '../model/cell.ts'
+import type { CellsByRow } from '../model/scorecard-document.ts'
 import {
   array,
   type Decoder,
@@ -92,6 +96,10 @@ const rowDefinition: Decoder<RowDefinition> = struct({
   kind: oneOf(['count', 'measurement']),
   runs: number,
   family: oneOf(['static', 'cold-path', 'gate-mutation', 'running-stack', 'agent-surfaces', 'networked']),
+  ratstackSupport: union<RatstackSupport>(
+    struct({ _tag: literal('Required') }),
+    struct({ _tag: literal('MayBeUnsupported'), bar: number }),
+  ),
 })
 
 const verdict: Decoder<Verdict> = union<Verdict>(
@@ -144,3 +152,19 @@ export const familyResult: Decoder<FamilyResult> = struct({
   flags: array(struct({ id: string, flag })),
   definitionHashes: array(struct({ id: string, hash: string })),
 })
+
+export class DuplicateCell extends Error {
+  constructor(readonly id: string, readonly side: Side) {
+    super(`two family results carry a ${side} cell for ${id}; each (row, side) is measured once`)
+  }
+}
+
+export const cellsByRow = (cells: readonly SideCell[]): CellsByRow => {
+  const keyed: Record<string, Partial<Record<Side, MeasuredCell>>> = {}
+  for (const { id, side, measured } of cells) {
+    const row = keyed[id] ?? {}
+    if (row[side] !== undefined) throw new DuplicateCell(id, side)
+    keyed[id] = { ...row, [side]: measured }
+  }
+  return keyed
+}
