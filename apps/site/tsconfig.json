@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": [
+      "@cloudflare/workers-types",
+      "node",
+      "vite/client"
+    ],
+    "customConditions": [
+      "@systemfsoftware/source"
+    ],
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  },
+  "include": [
+    "src",
+    "alchemy.run.ts"
+  ]
+}

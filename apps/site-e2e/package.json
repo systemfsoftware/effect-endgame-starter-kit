@@ -1,0 +1,26 @@
+{
+  "author": "TODO <todo@example.com>",
+  "description": "Seam-only journeys against the running site Worker",
+  "devDependencies": {
+    "@systemfsoftware/effect-gherkin-spec": "catalog:",
+    "@systemfsoftware/oxlint-config-recommended": "catalog:",
+    "@systemfsoftware/tsconfig": "catalog:",
+    "@systemfsoftware/vitest": "catalog:",
+    "@types/node": "catalog:",
+    "effect": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "license": "Apache-2.0",
+  "name": "@endgame/site-e2e",
+  "private": true,
+  "scripts": {
+    "journeys": "vitest run",
+    "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
+    "typecheck": "tsc --noEmit --incremental"
+  },
+  "type": "module",
+  "version": "0.0.0"
+}

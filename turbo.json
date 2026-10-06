@@ -5,6 +5,17 @@
     "XDG_CACHE_HOME"
   ],
   "tasks": {
+    "generate": {
+      "outputLogs": "errors-only",
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md"
+      ],
+      "outputs": [
+        "src/routeTree.gen.ts"
+      ],
+      "cache": true
+    },
     "build": {
       "outputLogs": "new-only",
       "inputs": [
@@ -31,7 +42,8 @@
       ],
       "outputs": [],
       "dependsOn": [
-        "^build"
+        "^build",
+        "generate"
       ],
       "cache": true
     },
@@ -122,7 +134,8 @@
       "outputs": [],
       "dependsOn": [
         "^build",
-        "build"
+        "build",
+        "generate"
       ],
       "env": [
         "NODE_ENV",
