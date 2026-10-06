@@ -1,11 +1,9 @@
 import { Workflow } from '@systemfsoftware/effect-cell-types'
-import * as Arr from 'effect/Array'
 import * as Match from 'effect/Match'
-import * as Option from 'effect/Option'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
-import { Accept, type AcceptPreferences, PathRoute } from './serve-page.schema'
+import { Accept, type AcceptPreferences, Origin, PathRoute, prefersHtml } from './serve-page.schema.ts'
 
 const ServePageTypeId: unique symbol = Symbol.for('endgame/site/ServePageDecision')
 
@@ -35,42 +33,22 @@ export const ServePageDecision = S.Union([
 export class ServePageCommand extends S.Class<ServePageCommand>('ServePageCommand')({
   path: PathRoute,
   accept: Accept,
-  origin: S.String,
+  origin: Origin,
 }) {
   static readonly [Workflow.InstrumentationBrand]: { readonly path: 'app.front_door.route' } = {
     path: 'app.front_door.route',
   }
 }
 
-const qOf = (preferences: AcceptPreferences, pattern: string): Option.Option<number> =>
-  Option.map(
-    Arr.findFirst(preferences, (preference) => preference.pattern === pattern),
-    (preference) => preference.q,
-  )
-
-const effectiveQOf = (preferences: AcceptPreferences, media: string): number => {
-  const major = media.slice(0, media.indexOf('/'))
-  return Option.getOrElse(
-    Option.orElse(
-      Option.orElse(qOf(preferences, media), () => qOf(preferences, `${major}/*`)),
-      () => qOf(preferences, '*/*'),
-    ),
-    () => 0,
-  )
-}
-
-const htmlWinsOf = (preferences: AcceptPreferences): boolean =>
-  effectiveQOf(preferences, 'text/html') > effectiveQOf(preferences, 'text/markdown')
-
 const pageOf = (preferences: AcceptPreferences): ServeMarkdownPage | ServeHtmlPage =>
-  Match.value(htmlWinsOf(preferences)).pipe(
+  Match.value(prefersHtml(preferences)).pipe(
     Match.when(true, () => new ServeHtmlPage({})),
     Match.when(false, () => new ServeMarkdownPage({})),
     Match.exhaustive,
   )
 
 const notFoundOf = (preferences: AcceptPreferences): ServeMarkdownNotFound | ServeHtmlPage =>
-  Match.value(htmlWinsOf(preferences)).pipe(
+  Match.value(prefersHtml(preferences)).pipe(
     Match.when(true, () => new ServeHtmlPage({})),
     Match.when(false, () => new ServeMarkdownNotFound({})),
     Match.exhaustive,

@@ -4,6 +4,8 @@ import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
+import { Origin } from './serve-page.schema'
+
 const LlmsTxtTypeId: unique symbol = Symbol.for('endgame/site/LlmsTxtDecision')
 
 export const LlmsPage = S.Struct({
@@ -25,7 +27,7 @@ export class LlmsTxtWithoutPages extends S.TaggedClass<LlmsTxtWithoutPages>()('L
 export const LlmsTxtDecision = S.Union([LlmsTxtWithPages, LlmsTxtWithoutPages])
 
 export class LlmsTxtCommand extends S.Class<LlmsTxtCommand>('LlmsTxtCommand')({
-  origin: S.String.pipe(S.check(S.isPattern(/^https?:\/\/[^\s/()]+$/))),
+  origin: Origin,
   pages: S.Array(LlmsPage),
 }) {
   static readonly [Workflow.InstrumentationBrand]: { readonly origin: 'app.front_door.origin' } = {

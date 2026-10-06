@@ -1,18 +1,22 @@
-import { Sandwich } from '@systemfsoftware/effect-cell-types'
-import { Effect, Result } from 'effect'
+import { Cell, Sandwich } from '@systemfsoftware/effect-cell-types'
+import { Cause, Effect, Result } from 'effect'
 import { HttpServerRequest, HttpServerResponse } from 'effect/http'
 
 import { markdown } from 'virtual:readme-opening'
 import { ServePage } from './FrontDoorTaxonomy'
 import { HtmlPort } from './html-port.service'
-import { LlmsPage, llmsTxt, LlmsTxtCommand } from './llms-txt.workflow'
+import { llmsTxt, LlmsTxtCommand } from './llms-txt.workflow'
+import { HOME_CATALOG, Origin, PageFailure, parseAccept, prefersHtml } from './serve-page.schema'
 import { servePage } from './serve-page.workflow'
 
 const ServerRequest = HttpServerRequest.HttpServerRequest
 
-const HOME_CATALOG: ReadonlyArray<LlmsPage> = [{ title: 'Endgame Starter', path: '/' }]
-
 const NOT_FOUND_BODY = '# Not found\n\nThe page you asked for is not here. Try `/`.\n'
+
+const FAILURE_BODY = '# Internal Server Error\n\nThe page could not be rendered.\n'
+
+const FAILURE_HTML =
+  '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Internal Server Error</title></head><body><h1>Internal Server Error</h1><p>The page could not be rendered.</p></body></html>'
 
 const markdownBody = (body: string, status: number): HttpServerResponse.HttpServerResponse =>
   HttpServerResponse.setHeader(
@@ -21,21 +25,37 @@ const markdownBody = (body: string, status: number): HttpServerResponse.HttpServ
     'Accept',
   )
 
+const htmlBody = (body: string, status: number): HttpServerResponse.HttpServerResponse =>
+  HttpServerResponse.setHeader(
+    HttpServerResponse.text(body, { contentType: 'text/html; charset=utf-8', status }),
+    'Vary',
+    'Accept',
+  )
+
+const failureBodyOf = (accept: string): HttpServerResponse.HttpServerResponse =>
+  prefersHtml(parseAccept(accept)) ? htmlBody(FAILURE_HTML, 500) : markdownBody(FAILURE_BODY, 500)
+
 const llmsDocumentOf = (origin: string): string =>
-  Result.getOrThrow(llmsTxt(LlmsTxtCommand.make({ origin, pages: HOME_CATALOG }))).document
+  Result.getOrThrow(llmsTxt(LlmsTxtCommand.make({ origin: Origin.make(origin), pages: HOME_CATALOG }))).document
 
 const renderHtml = () =>
   Effect.gen(function*() {
     const request = yield* ServerRequest
     const port = yield* HtmlPort
-    const web = yield* Effect.orDie(HttpServerRequest.toWeb(request))
-    const response = yield* port.render(web)
+    const web = yield* HttpServerRequest.toWeb(request).pipe(
+      Effect.catchCause((cause) => Effect.fail(new PageFailure({ detail: Cause.pretty(cause) }))),
+    )
+    const response = yield* port.render(web).pipe(
+      Effect.catchCause((cause) => Effect.fail(new PageFailure({ detail: Cause.pretty(cause) }))),
+    )
     return HttpServerResponse.setHeader(HttpServerResponse.fromWeb(response), 'Vary', 'Accept')
   })
 
 const read = (request: HttpServerRequest.HttpServerRequest) =>
   Effect.gen(function*() {
-    const web = yield* Effect.orDie(HttpServerRequest.toWeb(request))
+    const web = yield* HttpServerRequest.toWeb(request).pipe(
+      Effect.catchCause((cause) => Effect.fail(new PageFailure({ detail: Cause.pretty(cause) }))),
+    )
     const url = new URL(web.url)
     return {
       path: url.pathname,
@@ -43,6 +63,11 @@ const read = (request: HttpServerRequest.HttpServerRequest) =>
       origin: url.origin,
     }
   })
+
+const failureCell = Cell.map(
+  Cell.id<HttpServerRequest.HttpServerRequest>(),
+  (request) => failureBodyOf(request.headers['accept'] ?? ''),
+)
 
 export const servePageCell = Sandwich.named(ServePage.name)(read)
   .decide(servePage)
@@ -56,3 +81,4 @@ export const servePageCell = Sandwich.named(ServePage.name)(read)
     ServeMarkdownNotFound: () => Effect.succeed(markdownBody(NOT_FOUND_BODY, 404)),
     CommandRejected: (rejected) => Effect.succeed(markdownBody(`# Bad Request\n\n${rejected.issue}\n`, 400)),
   })
+  .pipe(Cell.orElse(failureCell))
