@@ -69,6 +69,35 @@ const runnerName = (): string => Deno.env.get('RUNNER_NAME') ?? Deno.hostname()
 
 const checkoutOf = (arg: string | undefined): string => arg ?? Deno.cwd()
 
+const sha256Bytes = async (bytes: BufferSource): Promise<string> =>
+  [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))]
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('')
+
+const sha256 = (text: string): Promise<string> => sha256Bytes(new TextEncoder().encode(text))
+
+const generated = ['node_modules/', '.cache/', 'journeys/__records__/']
+
+const walkEntry = async (root: string, prefix: string, entry: Deno.DirEntry): Promise<readonly string[]> => {
+  const path = joinPath(prefix, entry.name)
+  if (entry.isDirectory) return await walkFiles(root, path)
+  return [path]
+}
+
+export const walkFiles = async (root: string, prefix = ''): Promise<readonly string[]> => {
+  const entries = await entriesIn(join(root, prefix))
+  const nested = await Promise.all(entries.map((entry) => walkEntry(root, prefix, entry)))
+  return nested.flat().sort()
+}
+
+const instrumentTreeHash = async (dir: string): Promise<string> => {
+  const files = (await walkFiles(dir)).filter((file) => !generated.some((prefix) => file.startsWith(prefix)))
+  const parts = await Promise.all(
+    files.map(async (file) => `${file}\0${await sha256Bytes(await Deno.readFile(join(dir, file)))}`),
+  )
+  return sha256(parts.join('\n'))
+}
+
 export const loadInstrument = async (checkoutArg: string | undefined): Promise<Instrument> => {
   const dir = required('SCORECARD_INSTRUMENT')
   const checkout = await gitText(checkoutOf(checkoutArg), ['rev-parse', '--show-toplevel'])
@@ -79,7 +108,7 @@ export const loadInstrument = async (checkoutArg: string | undefined): Promise<I
     ratstackSrc: required('SCORECARD_RATSTACK_SRC'),
     checkout,
     pin: pinOf(await readJson(join(dir, 'ratstack.pin.json'))),
-    instrumentHash: await gitText(checkout, ['rev-parse', 'HEAD:evals/ratstack-scorecard']),
+    instrumentHash: await instrumentTreeHash(dir),
     nixpkgsRev: nixpkgsRevOf(await readJson(join(dir, 'flake.lock'))),
     runner: runnerName(),
     starterCommit: await gitText(checkout, ['rev-parse', 'HEAD']),
@@ -106,11 +135,6 @@ export const provenanceFor = (
   tools: instrument.toolVersions,
   detail,
 })
-
-const sha256 = async (text: string): Promise<string> =>
-  [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))]
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('')
 
 export const definitionHashesFor = async (
   instrument: Instrument,
@@ -146,18 +170,6 @@ const copyTracked = async (from: string, to: string, files: readonly string[]): 
 
 export const trackedFiles = async (checkout: string): Promise<readonly string[]> =>
   decoder.decode(await git(checkout, ['ls-files', '-z'])).split('\0').filter((file) => file !== '')
-
-const walkEntry = async (root: string, prefix: string, entry: Deno.DirEntry): Promise<readonly string[]> => {
-  const path = joinPath(prefix, entry.name)
-  if (entry.isDirectory) return await walkFiles(root, path)
-  return [path]
-}
-
-export const walkFiles = async (root: string, prefix = ''): Promise<readonly string[]> => {
-  const entries = await entriesIn(join(root, prefix))
-  const nested = await Promise.all(entries.map((entry) => walkEntry(root, prefix, entry)))
-  return nested.flat().sort()
-}
 
 export const materializeStarter = async (instrument: Instrument, work: string): Promise<string> => {
   const target = join(work, 'starter')
