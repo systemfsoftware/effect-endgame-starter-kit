@@ -15,7 +15,7 @@
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
       pin = builtins.fromJSON (builtins.readFile ./ratstack.pin.json);
       toolsStoreHash = {
-        x86_64-linux = "sha256-bAD/wP5Kwg8dqnKUzKz5/LHvOUbW7Xt+8ibqzPvwdHY=";
+        x86_64-linux = "sha256-hqYJGB+/sfZdqjb+4PWT09NaGsoaLpw5iW051xNw6oI=";
         aarch64-linux = "sha256-jUyIV2ysOxkIij/Ff5VGuIADTibbY0SsCPGglmIvdn0=";
         aarch64-darwin = "sha256-XWYBTy3xZbQwJxdGbAK4+R69XNmL3RRyXu6+nY+XPXc=";
       };
