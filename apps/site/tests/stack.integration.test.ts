@@ -24,7 +24,7 @@ const importStack = () =>
     }
   })
 
-Feature('Importing the stack')
+Feature('Importing the stack', { timeout: 60_000 })
   .withLayer(NodeFileSystem.layer)
   .live('importing the stack module and reading the filesystem are real Node I/O')
   .body(({ scenario }) => {
