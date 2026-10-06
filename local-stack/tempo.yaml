@@ -20,3 +20,15 @@ storage:
       path: local-stack/data/tempo/blocks
     wal:
       path: local-stack/data/tempo/wal
+
+live_store:
+  shutdown_marker_dir: local-stack/data/tempo/live-store/shutdown-marker
+  wal:
+    path: local-stack/data/tempo/live-store/traces
+
+backend_scheduler:
+  local_work_path: local-stack/data/tempo/backend-scheduler
+
+block_builder:
+  wal:
+    path: local-stack/data/tempo/block-builder/traces
