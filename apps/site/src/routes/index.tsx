@@ -8,7 +8,7 @@ export const Route = createFileRoute('/')({ component: Home })
 
 const workerHealth = Effect.scoped(Effect.flatMap(siteClient, (client) => client.Health())).pipe(
   Effect.map((health) => health.status),
-  Effect.orElseSucceed(() => 'unreachable'),
+  Effect.catchCause(() => Effect.succeed('unreachable')),
   Effect.provide(SiteClientProtocol),
 )
 
