@@ -10,6 +10,7 @@
     "@std/fs/expand-glob": "jsr:@std/fs@1/expand-glob",
     "@std/path": "jsr:@std/path@1",
     "@std/yaml": "jsr:@std/yaml@1",
-    "octokit": "npm:octokit@^4"
+    "octokit": "npm:octokit@^4",
+    "@std/assert": "jsr:@std/assert@1"
   }
 }

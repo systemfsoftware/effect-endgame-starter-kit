@@ -19,15 +19,30 @@
     "vitest": "catalog:"
   },
   "exports": {
-    ".": { "@systemfsoftware/source": "./src/index.ts", "default": "./dist/index.js" },
+    ".": {
+      "@systemfsoftware/source": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
     "./package.json": "./package.json"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "license": "Apache-2.0",
   "name": "@TODO/starter",
-  "omp": { "extensions": ["./dist/index.js"] },
+  "omp": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
   "private": true,
-  "publishConfig": { "exports": { ".": "./dist/index.js", "./package.json": "./package.json" }, "provenance": true },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./package.json": "./package.json"
+    },
+    "provenance": true
+  },
   "scripts": {
     "build": "rimraf dist && tsdown",
     "clean": "rimraf dist",
@@ -38,5 +53,12 @@
     "typecheck": "tsc --noEmit --incremental && tsc -p tsconfig.node.json --noEmit"
   },
   "type": "module",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "stryker": {
+    "mutate": [
+      "src/**/*.ts",
+      "!src/**/*.test.ts",
+      "!src/**/*.d.ts"
+    ]
+  }
 }

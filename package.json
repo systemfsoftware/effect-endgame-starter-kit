@@ -25,14 +25,15 @@
     "format": "./bin/dprint fmt",
     "format:check": "./bin/dprint check",
     "gate:dist": "turbo --concurrency=${TURBO_CONCURRENCY:-100%} build",
-    "gate:tasks": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} --continue lint typecheck typecheck:node test",
+    "gate:tasks": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} --continue lint typecheck typecheck:node test test:scripts",
     "lint": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} lint",
     "mutation": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} mutation",
     "precommit": "pnpm exec lint-staged --no-revert --config .lintstagedrc.js",
     "prepare": "husky && effect-tsgo patch --oxlint --no-typescript --skip-missing",
-    "test": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} test",
+    "test": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} test test:scripts",
     "typecheck": "turbo --concurrency=${TURBO_CONCURRENCY:-50%} --continue typecheck typecheck:node",
-    "typecheck:node": "tsc -p tsconfig.node.json --noEmit"
+    "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
+    "test:scripts": "nix develop --command deno test --config=scripts/deno.json --allow-read --allow-write --allow-import=jsr.io scripts/"
   },
   "type": "module"
 }
