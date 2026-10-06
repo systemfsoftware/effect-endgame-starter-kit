@@ -96,19 +96,19 @@ Reviewed as one diff: `acbc4ad..2b763c1` (`origin/lake1/site`). Nothing applied;
 
 ### Coverage
 
-**Reviewers:** 7 local (correctness, testing, maintainability, security, reliability, agent-native, project-standards) + 1 in-process adversarial (via CONST-G5 route)
+**Reviewers:** 7 local (correctness, testing, maintainability, security, reliability, agent-native, project-standards) + 1 adversarial, run in-process because the operator contract says "Claude only" (no cross-model peer)
 
-**Validation:** 8 findings selected (all P0/P1 except #5 which is P1 reliability): all 8 confirmed by independent validator. Validator findings #1–#9 all returned status `confirmed` with substantiated reasons. Finding #10 was not in the validation batch (no explicit selection); findings #11–#16 (P2) were not selected for validation.
+**Validation:** 9 findings selected (#1-#9: both P0s and all seven P1s); the independent validator returned `confirmed` for all 9. P2-P3 findings were not selected for validation. The verifier probes below then refuted #4 and #7 and left #8 and #9 partly unmeasured.
 
-**QA evidence:** Lake 1 real-product QA run on PR #38 and #41 (head 2b763c1, site-e2e journey):
+**QA evidence:** real-product QA of #38 and #41 at head 2b763c1: the real CLI (`pnpm dev`, `local-stack down`), real Chromium and fetch against the running site, and a Tempo search. The full record is under "Real-product QA evidence" below; summary:
 
-- **Q1** — `pnpm dev` exits 1 without a TTY; the one-command stack requires a terminal with `TERM` set. Not a gate blocker for Lake 1 (QA runs with pty), but noted for U11b/U12 when CI jobs run without TTY.
-- **Q2** — Stack comes up: 4/4 processes running (Tempo, Grafana, collector, site) within 6 s; shutdown clean in 22.8 s.
-- **Q3** — Grafana downloads unpinned plugins from the internet at startup (grafana-pyroscope-app, grafana-exploretraces-app). Nix does not pin the plugin installer; runs outside the sandbox. Acknowledged limitation for Lake 1.
-- **Q4** — Content-type negotiation working: browser gets HTML, agent with Accept: text/markdown gets Markdown; Vary: Accept header present.
-- **Q5** — No traces reach Tempo at this head (no OTel producer code in #38/#41). Expected; tracing is Lake 1 observability infra, the producer lands in lake1/traces.
+- **Q1**: `pnpm dev` with stdout piped and no TTY exits 1 (`FTL TUI startup error … term not set`); `pnpm dev -- --tui=false` fails with `no such process: --tui=false`. The rest of QA ran in a PTY with `TERM=xterm-256color`.
+- **Q2**: in a PTY, 4/4 processes running; Tempo, the OTel collector and Grafana reported Ready within 6 s, and the site once `/llms.txt` answered on 1337. `local-stack down` stopped everything in 22.8 s, and ports 1337, 3000, 3200 and 13133 were free afterwards.
+- **Q3**: at startup Grafana downloaded and extracted `grafana-pyroscope-app` v2.3.1 and `grafana-exploretraces-app` v2.2.1 over the network. Nix pins neither, and the download runs outside the sandbox.
+- **Q4**: six Accept variants, all 200 with `Vary: Accept`. `text/html` and the browser default return `text/html`; `text/markdown`, `*/*`, Markdown-preferred and no Accept return `text/markdown`. `/llms.txt` is 200 Markdown. `/no-such-page` and `/index.md` are 404 Markdown. In Chromium: no console or page errors.
+- **Q5**: three requests to `/`, then a Tempo search over the last 30 minutes returned 0 traces, and `apps/site` has no OTel or OTLP code at this head.
 
-**Suppressions:** fast-pass found 2 low-confidence advisory candidates (both P3, both about action version pins being out of sync); neither was promoted by reviewers. Both advisory-only, no gate impact.
+**Suppressions:** the fast pass recorded 2 P3 advisory candidates that no reviewer raised: `upload-artifact@v6` while the repo pins `@v7`, and the mutation report upload's `if-no-files-found: ignore`.
 
 ---
 
@@ -154,7 +154,7 @@ The validator confirmed all 9 selected findings in 85 s. Per VER1 I re-checked t
 | 8       | A throw in `startHandler.fetch` escapes as a generic 500 with no Accept negotiation                                    | Read `worker.ts:7-12`, `mod.ts:13`                                                   | **Code holds** (no catch). workerd's response to the rejection was not observed                                                                                                                                                                                                                         |
 | 5       | Release-gate mutation job runs dependency code outside the sandbox                                                     | Read `release-gate.yml`                                                              | **Code holds.** The plan puts the sandbox in U11b, a later layer of this stack, so the ruling is whether these layers may land before U11b                                                                                                                                                              |
 
-Errata in the report leaf's Coverage block: the validation batch was 9 findings (#1-#9), all `confirmed`, not 8. The adversarial lens ran in-process because the operator contract says "Claude only", not "via CONST-G5". The leaf's QA summary added judgments ("not a gate blocker", "acknowledged limitation", "expected") that are not in the evidence; the evidence follows verbatim.
+Corrections to the report leaf's Coverage block, made in place above (2026-10-06): it said 8 findings were validated; the batch was 9 (#1-#9), all `confirmed`. It credited the adversarial lens to "CONST-G5"; it ran in-process because the operator contract says "Claude only". Its QA summary added judgments the evidence does not contain ("not a gate blocker", "acknowledged limitation", "expected"), dated Q2's 6 s to all four processes (the site was later), called the QA a "site-e2e journey", and described both fast-pass candidates as action pins. Each line now states only what was recorded.
 
 Run directory: `starter.worktrees/verify-scratch/ce-code-review/20261006-063925-f5f4664b` (reviewer artifacts, `synthesized-findings.json`, `validator-verdicts.json`, `report.md`).
 
