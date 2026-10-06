@@ -1,0 +1,34 @@
+{
+  "journeys": [
+    {
+      "id": "static-family",
+      "produce": {
+        "kind": "measure-static",
+        "ratstackRepo": "journeys/__fixtures__/repos/ratstack",
+        "starterRepo": "journeys/__fixtures__/repos/starter",
+        "failingTool": null
+      },
+      "inputs": [
+        "journeys/__fixtures__/repos",
+        "src",
+        "pnpm-lock.yaml",
+        "flake.lock"
+      ]
+    },
+    {
+      "id": "static-family-failing-tool",
+      "produce": {
+        "kind": "measure-static",
+        "ratstackRepo": "journeys/__fixtures__/repos/ratstack",
+        "starterRepo": "journeys/__fixtures__/repos/starter",
+        "failingTool": "extract-comments.mjs"
+      },
+      "inputs": [
+        "journeys/__fixtures__/repos",
+        "src",
+        "pnpm-lock.yaml",
+        "flake.lock"
+      ]
+    }
+  ]
+}
