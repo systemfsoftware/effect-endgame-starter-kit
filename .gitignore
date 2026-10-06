@@ -12,6 +12,7 @@ result
 result-*
 local-stack/data/
 .alchemy/
+apps/site/.wrangler/
 apps/site/src/routeTree.gen.ts
 apps/site/.tanstack/
 apps/site-e2e/artifacts/

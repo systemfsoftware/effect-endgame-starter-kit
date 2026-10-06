@@ -55,7 +55,7 @@ processes:
 
   site:
     command: >-
-      pnpm --filter @endgame/site exec alchemy dev --stage local --no-input
+      pnpm --filter @endgame/site dev
     depends_on:
       otel-collector:
         condition: process_healthy

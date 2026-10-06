@@ -1,10 +1,10 @@
-import babel from '@rolldown/plugin-babel'
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import viteReact, { reactCompilerPreset } from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-import { readmeOpening } from './readme-opening-plugin.ts'
+import { siteWorker } from './site-worker.ts'
+import { SITE_DEV_PORT, sitePlugins } from './vite-plugins.ts'
 
 export default defineConfig({
-  plugins: [readmeOpening(), tanstackStart(), viteReact(), babel({ presets: [reactCompilerPreset()] })],
+  plugins: sitePlugins(siteWorker.main),
+  server: { host: '127.0.0.1', port: SITE_DEV_PORT, strictPort: true },
+  preview: { host: '127.0.0.1', port: SITE_DEV_PORT, strictPort: true },
 })
