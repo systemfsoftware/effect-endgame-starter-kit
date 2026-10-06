@@ -1,18 +1,9 @@
-import type { Family, RowDefinition } from '../model/cell.ts'
+import type { RowDefinition } from '../model/cell.ts'
 
 const count3 = { kind: 'count', runs: 3 } as const
 const measured5 = { kind: 'measurement', runs: 5 } as const
 const measured3 = { kind: 'measurement', runs: 3 } as const
 const required = { ratstackSupport: { _tag: 'Required' } } as const
-
-export const familyTimeoutMinutes: Readonly<Record<Family, number>> = {
-  'static': 20,
-  'cold-path': 120,
-  'gate-mutation': 240,
-  'running-stack': 90,
-  'agent-surfaces': 90,
-  'networked': 60,
-}
 
 export const rowDefinitions: readonly RowDefinition[] = [
   {

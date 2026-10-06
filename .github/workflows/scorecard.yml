@@ -17,151 +17,87 @@ concurrency:
   group: scorecard-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-env:
-  INSTRUMENT_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
-
 jobs:
-  plan:
+  scorecard:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 360
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
     outputs:
-      matrix: ${{ steps.plan.outputs.matrix }}
+      mode: ${{ steps.instrument.outputs.mode }}
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ env.INSTRUMENT_REF }}
-          path: instrument
-      - uses: cachix/install-nix-action@v31
-      - id: plan
-        name: Families and rat-stack cache keys
-        working-directory: instrument
+          fetch-depth: 0
+      - id: instrument
+        name: Choose the instrument that grades this run
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          scorecard="$(nix build --no-link --print-out-paths ./evals/ratstack-scorecard#scorecard)"
-          matrix="$("$scorecard/bin/scorecard" plan)"
-          echo "$matrix" | jq .
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-
-  measure:
-    name: measure (${{ matrix.family }})
-    needs: plan
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: ${{ matrix.timeoutMinutes }}
-    steps:
-      - uses: actions/checkout@v7
+          if [ "$GITHUB_EVENT_NAME" != pull_request ]; then
+            printf 'ref=%s\nmode=base\n' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          selector=evals/ratstack-scorecard/ci/instrument-ref.sh
+          if git cat-file -e "$BASE:$selector" 2>/dev/null; then
+            git show "$BASE:$selector" | bash -s -- "$BASE" "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          else
+            bash "$selector" "$BASE" "$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          fi
+          cat "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
         with:
-          ref: ${{ env.INSTRUMENT_REF }}
+          ref: ${{ steps.instrument.outputs.ref }}
           path: .scorecard-instrument
+          persist-credentials: false
+      - name: "BOOTSTRAP: self-graded, base had no instrument"
+        if: steps.instrument.outputs.mode == 'bootstrap'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          banner="# ⚠️ BOOTSTRAP: SELF-GRADED, BASE HAD NO INSTRUMENT
+
+          The base commit has no \`.github/workflows/scorecard.yml\`, so this run grades the pull request with its own instrument. Every later pull request is graded by its base's instrument."
+          printf '%s\n\n' "$banner" >> "$GITHUB_STEP_SUMMARY"
+          gh pr comment "$PR" --body "$banner"
       - uses: cachix/install-nix-action@v31
       - name: Allow the launcher's unprivileged user namespaces
         run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-      - name: Build main's instrument
+      - name: Build the grading instrument
         run: echo "SCORECARD=$(nix build --no-link --print-out-paths ./.scorecard-instrument/evals/ratstack-scorecard#scorecard)/bin/scorecard" >> "$GITHUB_ENV"
-      - id: ratstack-cache
-        name: Restore the rat-stack side
+      - name: Restore rat-stack results
         uses: actions/cache/restore@v6
         with:
-          path: scorecard-out/ratstack-${{ matrix.family }}.json
-          key: ${{ matrix.cacheKey }}
-      - id: cached
-        name: Refuse a cached rat-stack side that holds an instrument error
-        if: steps.ratstack-cache.outputs.cache-hit == 'true'
-        run: |
-          if "$SCORECARD" cache-check --file "scorecard-out/ratstack-${{ matrix.family }}.json"; then
-            echo "usable=true" >> "$GITHUB_OUTPUT"
-          else
-            rm -f "scorecard-out/ratstack-${{ matrix.family }}.json"
-            echo "::warning::cached rat-stack ${{ matrix.family }} side refused; measuring it again"
-          fi
-      - name: Measure the rat-stack side
-        if: steps.cached.outputs.usable != 'true'
-        run: |
-          mkdir -p scorecard-out
-          "$SCORECARD" measure --family "${{ matrix.family }}" --side ratstack --checkout "$GITHUB_WORKSPACE" \
-            --out "scorecard-out/ratstack-${{ matrix.family }}.json"
-      - id: savable
-        name: Check the fresh rat-stack side before caching it
-        if: steps.cached.outputs.usable != 'true' && github.event_name != 'pull_request'
-        run: |
-          if "$SCORECARD" cache-check --file "scorecard-out/ratstack-${{ matrix.family }}.json"; then
-            echo "save=true" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Save the rat-stack side for later runs
-        if: steps.savable.outputs.save == 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: scorecard-out/ratstack-${{ matrix.family }}.json
-          key: ${{ matrix.cacheKey }}
-      - name: Measure the starter side
-        run: |
-          mkdir -p scorecard-out
-          "$SCORECARD" measure --family "${{ matrix.family }}" --side starter --checkout "$GITHUB_WORKSPACE" \
-            --out "scorecard-out/starter-${{ matrix.family }}.json"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: family-${{ matrix.family }}
-          path: scorecard-out/
-          if-no-files-found: error
-
-  aggregate:
-    needs: [plan, measure]
-    if: ${{ !cancelled() && needs.plan.result == 'success' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/checkout@v7
-        with:
-          ref: ${{ env.INSTRUMENT_REF }}
-          path: .scorecard-instrument
-      - uses: cachix/install-nix-action@v31
-      - name: Allow the launcher's unprivileged user namespaces
-        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
-      - name: Build main's instrument
-        run: echo "SCORECARD=$(nix build --no-link --print-out-paths ./.scorecard-instrument/evals/ratstack-scorecard#scorecard)/bin/scorecard" >> "$GITHUB_ENV"
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: family-*
-          merge-multiple: true
-          path: families
-      - id: main
-        name: Find the latest scorecard on main
+          path: .scorecard-cache
+          key: scorecard-ratstack-${{ github.run_id }}
+          restore-keys: scorecard-ratstack-
+      - name: Measure, judge, ratchet and publish
         env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: echo "run=$("$SCORECARD" latest-main-run)" >> "$GITHUB_OUTPUT"
-      - name: Download main's scorecard
-        if: steps.main.outputs.run != ''
-        uses: actions/download-artifact@v8
-        with:
-          name: scorecard
-          run-id: ${{ steps.main.outputs.run }}
-          github-token: ${{ github.token }}
-          path: main
-      - name: Judge, ratchet and publish
-        run: |
-          main_args=()
-          if [ -f main/scorecard.json ]; then main_args=(--main main/scorecard.json); fi
-          status=0
-          "$SCORECARD" aggregate --families families "${main_args[@]}" --out scorecard.json --summary summary.md || status=$?
-          if [ -f summary.md ]; then cat summary.md >> "$GITHUB_STEP_SUMMARY"; fi
-          exit "$status"
+        run: '"$SCORECARD" ci --checkout "$GITHUB_WORKSPACE" --cache .scorecard-cache --out scorecard-out'
       - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: scorecard
-          path: scorecard.json
+          path: scorecard-out/scorecard.json
           if-no-files-found: error
+      - name: Save rat-stack results
+        if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+        uses: actions/cache/save@v6
+        with:
+          path: .scorecard-cache
+          key: scorecard-ratstack-${{ github.run_id }}
 
   instrument-preview:
     name: instrument preview (informational)
-    needs: aggregate
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.aggregate.result != 'skipped' }}
+    needs: scorecard
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.scorecard.outputs.mode == 'base' }}
     continue-on-error: true
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v7
         with:
@@ -185,25 +121,14 @@ jobs:
         with:
           name: scorecard
           path: graded
-      - name: Measure with this PR's instrument and list what it would re-baseline
+      - name: Grade with this PR's own instrument against the graded scorecard
         if: steps.changed.outputs.edits == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           scorecard="$(nix build --no-link --print-out-paths ./evals/ratstack-scorecard#scorecard)/bin/scorecard"
-          mkdir -p preview
-          for family in $("$scorecard" plan | jq -r '.include[].family'); do
-            "$scorecard" measure --family "$family" --out "preview/$family.json"
-          done
-          status=0
-          "$scorecard" aggregate --families preview --main graded/scorecard.json \
-            --out preview-scorecard.json --summary preview-summary.md || status=$?
-          {
-            echo "## Instrument preview (does not gate)"
-            echo
-            echo "This PR's own instrument, compared with the scorecard main's instrument produced for it. Re-baselined rows are listed under definition drift."
-            echo
-            cat preview-summary.md
-          } >> "$GITHUB_STEP_SUMMARY"
-          exit "$status"
+          "$scorecard" ci --checkout "$GITHUB_WORKSPACE" --cache .scorecard-cache --out preview \
+            --main graded/scorecard.json --title "Instrument preview (does not gate)"
 
   pin:
     if: github.event_name != 'pull_request'

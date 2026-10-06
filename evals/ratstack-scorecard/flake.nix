@@ -39,7 +39,7 @@
           };
           scorecard = pkgs.writeShellApplication {
             name = "scorecard";
-            runtimeInputs = [ pkgs.deno pkgs.git ];
+            runtimeInputs = [ pkgs.deno pkgs.git pkgs.bash ];
             text = ''
               export SCORECARD_INSTRUMENT=${self}
               export SCORECARD_SANDBOX=${sandbox}/bin/sandbox
@@ -50,7 +50,7 @@
               export SCORECARD_PNPM_VERSION=${pkgs.pnpm_12.version}
               export DENO_NO_PACKAGE_JSON=1
               exec deno run --no-config --allow-read --allow-write --allow-env --allow-sys=hostname \
-                --allow-run=git,${pkgs.deno}/bin/deno,${sandbox}/bin/sandbox \
+                --allow-run=git,bash,${pkgs.deno}/bin/deno,${sandbox}/bin/sandbox \
                 ${self}/src/main.ts "$@"
             '';
           };

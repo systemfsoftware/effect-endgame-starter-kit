@@ -13,8 +13,12 @@ interface MeasureStatic {
 
 interface JourneyEntry {
   readonly id: string
-  readonly produce: MeasureStatic | Aggregate
+  readonly produce: MeasureStatic | Aggregate | InstrumentRef
   readonly inputs: readonly string[]
+}
+
+interface InstrumentRef {
+  readonly kind: 'instrument-ref'
 }
 
 export interface LauncherRecord {
@@ -31,7 +35,7 @@ export interface LauncherRecord {
 
 const journeyEntry: Decoder<JourneyEntry> = struct({
   id: string,
-  produce: union<MeasureStatic | Aggregate>(
+  produce: union<MeasureStatic | Aggregate | InstrumentRef>(
     struct({
       kind: literal('measure-static'),
       ratstackRepo: string,
@@ -39,6 +43,7 @@ const journeyEntry: Decoder<JourneyEntry> = struct({
       failingTool: nullable(string),
     }),
     struct({ kind: literal('aggregate'), families: string, main: nullable(string) }),
+    struct({ kind: literal('instrument-ref') }),
   ),
   inputs: array(string),
 })
@@ -195,10 +200,92 @@ const produceStatic = async (
   }
 }
 
+const identity = ['-c', 'user.name=journey', '-c', 'user.email=journey@invalid', '-c', 'commit.gpgsign=false']
+
+const commitTree = async (repo: string, files: Readonly<Record<string, string | null>>, message: string) => {
+  for (const [path, content] of Object.entries(files)) {
+    if (content === null) await Deno.remove(join(repo, path), { recursive: true })
+    else {
+      await Deno.mkdir(join(repo, path, '..'), { recursive: true })
+      await Deno.writeTextFile(join(repo, path), content)
+    }
+  }
+  await git(repo, ['add', '-A'])
+  await git(repo, [...identity, 'commit', '-q', '--allow-empty', '-m', message])
+  return new TextDecoder().decode(await git(repo, ['rev-parse', 'HEAD'])).trim()
+}
+
+const produceInstrumentRef = async (root: string, entry: JourneyEntry): Promise<LauncherRecord> => {
+  const repo = await Deno.makeTempDir({ prefix: `journey-${entry.id}-` })
+  const started = performance.now()
+  try {
+    await git(repo, ['init', '-q', '-b', 'main'])
+    const workflow = '.github/workflows/scorecard.yml'
+    const verdict = 'evals/ratstack-scorecard/verdict'
+    const baseWithout = await commitTree(repo, { 'README.md': 'starter\n' }, 'base without the scorecard')
+    const introduce = await commitTree(repo, { [workflow]: 'name: Scorecard\n', [verdict]: 'green\n' }, 'add scorecard')
+    const baseWith = await commitTree(repo, { [verdict]: 'red\n' }, 'main instrument grades the row red')
+    const editsInstrument = await commitTree(repo, { [verdict]: 'green\n' }, 'PR edits the instrument to green')
+    await git(repo, ['checkout', '-q', baseWith])
+    const deletesInstrument = await commitTree(repo, { 'evals/ratstack-scorecard': null }, 'PR deletes the instrument')
+    await git(repo, ['checkout', '-q', baseWith])
+    const deletesWorkflow = await commitTree(
+      repo,
+      { [workflow]: null, [verdict]: 'green\n' },
+      'PR deletes the workflow',
+    )
+    const cases: Readonly<Record<string, readonly [string, string]>> = {
+      'bootstrap': [baseWithout, introduce],
+      'edits-instrument': [baseWith, editsInstrument],
+      'deletes-instrument': [baseWith, deletesInstrument],
+      'deletes-workflow': [baseWith, deletesWorkflow],
+      'base-missing': ['0'.repeat(40), editsInstrument],
+    }
+    const files: Record<string, string> = {}
+    for (const [name, [base, head]] of Object.entries(cases)) {
+      const run = await new Deno.Command('bash', {
+        args: [join(root, 'ci/instrument-ref.sh'), base, head],
+        cwd: repo,
+        stdout: 'piped',
+        stderr: 'piped',
+      }).output()
+      const stdout = new TextDecoder().decode(run.stdout)
+      const ref = /^ref=(\S+)$/mu.exec(stdout)?.[1]
+      const show = ref === undefined
+        ? undefined
+        : await new Deno.Command('git', { args: ['show', `${ref}:${verdict}`], cwd: repo, stdout: 'piped' }).output()
+      files[`${name}.json`] = JSON.stringify({
+        code: run.code,
+        stdout,
+        stderr: new TextDecoder().decode(run.stderr),
+        base,
+        head,
+        graded: show?.success === true ? new TextDecoder().decode(show.stdout).trim() : null,
+      })
+    }
+    return {
+      id: entry.id,
+      inputHash: '',
+      argv: ['bash', 'ci/instrument-ref.sh', '<base>', '<head>'],
+      code: 0,
+      stdout: '',
+      stderr: '',
+      files,
+      egressLog: null,
+      wallMs: Math.round(performance.now() - started),
+    }
+  } finally {
+    await Deno.remove(repo, { recursive: true })
+  }
+}
+
 const produce = async (instrument: Instrument, root: string, entry: JourneyEntry): Promise<LauncherRecord> => {
-  const record = entry.produce.kind === 'aggregate'
-    ? await produceAggregate(instrument, root, entry, entry.produce)
-    : await produceStatic(instrument, root, entry, entry.produce)
+  const spec = entry.produce
+  const record = spec.kind === 'aggregate'
+    ? await produceAggregate(instrument, root, entry, spec)
+    : spec.kind === 'instrument-ref'
+    ? await produceInstrumentRef(root, entry)
+    : await produceStatic(instrument, root, entry, spec)
   return { ...record, inputHash: await inputHashOf(root, entry.inputs, instrument.launcher.executable) }
 }
 
