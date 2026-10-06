@@ -63,7 +63,7 @@ Phase ordering is guaranteed at compile time: each phase returns branded markers
 | 🧪 **Vitest**             | Fast unit and integration test runner with TypeScript support                          |
 | 🔬 **Stryker**            | Mutation testing ensuring tests fail when bugs are introduced                          |
 | 📦 **tsdown**             | Fast TypeScript bundler building dual ESM and type declarations                        |
-| 📝 **Changesets**         | Automated versioning and changelog generation with npm OIDC provenance                 |
+| 📝 **Changesets**         | Automated versioning and changelogs, released as git tags via shared tooling           |
 | 🪝 **Husky & Commitlint** | Git hooks enforcing conventional commit standards                                      |
 | 🌳 **Worktrunk Scripts**  | Deno-powered git worktree lifecycle hooks for isolated agent work                      |
 

@@ -18,7 +18,10 @@ pnpm change --bump <none|patch|minor|major> --summary "<changelog entry>" [<pkg>
 - This README is NOT a changeset: the gate requires a file whose frontmatter
   parses as `"<pkg>": <none|patch|minor|major>`.
 
-Publishing uses npm OIDC trusted publishing from `.github/workflows/release.yml`.
-Register `@todo/starter` (TODO: your package name) as a trusted publisher on npmjs.com
-pointing at this repository and that workflow filename before the first new
-version can ship. OIDC cannot debut a package npm has never seen.
+Releasing is handled by the shared release tooling in
+`systemfsoftware/pnpm-release-management`, which this repository calls as a
+reusable workflow (`.github/workflows/release.yml`) rather than carrying its own
+copy; `release.jsonc` configures it. There is no registry publish: when the
+Release PR lands, each released version is tagged `<pkg>@vX.Y.Z` and its GitHub
+Release is cut from the authored changelog. Consumers depend on packages as Nix
+flake outputs pinned from git refs, so the tag is the release record.
