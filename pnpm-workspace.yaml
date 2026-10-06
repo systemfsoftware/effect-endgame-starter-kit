@@ -60,8 +60,6 @@ minimumReleaseAgeExclude:
   - "@effect/*"
   - effect-agent
   - "@effect-agent/*"
-  - "@cloudflare/vite-plugin@1.62.5"
-  - "@cloudflare/workers-types@5.20261005.1"
   - "@systemfsoftware/effect-cell-types@12.0.0"
   - "@systemfsoftware/effect-gherkin-spec@7.0.1"
   - "@systemfsoftware/effect-schema-discovery@2.0.0"
@@ -92,15 +90,6 @@ minimumReleaseAgeExclude:
   - "@systemfsoftware/trace-taxonomy@1.0.0"
   - "@systemfsoftware/tsconfig@2.0.1"
   - "@systemfsoftware/vitest@2.0.0"
-  - "@vitejs/plugin-react@6.1.2"
-  - miniflare@5.20261001.0-alpha
-  - wrangler@4.147.0
-  - workerd@1.20261005.1
-  - "@cloudflare/workerd-darwin-64@1.20261005.1"
-  - "@cloudflare/workerd-darwin-arm64@1.20261005.1"
-  - "@cloudflare/workerd-linux-64@1.20261005.1"
-  - "@cloudflare/workerd-linux-arm64@1.20261005.1"
-  - "@cloudflare/workerd-windows-64@1.20261005.1"
 overrides:
   workerd: 1.20261005.1
 packages:
