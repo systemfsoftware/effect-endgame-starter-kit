@@ -13,5 +13,8 @@
   // Turbo's task graph decides which packages a change touches, so an intent is
   // required for exactly the publishable packages a PR actually affects.
   "gate": { "strategy": "turbo", "task": "build" },
-  "pr": { "title": "chore(release): version packages" },
+  "pr": {
+    "title": "chore(release): version packages",
+    "body": "Consumes pending `.changeset/` intents.\n\nMerging tags the released versions and creates GitHub Releases.",
+  },
 }
