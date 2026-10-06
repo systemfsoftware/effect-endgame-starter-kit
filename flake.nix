@@ -20,9 +20,14 @@
       inputs.comment-checker.follows = "comment-checker";
       inputs.pnpm-release-management.follows = "pnpm-release-management";
     };
+    # The pnpm store is hashless: each tarball's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
+    importPnpmLock = {
+      url = "github:Scrumplex/importPnpmLock.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware }:
+  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware, importPnpmLock }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
@@ -30,7 +35,6 @@
     {
       packages = forEachSystem (pkgs:
         let
-          inherit (pkgs) lib;
           system = pkgs.stdenv.hostPlatform.system;
           dprint = pkgs.callPackage ./nix/dprint.nix { dprintConfig = ./dprint.json; };
           unwrapped = pkgs.callPackage ./nix/comment-checker.nix {
@@ -41,26 +45,18 @@
           };
           local-stack = pkgs.callPackage ./nix/local-stack.nix { };
           sfs-deps = systemfsoftware.packages.${system}.workspace-tarballs;
-          manifests = lib.fileset.toSource {
-            root = ./.;
-            fileset = lib.fileset.unions [
-              ./package.json
-              ./pnpm-lock.yaml
-              ./pnpm-workspace.yaml
-              (lib.fileset.fileFilter (file: file.name == "package.json") ./apps)
-              (lib.fileset.maybeMissing ./patches)
-            ];
-          };
-          workspace = pnpm-release-management.lib.mkPnpmWorkspacePackages {
-            inherit pkgs;
+          pnpm-store = pkgs.callPackage ./nix/pnpm-store.nix {
+            inherit (importPnpmLock.legacyPackages.${system}) importPnpmLock;
+            nodejs = pkgs.nodejs_24;
+            pnpm = pkgs.pnpm_12;
+          } {
             pname = "starter";
-            src = pkgs.runCommand "starter-manifests" { } ''
-              cp -r ${manifests} "$out"
-              chmod -R u+w "$out"
-              mkdir -p "$out/packages" "$out/.sfs-deps"
-              cp ${sfs-deps}/*.tgz "$out/.sfs-deps/"
-            '';
-            hash = "sha256-cap5A3jr/lRE+/TJiZw9zfATyD3mKUx7ueNY9pze54g=";
+            lockFile = ./pnpm-lock.yaml;
+            workspaceFile = ./pnpm-workspace.yaml;
+            files = {
+              patches = ./patches;
+              ".sfs-deps" = sfs-deps;
+            };
           };
           sandbox-source = pkgs.applyPatches {
             name = "sandbox-source";
@@ -69,8 +65,7 @@
           };
           sandbox = pkgs.callPackage "${sandbox-source}/default.nix" { };
         in {
-          inherit dprint local-stack sfs-deps sandbox;
-          inherit (workspace) pnpm-store;
+          inherit dprint local-stack sfs-deps sandbox pnpm-store;
           sandbox-proofs = pkgs.callPackage "${sandbox-source}/proofs.nix" { inherit sandbox; };
           comment-checker = sandboxed;
           comment-checker-unwrapped = unwrapped;
