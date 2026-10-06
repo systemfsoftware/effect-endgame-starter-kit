@@ -7,6 +7,16 @@ import { row, runsFor, sha } from './scorecard.arbitrary.ts'
 
 const measured = (runs: readonly number[]): Cell => ({ _tag: 'Measured', runs })
 
+const verifiedCitation: Cell = {
+  _tag: 'Unsupported',
+  citation: {
+    file: 'packages/core/src/join-interest-contract.ts',
+    lines: [22, 26],
+    text: 'Confirmation is not a seat',
+  },
+  check: { _tag: 'Verified' },
+}
+
 const passing = (r: Row): boolean => verdictOf(r)._tag !== 'InstrumentError'
 
 const withCells = (r: Row, ratstack: Cell, starter: Cell): Row => ({
@@ -27,7 +37,9 @@ describe('compareWithMain', () => {
     commit,
   ) => {
     const ratchet = compareWithMain({ rows, main: { _tag: 'Found', commit, rows } })
-    return ids(ratchet.failures) === ids(rows.filter((r) => !passing(r)).map((r) => r.definition))
+    return ratchet._tag === 'Compared' &&
+      ratchet.outcomes.every((outcome) => outcome._tag === 'InstrumentError' || outcome._tag === 'Held') &&
+      ids(ratchet.failures) === ids(rows.filter((r) => !passing(r)).map((r) => r.definition))
   })
 
   test.prop([uniqueRows])('without a main artifact the ratchet is a first baseline failing only instrument errors', (
@@ -35,6 +47,7 @@ describe('compareWithMain', () => {
   ) => {
     const ratchet = compareWithMain({ rows, main: { _tag: 'Missing' } })
     return ratchet._tag === 'FirstBaseline' &&
+      ratchet.outcomes.every((outcome) => outcome._tag === 'InstrumentError' || outcome._tag === 'New') &&
       ids(ratchet.failures) === ids(rows.filter((r) => !passing(r)).map((r) => r.definition))
   })
 
@@ -100,6 +113,16 @@ describe('compareWithMain', () => {
           main: { _tag: 'Found', commit, rows: [main] },
         }).failures.map((f) => f._tag).join(',')
       return at(inside) === '' && at(worst + worse * beyond) === 'Regressed'
+    },
+  )
+
+  test.prop([withRuns, sha])(
+    'an unsupported PR starter of equal verdict weight regresses exactly once',
+    ([base, runs], commit) => {
+      const main = withCells(base, measured(runs), measured(runs))
+      const pr = withCells(base, measured(runs), verifiedCitation)
+      const ratchet = compareWithMain({ rows: [pr], main: { _tag: 'Found', commit, rows: [main] } })
+      return ratchet.failures.length === 1 && ratchet.failures[0]?._tag === 'Regressed'
     },
   )
 })
