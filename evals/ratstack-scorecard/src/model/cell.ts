@@ -113,7 +113,7 @@ export interface FamilyResult {
 export type RowOutcome =
   | { readonly _tag: 'Held'; readonly id: string }
   | { readonly _tag: 'New'; readonly id: string }
-  | { readonly _tag: 'ReBaselined'; readonly id: string }
+  | { readonly _tag: 'ReBaselined'; readonly id: string; readonly mainHash: string; readonly prHash: string }
   | { readonly _tag: 'Neutral'; readonly id: string; readonly cause: CellTag }
   | { readonly _tag: 'InstrumentError'; readonly id: string; readonly error: string }
   | { readonly _tag: 'LostBeaten'; readonly id: string; readonly ratstack: CellTag; readonly starter: CellTag }

@@ -61,7 +61,10 @@ const starterAgainstMain = (main: Row, pr: Row): RowOutcome =>
 
 const compareRow = (main: Row, pr: Row): RowOutcome =>
   firstRule<RowOutcome>([
-    [main.definitionHash !== pr.definitionHash, () => ({ _tag: 'ReBaselined', id: pr.definition.id })],
+    [
+      main.definitionHash !== pr.definitionHash,
+      () => ({ _tag: 'ReBaselined', id: pr.definition.id, mainHash: main.definitionHash, prHash: pr.definitionHash }),
+    ],
     [
       beatenWeight(main.verdict) > beatenWeight(pr.verdict),
       () => ({
