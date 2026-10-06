@@ -1,5 +1,5 @@
 {
-  description = "starter toolchain — the formatter and runtimes the check chain shells out to";
+  description = "starter toolchain — the formatter, runtimes, systemfsoftware packages and dependency sandbox the check chain shells out to";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -9,25 +9,29 @@
       url = "github:systemfsoftware/comment-checker";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Hashless pnpm store: each lockfile integrity is the fetch hash.
-    # fetchPnpmDeps needs a second store-wide hash that Dependabot cannot update.
-    # A package built from this workspace takes this overlay to get
-    # `importPnpmLock` and `iplConfigHook` into its `callPackage` arguments.
-    importPnpmLock = {
-      url = "github:Scrumplex/importPnpmLock.nix";
+    pnpm-release-management = {
+      url = "github:systemfsoftware/pnpm-release-management/149e762e73549f1664e792bcc048729a30fa41da";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.comment-checker.follows = "comment-checker";
+    };
+    systemfsoftware = {
+      url = "github:systemfsoftware/systemfsoftware/c53bfc9253fe1d2d63119d0e4daae00da846432e";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.comment-checker.follows = "comment-checker";
+      inputs.pnpm-release-management.follows = "pnpm-release-management";
     };
   };
 
-  outputs = { self, nixpkgs, comment-checker, importPnpmLock }:
+  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware }:
     let
-      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
     in
     {
       packages = forEachSystem (pkgs:
         let
-          pkgs' = pkgs.extend importPnpmLock.overlays.default;
+          inherit (pkgs) lib;
+          system = pkgs.stdenv.hostPlatform.system;
           dprint = pkgs.callPackage ./nix/dprint.nix { };
           unwrapped = pkgs.callPackage ./nix/comment-checker.nix {
             hashes = "${comment-checker}/nix/release-hashes.json";
@@ -36,27 +40,60 @@
             comment-checker = unwrapped;
           };
           local-stack = pkgs.callPackage ./nix/local-stack.nix { };
+          sfs-deps = systemfsoftware.packages.${system}.workspace-tarballs;
+          manifests = lib.fileset.toSource {
+            root = ./.;
+            fileset = lib.fileset.unions [
+              ./package.json
+              ./pnpm-lock.yaml
+              ./pnpm-workspace.yaml
+              (lib.fileset.fileFilter (file: file.name == "package.json") ./apps)
+              (lib.fileset.maybeMissing ./patches)
+            ];
+          };
+          workspace = pnpm-release-management.lib.mkPnpmWorkspacePackages {
+            inherit pkgs;
+            pname = "starter";
+            src = pkgs.runCommand "starter-manifests" { } ''
+              cp -r ${manifests} "$out"
+              chmod -R u+w "$out"
+              mkdir -p "$out/packages" "$out/.sfs-deps"
+              cp ${sfs-deps}/*.tgz "$out/.sfs-deps/"
+            '';
+            hash = "sha256-coha4HuDKh3eiVuLQLnAypzVxNeS1nLe0fHaszmvmsk=";
+          };
         in {
-          inherit dprint local-stack;
+          inherit dprint local-stack sfs-deps;
+          inherit (workspace) pnpm-store;
+          sandbox = pnpm-release-management.packages.${system}.sandbox;
+          sandbox-proofs = pnpm-release-management.packages.${system}.sandbox-proofs;
           comment-checker = sandboxed;
           comment-checker-unwrapped = unwrapped;
           default = dprint;
         });
 
-      # pnpm is deliberately absent: `packageManager` pins pnpm@12.4.2 and
-      # corepack is the one thing allowed to resolve it. A second pnpm on PATH
-      # would answer `pnpm install` with a version the lockfile never saw.
-      devShells = forEachSystem (pkgs: {
+      devShells = forEachSystem (pkgs:
+        let
+          own = self.packages.${pkgs.stdenv.hostPlatform.system};
+        in {
         default = pkgs.mkShell {
           packages = [
-            self.packages.${pkgs.stdenv.hostPlatform.system}.dprint
-            self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker
-            self.packages.${pkgs.stdenv.hostPlatform.system}.local-stack
+            own.dprint
+            own.comment-checker
+            own.local-stack
+            own.sandbox
             pkgs.actionlint
             pkgs.jq
             pkgs.nodejs_24
+            pkgs.pnpm_12
             pkgs.deno
           ];
+          SANDBOX_PNPM_STORE = own.pnpm-store;
+          shellHook = ''
+            sfs_deps="$(git rev-parse --show-toplevel)/.sfs-deps"
+            rm -rf "$sfs_deps"
+            cp -r --no-preserve=mode ${own.sfs-deps} "$sfs_deps"
+          '';
           env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers.override {
               withChromium = false;

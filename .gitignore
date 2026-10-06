@@ -17,3 +17,5 @@ apps/site/src/routeTree.gen.ts
 apps/site/.tanstack/
 apps/site/artifacts/
 apps/site-e2e/artifacts/
+.sfs-deps
+.cache/
