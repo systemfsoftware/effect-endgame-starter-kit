@@ -425,8 +425,18 @@ This Product Contract covers the whole target. Each lake is planned in its own s
   - Starter Lake 2: registration core in one workshop on both adapters, laws, negative controls, input-gate test, race demo, Postgres on PlanetScale (R1, R2, R5, R7, R19-R25, R89). Depends on sfs Lake 2.
   - Starter Lake 3: identity, mail port on Email Service, exact per-email bounds and rate limits, abuse bounds, Clef triage, identity retention (R34-R40, R93, R108, R115). Can proceed alongside Starter Lake 2.
   - Starter Lake 4: durable orchestration, cross-workshop cap, expiry, promotion, outbox confirmation delivery, K2 domain events, signed receipts, crypto-shredded erasure, diagram, pack map (R3, R4, R6, R8-R14, R78, R90, R105, R106, R116). Depends on sfs Lake 5 and Starter Lakes 2-3.
+    - Moved from Lake 2 (Kiro 2026-10-06, ordering by dependency, not deferral):
+      - `cancel` Cell with promotion (R5, R6): AE2; `registration.integration.test.ts` "Cancelling a held or confirmed seat promotes the next waitlisted entry that passes the cap".
+      - `expire` Cell fired by the hold's alarm (R4, R5, R13): `registration.integration.test.ts` "A hold past its deadline expires by alarm and promotes the waitlist", and the command-sequence model run with the alarm path under real workerd.
+      - The Allowance negative control, register without the Allowance step (R23): a tripwire row in `store-laws.integration.test.ts` that must report `Broken` on the cross-workshop cap.
+      - Race check "seated equals reservations" (R24, R11): a `pnpm race` verdict line, proven by `race-verdict.workflow.property.test.ts`.
+      - Race check "FIFO promotion" (R24, R6): a `pnpm race` verdict line; AE2.
+      - Race check "one confirmation per hold" (R24, R8): a `pnpm race` verdict line; AE3.
+      - Workflow interleavings with alarms (R25, R119): `effect-sim-kernel` search over the register and promote workflows with alarm events; AE17.
   - Starter Lake 5: projections everywhere, front-door routes, WebMCP, Forge SDKs (R26-R33, R41-R42, R95-R100). Depends on sfs Lakes 3-4.
   - Starter Lake 6: credits, metered code mode, x402 top-ups (R15-R18, R81, R102-R104). Depends on Starter Lake 5.
+    - Moved from Lake 2 (Kiro 2026-10-06, ordering by dependency, not deferral):
+      - Race check "balance never negative" (R24, R17): a `pnpm race` verdict line over concurrent executes; AE4.
   - Starter Lake 7: web app, home page and copy rule, strict CSP with Trusted Types (R53-R56, R114, R117, R118). Depends on Starter Lakes 3, 5, 6.
   - Starter Lake 8: content, AI Search and inference, analytics, KV Instant and Flagship config, peers, deploy, Worker Previews, Traces and Workers Issues on (R43-R52, R57-R58, R60-R62, R64-R65, R84-R86, R91-R92, R94, R109, R112). Basin and K2 join when the Alchemy bump lands (R110). Depends on sfs Lake 6 and the prerequisites below.
   - Starter Lake 9: heavy jobs (Containers deployed, process-compose locally), `forkKit` on the Artifacts port, cold-clone acceptance, bin-removal matrix (R68, R69, R82, R87, R88, R120).
