@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto'
 import { readdir, readFile, stat } from 'node:fs/promises'
 import { join } from 'node:path'
 
-const instrument = join(import.meta.dirname, '..')
+const instrument = join(import.meta.dirname ?? '.', '..')
 
 const Manifest = Schema.Struct({
   journeys: Schema.Array(Schema.Struct({ id: Schema.String, inputs: Schema.Array(Schema.String) })),

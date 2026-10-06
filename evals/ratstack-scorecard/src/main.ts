@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { parseArgs } from 'node:util'
-import { checkImports } from './check-imports.ts'
 import { measureStatic } from './families/static.ts'
+import { runCheck } from './harness/gates.ts'
 import { type Instrument, loadInstrument } from './harness/instrument.ts'
 import { runJourneys } from './journeys.ts'
 import type { Side } from './model/cell.ts'
@@ -61,11 +61,7 @@ const check = async (args: readonly string[]): Promise<void> => {
   const { values } = parseArgs({ args: [...args], options: { checkout: { type: 'string' } }, strict: true })
   const instrument = await loadInstrument(values.checkout)
   const root = join(instrument.checkout, 'evals/ratstack-scorecard')
-  const violations = await checkImports(root)
-  for (const violation of violations) console.error(`check-imports: ${violation}`)
-  if (violations.length > 0) Deno.exit(1)
-  console.error('check-imports: the host driver loads no third-party code; no model file imports the journey fixture')
-  Deno.exit(await runJourneys(instrument, root))
+  Deno.exit(await runCheck(instrument, root))
 }
 
 const commands: Readonly<Record<string, (args: readonly string[]) => Promise<void>>> = { measure, journeys, check }

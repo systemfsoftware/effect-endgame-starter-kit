@@ -36,4 +36,6 @@ nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox --pnpm-store "$SANDBOX
 nix develop --command sh -c 'SANDBOX_PROJECT=$PWD sandbox -- pnpm vitest run'
 ```
 
-`src/main.ts` and everything it imports use only Deno APIs, `node:` builtins and each other, so `DENO_NO_PACKAGE_JSON=1 deno check src/` type-checks the orchestrator and the decision core without third-party code. The Node scripts in `src/tools/` are the only code that loads npm packages, and they only ever run inside the launcher.
+`src/main.ts` and everything it imports use only Deno APIs, `node:` builtins and each other, so `DENO_NO_PACKAGE_JSON=1 deno check src/` type-checks the orchestrator and the decision core without third-party code. The Deno TypeScript scripts in `src/tools/` are the only code that loads npm packages, and they only ever run inside the launcher.
+
+`scorecard check` (also `pnpm scorecard:check` at the repo root, part of `check:ci`) is the one gate. Inside the launcher it installs the instrument offline, patches oxlint for the `effecttsgo` plugin, type-checks the TS project with `tsc`, lints with the instrument's oxlint config, then checks and lints the host driver with `deno check` and `deno lint`, and finally runs the vitest journeys and tests. Any failure exits non-zero; it also refuses any third-party import in the host driver's graph and any import of the journey fixture from `src/`.

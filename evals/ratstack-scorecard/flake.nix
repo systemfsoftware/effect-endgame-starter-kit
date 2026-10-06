@@ -15,7 +15,7 @@
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
       pin = builtins.fromJSON (builtins.readFile ./ratstack.pin.json);
       toolsStoreHash = {
-        x86_64-linux = "sha256-jUyIV2ysOxkIij/Ff5VGuIADTibbY0SsCPGglmIvdn0=";
+        x86_64-linux = "sha256-bAD/wP5Kwg8dqnKUzKz5/LHvOUbW7Xt+8ibqzPvwdHY=";
         aarch64-linux = "sha256-jUyIV2ysOxkIij/Ff5VGuIADTibbY0SsCPGglmIvdn0=";
         aarch64-darwin = "sha256-XWYBTy3xZbQwJxdGbAK4+R69XNmL3RRyXu6+nY+XPXc=";
       };
@@ -39,18 +39,18 @@
           };
           scorecard = pkgs.writeShellApplication {
             name = "scorecard";
-            runtimeInputs = [ pkgs.deno pkgs.git ];
+            runtimeInputs = [ pkgs.deno pkgs.git pkgs.bash ];
             text = ''
               export SCORECARD_INSTRUMENT=${self}
               export SCORECARD_SANDBOX=${sandbox}/bin/sandbox
               export SCORECARD_TOOLS_STORE=${tools-store}
               export SCORECARD_RATSTACK_SRC=${ratstack-src}
-              export SCORECARD_TOOL_PATH=${pkgs.lib.makeBinPath [ pkgs.nodejs_24 pkgs.pnpm_12 pkgs.coreutils ]}
+              export SCORECARD_TOOL_PATH=${pkgs.lib.makeBinPath [ pkgs.nodejs_24 pkgs.pnpm_12 pkgs.deno pkgs.coreutils ]}
               export SCORECARD_NODE_VERSION=${pkgs.nodejs_24.version}
               export SCORECARD_PNPM_VERSION=${pkgs.pnpm_12.version}
               export DENO_NO_PACKAGE_JSON=1
               exec deno run --no-config --allow-read --allow-write --allow-env --allow-sys=hostname \
-                --allow-run=git,${sandbox}/bin/sandbox \
+                --allow-run=git,bash,${pkgs.deno}/bin/deno,${sandbox}/bin/sandbox \
                 ${self}/src/main.ts "$@"
             '';
           };

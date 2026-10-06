@@ -87,7 +87,7 @@ const overlayWithFailingTool = async (instrument: Instrument, work: string, tool
   }
   const failing = join(dir, 'src/tools', tool)
   await Deno.remove(failing)
-  await Deno.writeTextFile(failing, 'process.exit(3)\n')
+  await Deno.writeTextFile(failing, 'Deno.exit(3)\n')
   return dir
 }
 

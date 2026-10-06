@@ -11,9 +11,9 @@ import {
 } from '../harness/instrument.ts'
 import { runSandboxed } from '../harness/sandbox.ts'
 import type { Cell, Side } from '../model/cell.ts'
-import type { FamilyResult, SideCell } from '../model/scorecard-document.ts'
 import { isSourceFile, tallyDirectives, totalDirectives, vendoredRootsOf } from '../model/directives.ts'
 import { distinctPackages } from '../model/lockfile.ts'
+import type { FamilyResult, SideCell } from '../model/scorecard-document.ts'
 import { ratstack } from '../sides/ratstack.ts'
 import type { SideAdapter } from '../sides/side-adapter.ts'
 import { starter } from '../sides/starter.ts'
@@ -33,11 +33,11 @@ interface CountedRun {
 
 const instrumentError = (error: string): CountedRun => ({ cell: { _tag: 'InstrumentError', error }, detail: {} })
 
-const node = async (instrument: Instrument, work: string, tools: string, args: readonly string[]) =>
+const tool = async (instrument: Instrument, work: string, tools: string, args: readonly string[]) =>
   await runSandboxed(instrument.launcher, {
     project: work,
     cwd: tools,
-    command: ['node', ...args],
+    command: ['deno', 'run', '--allow-read', '--allow-write', '--allow-env', '--allow-ffi', ...args],
     deadlineMs: 15 * 60_000,
   })
 
@@ -68,13 +68,13 @@ const countDirectives = async (
   const counted = sources.filter((file) =>
     vendoredRootsOf(file, subject.adapter.vendored.map((v) => v.root)).length === 0
   )
-  const request = join(work, `directives-${subject.adapter.side}.request.json`)
-  await Deno.writeTextFile(request, JSON.stringify({ root: subject.root, files: counted }))
+  const request = join(work, `directives-${subject.adapter.side}.files`)
+  await Deno.writeTextFile(request, `${counted.join('\n')}\n`)
   const totals: number[] = []
   let detail: Record<string, number | string> = {}
   for (let run = 0; run < runs; run++) {
     const output = join(work, `directives-${subject.adapter.side}-${run}.json`)
-    const result = await node(instrument, work, tools, ['src/tools/extract-comments.mjs', request, output])
+    const result = await tool(instrument, work, tools, ['src/tools/extract-comments.ts', subject.root, request, output])
     if (result.code !== 0) {
       return instrumentError(`extract-comments exited ${result.code}: ${result.stderr.slice(-2000)}`)
     }
@@ -104,7 +104,7 @@ const countPackages = async (
   let detail: Record<string, number | string> = {}
   for (let run = 0; run < runs; run++) {
     const output = join(work, `lockfile-${subject.adapter.side}-${run}.json`)
-    const result = await node(instrument, work, tools, ['src/tools/parse-lockfile.mjs', lockfile, output])
+    const result = await tool(instrument, work, tools, ['src/tools/parse-lockfile.ts', lockfile, output])
     if (result.code !== 0) return instrumentError(`parse-lockfile exited ${result.code}: ${result.stderr.slice(-2000)}`)
     const documents = arrayAt(JSON.parse(await Deno.readTextFile(output)), ['documents'], 'parse-lockfile output')
     const keys = documents.flatMap((doc) => arrayAt(doc, ['packages'], 'lockfile document').map(String))

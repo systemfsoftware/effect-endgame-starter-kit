@@ -21,7 +21,7 @@
         "kind": "measure-static",
         "ratstackRepo": "journeys/__fixtures__/repos/ratstack",
         "starterRepo": "journeys/__fixtures__/repos/starter",
-        "failingTool": "extract-comments.mjs"
+        "failingTool": "extract-comments.ts"
       },
       "inputs": [
         "journeys/__fixtures__/repos",
