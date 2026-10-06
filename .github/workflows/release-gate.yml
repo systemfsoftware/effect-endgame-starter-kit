@@ -69,8 +69,8 @@ jobs:
 
   deploy:
     name: deploy · production
-    needs: [mutation]
-    if: ${{ !github.event.repository.is_template }}
+    needs: [plan, mutation]
+    if: ${{ !cancelled() && needs.plan.result == 'success' && (needs.mutation.result == 'success' || needs.mutation.result == 'skipped') && !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
