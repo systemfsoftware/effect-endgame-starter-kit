@@ -1,9 +1,17 @@
+import { join } from 'node:path'
 import { parseArgs } from 'node:util'
+import { checkImports } from './check-imports.ts'
 import { measureStatic } from './families/static.ts'
 import { type Instrument, loadInstrument } from './harness/instrument.ts'
+import { runJourneys } from './journeys.ts'
 import type { FamilyResult, Side } from './model/cell.ts'
 
-const usage = `usage: scorecard measure --family <family> [--side ratstack|starter] [--out <file>] [--checkout <dir>]`
+const usage = [
+  'usage:',
+  '  scorecard measure --family <family> [--side ratstack|starter] [--out <file>] [--checkout <dir>]',
+  '  scorecard journeys [--checkout <dir>]',
+  '  scorecard check [--checkout <dir>]   (import-graph rules, then journeys)',
+].join('\n')
 
 const families: Readonly<
   Record<string, (instrument: Instrument, work: string, sides: readonly Side[]) => Promise<FamilyResult>>
@@ -42,7 +50,24 @@ const measure = async (args: readonly string[]): Promise<void> => {
   }
 }
 
-const commands: Readonly<Record<string, (args: readonly string[]) => Promise<void>>> = { measure }
+const journeys = async (args: readonly string[]): Promise<void> => {
+  const { values } = parseArgs({ args: [...args], options: { checkout: { type: 'string' } }, strict: true })
+  const instrument = await loadInstrument(values.checkout)
+  Deno.exit(await runJourneys(instrument, join(instrument.checkout, 'evals/ratstack-scorecard')))
+}
+
+const check = async (args: readonly string[]): Promise<void> => {
+  const { values } = parseArgs({ args: [...args], options: { checkout: { type: 'string' } }, strict: true })
+  const instrument = await loadInstrument(values.checkout)
+  const root = join(instrument.checkout, 'evals/ratstack-scorecard')
+  const violations = await checkImports(root)
+  for (const violation of violations) console.error(`check-imports: ${violation}`)
+  if (violations.length > 0) Deno.exit(1)
+  console.error('check-imports: the host driver loads no third-party code; no model file imports the journey fixture')
+  Deno.exit(await runJourneys(instrument, root))
+}
+
+const commands: Readonly<Record<string, (args: readonly string[]) => Promise<void>>> = { measure, journeys, check }
 
 const [command, ...rest] = Deno.args
 const handler = commands[command ?? '']
