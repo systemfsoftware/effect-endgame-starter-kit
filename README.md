@@ -80,7 +80,7 @@ The repository is structured into two workspace roots defined in `pnpm-workspace
 └── docs/               # Solutions, tooling decisions, and plans
 ```
 
-- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site defined and deployed with Alchemy.
+- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site and an Effect HttpApi under `/api` (its OpenAPI document at `/api/openapi.json`), defined and deployed with Alchemy.
 - [`apps/site-e2e`](apps/site-e2e) — The end-to-end journeys that run against `pnpm dev` (`pnpm journeys`).
 
 ---

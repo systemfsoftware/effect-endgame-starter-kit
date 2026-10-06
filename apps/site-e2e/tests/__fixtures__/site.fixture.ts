@@ -1,4 +1,4 @@
-import { Config, ConfigProvider, Data, Duration, Effect } from 'effect'
+import { Config, ConfigProvider, Data, Duration, Effect, Schema as S } from 'effect'
 import { HttpClient, HttpClientError, HttpClientRequest } from 'effect/http'
 
 const REQUEST_TIMEOUT = Duration.seconds(30)
@@ -18,6 +18,12 @@ export interface FetchedPage {
   readonly contentType: string | null
   readonly vary: string | null
   readonly body: string
+}
+
+export interface FetchedJson {
+  readonly status: number
+  readonly contentType: string | null
+  readonly json: S.Json
 }
 
 export interface SiteRequest {
@@ -74,4 +80,13 @@ export const fetchSite = (
         }
       }),
     )
+  })
+
+export const fetchJson = (
+  site: SiteRequest,
+): Effect.Effect<FetchedJson, SiteRequestTimedOut | HttpClientError.HttpClientError, HttpClient.HttpClient> =>
+  Effect.gen(function*() {
+    const page = yield* fetchSite(site)
+    const json = yield* Effect.orDie(S.decodeEffect(S.fromJsonString(S.Json))(page.body))
+    return { status: page.status, contentType: page.contentType, json }
   })

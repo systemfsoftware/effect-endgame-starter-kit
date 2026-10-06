@@ -1,8 +1,14 @@
 import startHandler from '@tanstack/react-start/server-entry'
 import * as Effect from 'effect/Effect'
+import { HttpRouter } from 'effect/http'
 import * as S from 'effect/Schema'
 
+import { SiteApiLive } from './api/site-api-handlers'
 import { contentSecurityPolicyOf, CspNonce } from './csp/content-security-policy.schema'
+
+const siteApi = HttpRouter.toWebHandler(SiteApiLive)
+
+const isApiRequest = (request: Request): boolean => new URL(request.url).pathname.startsWith('/api/')
 
 const drawNonce = (random: Crypto) =>
   S.decodeEffect(CspNonce)(btoa(String.fromCharCode(...random.getRandomValues(new Uint8Array(16)))))
@@ -21,5 +27,6 @@ const serve = (request: Request, random: Crypto) =>
   })
 
 export default {
-  fetch: (request: Request): Promise<Response> => Effect.runPromise(serve(request, globalThis.crypto)),
+  fetch: (request: Request): Promise<Response> =>
+    isApiRequest(request) ? siteApi.handler(request) : Effect.runPromise(serve(request, globalThis.crypto)),
 }
