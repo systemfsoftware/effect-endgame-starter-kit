@@ -1,8 +1,15 @@
+import { Function } from 'effect'
 import type { Direction } from './cell.ts'
 import { matchDirection } from './dispatch.ts'
 
-export const smallerIsBetter = (direction: Direction, runs: readonly number[]): readonly number[] =>
-  runs.map((value) => value * matchDirection(direction, { lower: () => 1, higher: () => -1 }))
+export const smallerIsBetter: {
+  (direction: Direction): (runs: readonly number[]) => readonly number[]
+  (direction: Direction, runs: readonly number[]): readonly number[]
+} = Function.dual(
+  2,
+  (direction: Direction, runs: readonly number[]): readonly number[] =>
+    runs.map((value) => value * matchDirection(direction, { lower: () => 1, higher: () => -1 })),
+)
 
 export const median = (runs: readonly number[]): number => {
   const sorted = [...runs].sort((a, b) => a - b)

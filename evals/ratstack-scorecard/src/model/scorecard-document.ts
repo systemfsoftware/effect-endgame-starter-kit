@@ -12,7 +12,7 @@ import type {
   Side,
 } from './cell.ts'
 import { compareWithMain } from './compare-with-main.workflow.ts'
-import { verdictOf } from './judge-row.workflow.ts'
+import { verdictOf } from './verdict.ts'
 
 export interface DefinedRow {
   readonly definition: RowDefinition
@@ -60,8 +60,13 @@ const missingCell = (provenance: DocumentProvenance, id: RowId, side: Side): Mea
   },
 })
 
+const cellAt = (input: AssembleInput, id: RowId, side: Side): MeasuredCell | undefined => {
+  const bySide = input.cells[id]
+  return bySide?.[side]
+}
+
 const cellFor = (input: AssembleInput, id: RowId, side: Side): MeasuredCell =>
-  input.cells[id]?.[side] ?? missingCell(input.provenance, id, side)
+  cellAt(input, id, side) ?? missingCell(input.provenance, id, side)
 
 const rowOf = (input: AssembleInput, defined: DefinedRow): Row => {
   const ratstack = cellFor(input, defined.definition.id, 'ratstack')

@@ -1,4 +1,4 @@
-import type { Cell, Citation, Kind, Row, RowDefinition, Verdict } from './cell.ts'
+import type { Cell, Citation, Kind, RowDefinition, Verdict } from './cell.ts'
 import { firstRule, matchCell, matchCheck, matchKind, matchSupport } from './dispatch.ts'
 import { smallerIsBetter } from './runs.ts'
 
@@ -102,6 +102,3 @@ export const judgeRow = (input: JudgeRowInput): Verdict =>
     NoSecret: () => againstNothing(input),
     InstrumentError: (ratstack) => instrumentError(`rat-stack: ${ratstack.error}`),
   })
-
-export const verdictOf = (row: Row): Verdict =>
-  judgeRow({ definition: row.definition, ratstack: row.ratstack.cell, starter: row.starter.cell })

@@ -1,3 +1,4 @@
+import { Function } from 'effect'
 import fc from 'fast-check'
 import type {
   Cell,
@@ -12,6 +13,14 @@ import type {
   Side,
 } from './cell.ts'
 import type { AssembleInput } from './scorecard-document.ts'
+
+interface CellEntry {
+  readonly id: RowId
+  readonly side: Side
+  readonly measured: MeasuredCell
+}
+
+const belongs = (entry: CellEntry | undefined, id: RowId): entry is CellEntry => entry !== undefined && entry.id === id
 
 export const sha = fc.stringMatching(/^[0-9a-f]{40}$/)
 const text = fc.string({ minLength: 1, maxLength: 400 })
@@ -85,8 +94,14 @@ export const cellProvenance = (side: Side): fc.Arbitrary<CellProvenance> =>
     detail: fc.dictionary(fc.string({ minLength: 1, maxLength: 20 }), fc.oneof(fc.string({ maxLength: 40 }), value)),
   }, { requiredKeys: ['side', 'commit', 'instrumentHash', 'nixpkgsRev', 'runner', 'measuredAt', 'tools'] })
 
-export const measuredCell = (row: RowDefinition, side: Side): fc.Arbitrary<MeasuredCell> =>
-  fc.record({ cell: cell(row), provenance: cellProvenance(side) })
+export const measuredCell: {
+  (row: RowDefinition): (side: Side) => fc.Arbitrary<MeasuredCell>
+  (row: RowDefinition, side: Side): fc.Arbitrary<MeasuredCell>
+} = Function.dual(
+  2,
+  (row: RowDefinition, side: Side): fc.Arbitrary<MeasuredCell> =>
+    fc.record({ cell: cell(row), provenance: cellProvenance(side) }),
+)
 
 export const documentProvenance: fc.Arbitrary<DocumentProvenance> = fc.record({
   commit: sha,
@@ -128,9 +143,7 @@ export const assembleInput: fc.Arbitrary<AssembleInput> = uniqueDefinitions.chai
       Object.fromEntries(
         definitions.map((d) => [
           d.id,
-          Object.fromEntries(
-            cells.flatMap((c) => (c === undefined || c.id !== d.id ? [] : [[c.side, c.measured] as const])),
-          ),
+          Object.fromEntries(cells.filter((c) => belongs(c, d.id)).map((c) => [c.side, c.measured])),
         ]),
       )
     ),

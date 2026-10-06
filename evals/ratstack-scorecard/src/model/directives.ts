@@ -1,3 +1,5 @@
+import { Function } from 'effect'
+
 export type DirectiveFamily =
   | 'oxlint'
   | 'effect-diagnostics'
@@ -46,5 +48,10 @@ export const totalDirectives = (tally: DirectiveTally): number =>
 
 export const isSourceFile = (path: string): boolean => /\.[cm]?[jt]sx?$/u.test(path)
 
-export const vendoredRootsOf = (path: string, roots: readonly string[]): readonly string[] =>
-  roots.filter((root) => path.startsWith(root))
+export const vendoredRootsOf: {
+  (path: string): (roots: readonly string[]) => readonly string[]
+  (path: string, roots: readonly string[]): readonly string[]
+} = Function.dual(
+  2,
+  (path: string, roots: readonly string[]): readonly string[] => roots.filter((root) => path.startsWith(root)),
+)

@@ -1,7 +1,7 @@
 import type { Cell, Direction, MainBaseline, Ratchet, Row, RowId, RowOutcome, Verdict } from './cell.ts'
 import { firstRule, matchBaseline, matchCell, matchOutcome, matchVerdict } from './dispatch.ts'
-import { verdictOf } from './judge-row.workflow.ts'
 import { median, smallerIsBetter } from './runs.ts'
+import { verdictOf } from './verdict.ts'
 
 export interface CompareWithMainInput {
   readonly rows: readonly Row[]
