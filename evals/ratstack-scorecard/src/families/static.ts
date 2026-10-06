@@ -1,5 +1,5 @@
 import { join } from 'node:path'
-import { arrayAt, numberAt, stringAt } from '../harness/decode.ts'
+import { arrayAt, numberAt, parseJson, stringAt } from '../harness/decode.ts'
 import {
   type Instrument,
   materializeRatstack,
@@ -24,6 +24,11 @@ interface Subject {
   readonly adapter: SideAdapter
   readonly root: string
   readonly files: readonly string[]
+}
+
+interface Sample {
+  readonly value: number
+  readonly detail: Readonly<Record<string, number | string>>
 }
 
 interface CountedRun {
@@ -54,6 +59,60 @@ const subjectOf = async (instrument: Instrument, work: string, side: Side): Prom
       files: await trackedFiles(instrument.checkout),
     }
 
+const sampleRuns = async (
+  count: number,
+  sample: (run: number) => Promise<Sample | string>,
+): Promise<readonly (Sample | string)[]> => {
+  const results: (Sample | string)[] = []
+  for (let run = 0; run < count; run++) results.push(await sample(run))
+  return results
+}
+
+const firstError = (samples: readonly (Sample | string)[]): string | undefined =>
+  samples.find((sample): sample is string => typeof sample === 'string')
+
+const measuredSamples = (samples: readonly (Sample | string)[]): readonly Sample[] =>
+  samples.filter((sample): sample is Sample => typeof sample !== 'string')
+
+const lastDetail = (samples: readonly Sample[]): Readonly<Record<string, number | string>> =>
+  samples.reduce<Readonly<Record<string, number | string>>>((_, sample) => sample.detail, {})
+
+const countedRun = (
+  samples: readonly (Sample | string)[],
+  enrich: (detail: Readonly<Record<string, number | string>>) => Readonly<Record<string, number | string>>,
+): CountedRun => {
+  const error = firstError(samples)
+  if (error !== undefined) return instrumentError(error)
+  const measured = measuredSamples(samples)
+  return {
+    cell: { _tag: 'Measured', runs: measured.map((sample) => sample.value) },
+    detail: enrich(lastDetail(measured)),
+  }
+}
+
+const directiveSample = async (
+  instrument: Instrument,
+  work: string,
+  tools: string,
+  subject: Subject,
+  request: string,
+  run: number,
+): Promise<Sample | string> => {
+  const output = join(work, `directives-${subject.adapter.side}-${run}.json`)
+  const result = await tool(instrument, work, tools, ['src/tools/extract-comments.ts', subject.root, request, output])
+  if (result.code !== 0) return `extract-comments exited ${result.code}: ${result.stderr.slice(-2000)}`
+  const files = arrayAt(parseJson(await Deno.readTextFile(output)), ['files'], 'extract-comments output')
+  const comments = files.flatMap((file) => arrayAt(file, ['comments'], 'extract-comments file').map(String))
+  const tally = tallyDirectives(comments)
+  return {
+    value: totalDirectives(tally),
+    detail: {
+      ...tally,
+      parseErrors: files.reduce<number>((sum, file) => sum + numberAt(file, ['errors'], 'extract-comments file'), 0),
+    },
+  }
+}
+
 const countDirectives = async (
   instrument: Instrument,
   work: string,
@@ -61,36 +120,45 @@ const countDirectives = async (
   subject: Subject,
 ): Promise<CountedRun> => {
   const sources = subject.files.filter(isSourceFile)
+  const vendorRoots = subject.adapter.vendored.map((vendored) => vendored.root)
   const excluded = subject.adapter.vendored.map((vendored) => ({
     ...vendored,
     files: sources.filter((file) => vendoredRootsOf(file, [vendored.root]).length > 0).length,
   }))
-  const counted = sources.filter((file) =>
-    vendoredRootsOf(file, subject.adapter.vendored.map((v) => v.root)).length === 0
-  )
+  const counted = sources.filter((file) => vendoredRootsOf(file, vendorRoots).length === 0)
   const request = join(work, `directives-${subject.adapter.side}.files`)
   await Deno.writeTextFile(request, `${counted.join('\n')}\n`)
-  const totals: number[] = []
-  let detail: Record<string, number | string> = {}
-  for (let run = 0; run < runs; run++) {
-    const output = join(work, `directives-${subject.adapter.side}-${run}.json`)
-    const result = await tool(instrument, work, tools, ['src/tools/extract-comments.ts', subject.root, request, output])
-    if (result.code !== 0) {
-      return instrumentError(`extract-comments exited ${result.code}: ${result.stderr.slice(-2000)}`)
-    }
-    const parsed = JSON.parse(await Deno.readTextFile(output))
-    const files = arrayAt(parsed, ['files'], 'extract-comments output')
-    const comments = files.flatMap((file) => arrayAt(file, ['comments'], 'extract-comments file').map(String))
-    const tally = tallyDirectives(comments)
-    totals.push(totalDirectives(tally))
-    detail = {
-      ...tally,
-      filesCounted: counted.length,
-      parseErrors: files.reduce<number>((sum, file) => sum + numberAt(file, ['errors'], 'extract-comments file'), 0),
-      ...Object.fromEntries(excluded.map((v) => [`excluded:${v.root}`, `${v.files} files: ${v.reason}`])),
-    }
+  const samples = await sampleRuns(runs, (run) => directiveSample(instrument, work, tools, subject, request, run))
+  return countedRun(samples, (detail) => ({
+    ...detail,
+    filesCounted: counted.length,
+    ...Object.fromEntries(
+      excluded.map((vendored) => [`excluded:${vendored.root}`, `${vendored.files} files: ${vendored.reason}`]),
+    ),
+  }))
+}
+
+const packageSample = async (
+  instrument: Instrument,
+  work: string,
+  tools: string,
+  subject: Subject,
+  run: number,
+): Promise<Sample | string> => {
+  const output = join(work, `lockfile-${subject.adapter.side}-${run}.json`)
+  const lockfile = join(subject.root, subject.adapter.lockfile)
+  const result = await tool(instrument, work, tools, ['src/tools/parse-lockfile.ts', lockfile, output])
+  if (result.code !== 0) return `parse-lockfile exited ${result.code}: ${result.stderr.slice(-2000)}`
+  const documents = arrayAt(parseJson(await Deno.readTextFile(output)), ['documents'], 'parse-lockfile output')
+  return {
+    value: distinctPackages(documents.flatMap((doc) => arrayAt(doc, ['packages'], 'lockfile document').map(String)))
+      .length,
+    detail: {
+      lockfile: subject.adapter.lockfile,
+      documents: documents.length,
+      lockfileVersions: documents.map((doc) => stringAt(doc, ['lockfileVersion'], 'lockfile document')).join(', '),
+    },
   }
-  return { cell: { _tag: 'Measured', runs: totals }, detail }
 }
 
 const countPackages = async (
@@ -99,23 +167,8 @@ const countPackages = async (
   tools: string,
   subject: Subject,
 ): Promise<CountedRun> => {
-  const lockfile = join(subject.root, subject.adapter.lockfile)
-  const counts: number[] = []
-  let detail: Record<string, number | string> = {}
-  for (let run = 0; run < runs; run++) {
-    const output = join(work, `lockfile-${subject.adapter.side}-${run}.json`)
-    const result = await tool(instrument, work, tools, ['src/tools/parse-lockfile.ts', lockfile, output])
-    if (result.code !== 0) return instrumentError(`parse-lockfile exited ${result.code}: ${result.stderr.slice(-2000)}`)
-    const documents = arrayAt(JSON.parse(await Deno.readTextFile(output)), ['documents'], 'parse-lockfile output')
-    const keys = documents.flatMap((doc) => arrayAt(doc, ['packages'], 'lockfile document').map(String))
-    counts.push(distinctPackages(keys).length)
-    detail = {
-      lockfile: subject.adapter.lockfile,
-      documents: documents.length,
-      lockfileVersions: documents.map((doc) => stringAt(doc, ['lockfileVersion'], 'lockfile document')).join(', '),
-    }
-  }
-  return { cell: { _tag: 'Measured', runs: counts }, detail }
+  const samples = await sampleRuns(runs, (run) => packageSample(instrument, work, tools, subject, run))
+  return countedRun(samples, (detail) => detail)
 }
 
 export const measureStatic = async (

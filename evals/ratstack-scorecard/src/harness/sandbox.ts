@@ -23,10 +23,18 @@ export interface Launcher {
 
 const decoder = new TextDecoder()
 
+const allowHostArgs = (hosts: readonly string[] | undefined): readonly string[] =>
+  (hosts ?? []).flatMap((host) => ['--allow-host', host])
+
+const passEnvArgs = (env: Readonly<Record<string, string>> | undefined): readonly string[] =>
+  Object.keys(env ?? {}).flatMap((name) => ['--pass-env', name])
+
+const storeArgs = (store: string | undefined): readonly string[] => store === undefined ? [] : ['--pnpm-store', store]
+
 export const launcherArgs = (request: SandboxRequest): readonly string[] => [
-  ...(request.allowHosts ?? []).flatMap((host) => ['--allow-host', host]),
-  ...Object.keys(request.env ?? {}).flatMap((name) => ['--pass-env', name]),
-  ...(request.pnpmStore === undefined ? [] : ['--pnpm-store', request.pnpmStore]),
+  ...allowHostArgs(request.allowHosts),
+  ...passEnvArgs(request.env),
+  ...storeArgs(request.pnpmStore),
   '--',
   ...request.command,
 ]
