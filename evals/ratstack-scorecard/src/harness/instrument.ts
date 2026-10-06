@@ -124,6 +124,12 @@ export const materializeStarter = async (instrument: Instrument, work: string): 
   return target
 }
 
+export const materializeRatstack = async (instrument: Instrument, work: string): Promise<string> => {
+  const target = join(work, 'ratstack')
+  await copyTracked(instrument.ratstackSrc, target, await walkFiles(instrument.ratstackSrc))
+  return target
+}
+
 export const prepareTools = async (instrument: Instrument, work: string): Promise<string> => {
   const tools = join(work, 'tools')
   await Deno.mkdir(join(tools, 'src/tools'), { recursive: true })
