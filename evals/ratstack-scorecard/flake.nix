@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/494ce7fd23ff6a5dff39e1fb11e9b6f2ac74bf25";
     pnpm-release-management = {
-      url = "github:systemfsoftware/pnpm-release-management/180122866dd537fa728b5563fb1820fbd2af88cc";
+      url = "github:systemfsoftware/pnpm-release-management/8f1984418fef130956a3d1f50dc471fd1984d2ec";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
