@@ -11,6 +11,21 @@ export type CspAttributeText = S.Schema.Type<typeof CspAttributeText>
 export const boundedCspAttributeText = (value: string): CspAttributeText =>
   value.slice(0, MAX_CSP_REPORT_ATTRIBUTE_LENGTH)
 
+export class CspReportTooLarge extends S.TaggedError<CspReportTooLarge>()('CspReportTooLarge', {
+  limit: S.Finite,
+  received: S.Finite,
+}) {
+  override get message(): string {
+    return `the csp report body is ${this.received} bytes, over the ${this.limit}-byte limit`
+  }
+}
+
+export class CspReportRefused extends S.TaggedError<CspReportRefused>()('CspReportRefused', {}) {
+  override get message(): string {
+    return 'the csp report body could not be decoded'
+  }
+}
+
 export const CspDirective = S.String.pipe(
   S.check(S.isPattern(/^[a-z]+(?:-[a-z]+)*$/)),
   S.check(S.isMaxLength(MAX_CSP_REPORT_ATTRIBUTE_LENGTH)),
@@ -97,3 +112,10 @@ export const violationsOf = (body: CspReportBody): ReadonlyArray<CspViolation> =
     Match.when(isReportingApiBatch, (reports) => Arr.map(reports, fromReportingApi)),
     Match.orElse((legacy) => [fromLegacy(legacy)]),
   )
+
+export const AcceptedReport = S.TaggedStruct('Accepted', { dropped: S.Finite })
+export const TooLargeReport = S.TaggedStruct('TooLarge', { reason: S.String })
+export const RefusedReport = S.TaggedStruct('Refused', { reason: S.String })
+
+export const CspReportOutcome = S.Union([AcceptedReport, TooLargeReport, RefusedReport])
+export type CspReportOutcome = S.Schema.Type<typeof CspReportOutcome>

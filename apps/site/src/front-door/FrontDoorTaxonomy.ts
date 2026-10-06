@@ -25,8 +25,19 @@ export const RecordCspViolation = Span.declare({
   }),
 })
 
+export const RecordCspReport = Span.declare({
+  id: 'front_door.record_csp_report',
+  name: 'front_door.record_csp_report',
+  attrs: S.Struct({
+    'app.csp.report.outcome': S.Literals(['accepted', 'too-large', 'refused']),
+    'app.csp.report.dropped': S.optionalKey(S.Finite),
+  }),
+})
+
 export const frontDoorTaxonomy = Taxonomy.make('front_door').pipe(
   Taxonomy.add(ServePage),
+  Taxonomy.add(RecordCspReport),
   Taxonomy.add(RecordCspViolation),
+  Taxonomy.child(RecordCspReport, RecordCspViolation),
   Taxonomy.forbid(RecordCspViolation, { unless: 'csp-report' }),
 )

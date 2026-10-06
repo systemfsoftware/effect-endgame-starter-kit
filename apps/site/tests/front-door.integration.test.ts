@@ -38,6 +38,15 @@ const LEGACY_REPORT = JSON.stringify({
   'csp-report': { 'effective-directive': 'script-src', 'blocked-uri': 'https://evil.example/path?q=1' },
 })
 
+const HOME_REPORT = JSON.stringify({
+  'csp-report': { 'effective-directive': 'script-src', 'blocked-uri': 'https://evil.example/' },
+})
+
+const padToBytes = (json: string, bytes: number): string => json + ' '.repeat(bytes - json.length)
+
+const AT_BODY_CAP = padToBytes(HOME_REPORT, 64 * 1024)
+const OVER_BODY_CAP = padToBytes(HOME_REPORT, 64 * 1024 + 1)
+
 const REPORTING_BATCH = JSON.stringify([
   { type: 'csp-violation', body: { effectiveDirective: 'img-src', blockedURL: 'data:text/html,blocked' } },
 ])
@@ -238,6 +247,22 @@ Feature('Reading the site as an agent').withLayer(HtmlPortDouble).body(({ scenar
         })),
       Then('both formats are accepted and the malformed body is refused')((s, expect) =>
         expect(s.responses).toEqual({ legacy: 204, reporting: 204, malformed: 400 })
+      ),
+    ),
+  )
+
+  scenario(
+    'A report body at the size cap is accepted and one over it is refused',
+    Gherkin.Do.pipe(
+      When('a browser posts a report body at the cap and one byte over it')('responses', () =>
+        Effect.gen(function*() {
+          return {
+            atCap: yield* postReport(AT_BODY_CAP),
+            overCap: yield* postReport(OVER_BODY_CAP),
+          }
+        })),
+      Then('the body at the cap is accepted and the one over it is refused for size')((s, expect) =>
+        expect(s.responses).toEqual({ atCap: 204, overCap: 413 })
       ),
     ),
   )

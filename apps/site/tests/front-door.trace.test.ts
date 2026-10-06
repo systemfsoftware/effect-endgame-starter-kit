@@ -1,5 +1,12 @@
 import { NodeFileSystem } from '@effect/platform-node'
-import { frontDoorHandlerWith, frontDoorTaxonomy, HtmlPort, RecordCspViolation, ServePage } from '@endgame/site'
+import {
+  frontDoorHandlerWith,
+  frontDoorTaxonomy,
+  HtmlPort,
+  RecordCspReport,
+  RecordCspViolation,
+  ServePage,
+} from '@endgame/site'
 import { Contract, ObservationWindow, Rel, Stimulus, Suite } from '@systemfsoftware/trace-spec'
 import { it } from '@systemfsoftware/vitest'
 import { Context, Effect, Layer } from 'effect'
@@ -155,6 +162,71 @@ const harness = Layer.mergeAll(
 
 const reportInput = (spec: ReportCase): ReportRequest => ({ body: legacyReport(spec.directive, spec.blockedUri) })
 
+const reportBatch = (count: number, overflowDirective: string): string =>
+  JSON.stringify(
+    Array.from({ length: count }, (_, index) => ({
+      type: 'csp-violation',
+      body: {
+        effectiveDirective: index === count - 1 ? overflowDirective : 'img-src',
+        blockedURL: 'https://evil.example/',
+      },
+    })),
+  )
+
+const homeReport = JSON.stringify({
+  'csp-report': { 'effective-directive': 'script-src', 'blocked-uri': 'https://evil.example/' },
+})
+
+const padToBytes = (json: string, bytes: number): string => json + ' '.repeat(bytes - json.length)
+
+const atReportCapContract = Contract.of(frontDoorTaxonomy).pipe(
+  Contract.stimulate(reportStimulus),
+  Contract.holds(
+    Rel.all(
+      Rel.exists(RecordCspReport),
+      Rel.attrs(RecordCspReport, { 'app.csp.report.outcome': 'accepted' }),
+      Rel.forall(
+        RecordCspReport,
+        (node) => node.attrs['app.csp.report.dropped'] === undefined,
+        'no report was dropped at the cap',
+      ),
+      Rel.forall(
+        RecordCspViolation,
+        (node) => node.attrs['app.csp.directive'] === 'img-src',
+        'every report in the at-cap batch is recorded',
+      ),
+      Rel.fromTaxonomy(frontDoorTaxonomy, { path: 'csp-report' }),
+    ),
+  ),
+)
+
+const overReportCapContract = Contract.of(frontDoorTaxonomy).pipe(
+  Contract.stimulate(reportStimulus),
+  Contract.holds(
+    Rel.all(
+      Rel.exists(RecordCspReport),
+      Rel.attrs(RecordCspReport, { 'app.csp.report.outcome': 'accepted', 'app.csp.report.dropped': 1 }),
+      Rel.forall(
+        RecordCspViolation,
+        (node) => node.attrs['app.csp.directive'] !== 'script-src',
+        'the overflow report is not recorded',
+      ),
+      Rel.fromTaxonomy(frontDoorTaxonomy, { path: 'csp-report' }),
+    ),
+  ),
+)
+
+const overBodyCapContract = Contract.of(frontDoorTaxonomy).pipe(
+  Contract.stimulate(reportStimulus),
+  Contract.holds(
+    Rel.all(
+      Rel.exists(RecordCspReport),
+      Rel.attrs(RecordCspReport, { 'app.csp.report.outcome': 'too-large' }),
+      Rel.absent(RecordCspViolation),
+    ),
+  ),
+)
+
 Suite.make({ it })('front door span graph')
   .withScenarioLayer(harness)
   .live('the failure dump writes the decoded graph through the real Node file system')
@@ -195,4 +267,13 @@ Suite.make({ it })('front door span graph')
       reportContract(unrecognizedCase),
       reportInput(unrecognizedCase),
     )
+    Case('a posted batch at the report cap records every report', atReportCapContract, {
+      body: reportBatch(100, 'img-src'),
+    })
+    Case('a posted batch one over the report cap drops the overflow report', overReportCapContract, {
+      body: reportBatch(101, 'script-src'),
+    })
+    Case('a posted report over the body cap is refused for size before decoding', overBodyCapContract, {
+      body: padToBytes(homeReport, 64 * 1024 + 1),
+    })
   })
