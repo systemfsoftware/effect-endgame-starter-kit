@@ -28,6 +28,7 @@ jobs:
   mutation:
     name: mutation · ${{ matrix.package }}
     needs: [plan]
+    if: ${{ needs.plan.outputs.packages != '[]' }}
     runs-on: ubuntu-latest
     timeout-minutes: 75
     strategy:
