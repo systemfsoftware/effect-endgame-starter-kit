@@ -82,7 +82,7 @@
         "!**/AGENTS.md",
         "!**/CHANGELOG.md"
       ],
-      "outputLogs": "errors-only",
+      "outputLogs": "new-only",
       "dependsOn": [
         "^build",
         "build"
