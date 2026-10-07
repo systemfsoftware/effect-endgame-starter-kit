@@ -44,6 +44,16 @@
       "outputs": [],
       "cache": true
     },
+    "//#test:scripts": {
+      "outputLogs": "errors-only",
+      "inputs": [
+        "scripts/**",
+        "flake.nix",
+        "flake.lock"
+      ],
+      "outputs": [],
+      "cache": true
+    },
     "test": {
       "inputs": [
         "$TURBO_DEFAULT$",

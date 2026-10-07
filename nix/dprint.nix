@@ -35,9 +35,9 @@ stdenvNoCC.mkDerivation {
   # The archive holds one bare executable, so there is no directory to enter.
   sourceRoot = ".";
 
-  nativeBuildInputs = [ unzip ] ++ lib.optional stdenvNoCC.hostPlatform.isLinux autoPatchelfHook;
+  nativeBuildInputs = [ unzip autoPatchelfHook ];
   # `xz` supplies liblzma.so.5, which the official x86_64-linux binary links.
-  buildInputs = lib.optionals stdenvNoCC.hostPlatform.isLinux [ stdenv.cc.cc.lib xz ];
+  buildInputs = [ stdenv.cc.cc.lib xz ];
 
   installPhase = ''
     runHook preInstall

@@ -1,0 +1,63 @@
+name: Release gate
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-gate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: plan · mutation shards
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      packages: ${{ steps.shards.outputs.packages }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: denoland/setup-deno@v2
+      - id: shards
+        run: ./scripts/mutation-shards.ts --output "$GITHUB_OUTPUT"
+
+  mutation:
+    name: mutation · ${{ matrix.package }}
+    needs: [plan]
+    if: ${{ needs.plan.outputs.packages != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.plan.outputs.packages) }}
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Stryker incremental cache
+        uses: actions/cache@v6
+        with:
+          path: |
+            apps/*/reports/stryker-incremental.json
+            packages/*/reports/stryker-incremental.json
+          key: stryker-${{ matrix.package }}-${{ github.sha }}
+          restore-keys: stryker-${{ matrix.package }}-
+      - name: Mutation at break 100
+        run: pnpm exec turbo run mutation --filter="${{ matrix.package }}"
+      - if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: mutation-report-${{ strategy.job-index }}
+          path: |
+            apps/*/reports/mutation-report.*
+            packages/*/reports/mutation-report.*
+          if-no-files-found: ignore
