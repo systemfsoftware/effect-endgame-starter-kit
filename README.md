@@ -114,6 +114,19 @@ pnpm dev       # the whole app at http://localhost:1337, Alchemy's local emulati
 pnpm journeys  # the end-to-end journeys in a real browser against pnpm dev
 ```
 
+The site ships one example feature, a guestbook at `/guestbook`: a pure decision (`sign-guestbook.workflow.ts`, built with `Workflow.make`) trims a name and a message and refuses them with typed errors; the RPC procedures `sign` and `list` write and read entries in D1, with the decision's tagged refusals as `sign`'s error schema; and the page shows the entries or the refusal. Everything it owns lives in [`apps/site/src/features/guestbook`](apps/site/src/features/guestbook) and [`apps/site-e2e/tests/features/guestbook`](apps/site-e2e/tests/features/guestbook).
+
+To remove it:
+
+1. Delete `apps/site/src/features/guestbook`.
+2. Delete `apps/site-e2e/tests/features/guestbook`.
+3. Delete the route file `apps/site/src/routes/guestbook.tsx`.
+4. `apps/site/src/api/site-rpcs.ts`: drop the `GuestbookRpcs` import and make `SiteRpcs` just `HealthRpcs`.
+5. `apps/site/src/api/site-rpc-server.ts`: drop the `GuestbookHandlers` import and its `Layer.provide(GuestbookHandlers)` line.
+6. `apps/site/alchemy.run.ts`: drop the `migrations` option from `Cloudflare.D1.Database('Database', …)`.
+
+Removal leaves a deployed D1 as it is: the `guestbook_entries` table and its `0001_create_guestbook_entries.sql` row in `__alchemy_migrations` stay; drop them from the D1 console in the Cloudflare dashboard with `DROP TABLE guestbook_entries; DELETE FROM __alchemy_migrations WHERE name = '0001_create_guestbook_entries.sql';`.
+
 ### 5. Deploy
 
 Your copy deploys to your own Cloudflare account; the template holds no credentials. Set `CLOUDFLARE_API_TOKEN` (a token that can edit Workers and D1) and `CLOUDFLARE_ACCOUNT_ID`, and optionally `SITE_DOMAIN` (a hostname in a zone on that account) to serve production there instead of on `workers.dev`:
