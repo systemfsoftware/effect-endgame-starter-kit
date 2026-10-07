@@ -25,7 +25,6 @@
     "build": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} build",
     "dev": "sandbox --publish 1337:1337 -- pnpm --filter @endgame/site dev",
     "journeys": "sandbox --listen 1337 --pass-env PLAYWRIGHT_BROWSERS_PATH -- ./bin/journeys",
-    "journeys:deployed": "./bin/journeys-deployed",
     "check:ci": "s=0; pnpm format:check || s=1; pnpm check:sfs-sources || s=1; TURBO_CONCURRENCY=${TURBO_CONCURRENCY:-100%} pnpm gate:tasks || s=1; pnpm gate:dist || s=1; pnpm test:sandbox || s=1; exit $s",
     "check:sfs-sources": "sandbox --allow-host jsr.io -- ./scripts/check-sfs-sources.ts",
     "clean": "sandbox -- turbo clean",
