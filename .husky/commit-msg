@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 set -e
-pnpm exec commitlint --edit "$1"
+sandbox --pass-env GIT_INDEX_FILE --pass-env GIT_DIR --pass-env GIT_WORK_TREE -- pnpm exec commitlint --edit "$1"

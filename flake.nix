@@ -1,5 +1,5 @@
 {
-  description = "starter toolchain — the formatter and runtimes the check chain shells out to";
+  description = "starter toolchain — the formatter, runtimes, systemfsoftware packages and dependency sandbox the check chain shells out to";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -9,17 +9,34 @@
       url = "github:systemfsoftware/comment-checker";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Hashless pnpm store: each lockfile integrity is the fetch hash.
-    # fetchPnpmDeps needs a second store-wide hash that Dependabot cannot update.
-    # A package built from this workspace takes this overlay to get
-    # `importPnpmLock` and `iplConfigHook` into its `callPackage` arguments.
+    pnpm-release-management = {
+      url = "github:systemfsoftware/pnpm-release-management/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.comment-checker.follows = "comment-checker";
+      inputs.importPnpmLock.follows = "importPnpmLock";
+    };
+    systemfsoftware = {
+      url = "github:systemfsoftware/systemfsoftware/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.comment-checker.follows = "comment-checker";
+      inputs.pnpm-release-management.follows = "pnpm-release-management";
+    };
+    stryker-js-effect = {
+      url = "github:systemfsoftware/stryker-js-effect/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.comment-checker.follows = "comment-checker";
+      inputs.importPnpmLock.follows = "importPnpmLock";
+      inputs.pnpm-release-management.follows = "pnpm-release-management";
+      inputs.systemfsoftware.follows = "systemfsoftware";
+    };
+    # The pnpm store is hashless: each tarball's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
     importPnpmLock = {
       url = "github:Scrumplex/importPnpmLock.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, comment-checker, importPnpmLock }:
+  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware, stryker-js-effect, importPnpmLock }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" ];
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
@@ -27,39 +44,84 @@
     {
       packages = forEachSystem (pkgs:
         let
-          pkgs' = pkgs.extend importPnpmLock.overlays.default;
-          dprint = pkgs.callPackage ./nix/dprint.nix { };
+          system = pkgs.stdenv.hostPlatform.system;
+          dprint = pkgs.callPackage ./nix/dprint.nix { dprintConfig = ./dprint.json; };
           unwrapped = pkgs.callPackage ./nix/comment-checker.nix {
             hashes = "${comment-checker}/nix/release-hashes.json";
           };
           sandboxed = pkgs.callPackage ./nix/comment-checker-sandbox.nix {
             comment-checker = unwrapped;
           };
+          sfs-deps = pkgs.runCommand "sfs-deps" { nativeBuildInputs = [ pkgs.jq ]; } ''
+            mkdir $out
+            for dir in ${systemfsoftware.packages.${system}.workspace-tarballs} ${stryker-js-effect.packages.${system}.workspace-tarballs}; do
+              cp "$dir"/*.tgz $out/
+            done
+            jq -s add ${systemfsoftware.packages.${system}.workspace-tarballs}/index.json ${stryker-js-effect.packages.${system}.workspace-tarballs}/index.json > $out/index.json
+          '';
+          pnpm-store = pnpm-release-management.lib.mkPnpmConsumerStore {
+            inherit pkgs;
+            pname = "starter";
+            src = pkgs.lib.fileset.toSource {
+              root = ./.;
+              fileset = pkgs.lib.fileset.unions [
+                ./pnpm-lock.yaml
+                ./pnpm-workspace.yaml
+                (pkgs.lib.fileset.fileFilter (file: file.name == "package.json") ./.)
+              ];
+            };
+            files.".sfs-deps" = sfs-deps;
+          };
+          sandbox = pkgs.callPackage "${pnpm-release-management}/nix/sandbox/default.nix" { };
         in {
-          inherit dprint;
+          inherit dprint sfs-deps sandbox pnpm-store;
+          sandbox-proofs = (pkgs.callPackage "${pnpm-release-management}/nix/sandbox/proofs.nix" {
+            inherit pkgs sandbox;
+            inherit (importPnpmLock.legacyPackages.${system}) iplConfigHook;
+          }).sandbox-proofs;
           comment-checker = sandboxed;
           comment-checker-unwrapped = unwrapped;
           default = dprint;
         });
 
-      # pnpm is deliberately absent: `packageManager` pins pnpm@12.4.2 and
-      # corepack is the one thing allowed to resolve it. A second pnpm on PATH
-      # would answer `pnpm install` with a version the lockfile never saw.
-      devShells = forEachSystem (pkgs: {
+      devShells = forEachSystem (pkgs:
+        let
+          own = self.packages.${pkgs.stdenv.hostPlatform.system};
+          playwrightBrowsers = pkgs.playwright-driver.browsers.override {
+            withChromium = false;
+            withFirefox = false;
+            withWebkit = false;
+            withFfmpeg = false;
+          };
+          # The launcher reads only store paths on PATH, the command and the
+          # pnpm store, so a bare --pass-env cannot carry the browsers in. A
+          # PATH entry whose closure reaches them makes the store path readable.
+          playwrightBrowsersAnchor = pkgs.writeShellApplication {
+            name = "playwright-browsers-anchor";
+            runtimeInputs = [ playwrightBrowsers ];
+            text = ":";
+          };
+        in {
         default = pkgs.mkShell {
           packages = [
-            self.packages.${pkgs.stdenv.hostPlatform.system}.dprint
-            self.packages.${pkgs.stdenv.hostPlatform.system}.comment-checker
+            own.dprint
+            own.comment-checker
+            own.sandbox
+            pnpm-release-management.packages.${pkgs.stdenv.hostPlatform.system}.release-tools
+            pkgs.actionlint
             pkgs.nodejs_24
+            pkgs.pnpm_12
             pkgs.deno
-          ];
+          ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ playwrightBrowsersAnchor ];
+          SANDBOX_PNPM_STORE = own.pnpm-store;
+          shellHook = ''
+            root="$(git rev-parse --show-toplevel)"
+            git config core.hooksPath .husky
+            rm -rf "$root/.sfs-deps"
+            cp -r --no-preserve=mode ${own.sfs-deps} "$root/.sfs-deps"
+          '';
           env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
-            PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers.override {
-              withChromium = false;
-              withFirefox = false;
-              withWebkit = false;
-              withFfmpeg = false;
-            }}";
+            PLAYWRIGHT_BROWSERS_PATH = "${playwrightBrowsers}";
           };
         };
       });

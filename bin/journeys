@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Start the app with pnpm dev, run the e2e journeys against it, then stop it.
+# Start the app (pnpm dev without its own launcher: pnpm journeys already runs
+# this script inside the sandbox), run the e2e journeys against it, then stop it.
 # A red run prints the tail of the dev server's log.
 set -uo pipefail
 # Job control gives pnpm dev its own process group, so one SIGINT reaches
@@ -12,7 +13,7 @@ readonly site=http://localhost:1337
 readonly log=.journeys/dev.log
 mkdir -p .journeys
 
-pnpm dev >"$log" 2>&1 &
+pnpm --filter @endgame/site dev >"$log" 2>&1 &
 readonly dev=$!
 
 status=0

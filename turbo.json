@@ -2,7 +2,14 @@
   "$schema": "https://v2-11-7.turborepo.dev/schema.json",
   "agentGuidance": false,
   "globalPassThroughEnv": [
-    "XDG_CACHE_HOME"
+    "XDG_CACHE_HOME",
+    "HTTPS_PROXY",
+    "HTTP_PROXY",
+    "NO_PROXY",
+    "https_proxy",
+    "http_proxy",
+    "no_proxy",
+    "NODE_USE_ENV_PROXY"
   ],
   "tasks": {
     "generate": {
