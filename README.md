@@ -16,18 +16,15 @@ AI coding agents produce TypeScript that compiles cleanly and passes shallow uni
 
 `starter` establishes an uncompromising substrate. Invariants are not aspirational guidelines or doc comments; they are enforced mechanically by linter rules, complexity ceilings, mutation test floors, and continuous integration gates.
 
-| Concern                  | The Naive AI-Assisted Default                                | The Endgame Architecture (`starter`)                                 |
-| ------------------------ | ------------------------------------------------------------ | -------------------------------------------------------------------- |
-| **Domain Logic**         | ❌ Interleaved I/O, clocks, random generators, and mutations | ✅ Pure functions returning tagged `Decision` or `Refusal` unions    |
-| **Branching**            | ❌ Sprawling nested `if`/`else` and procedural loops         | ✅ Cyclomatic complexity 1 via exhaustive pattern matching (`Match`) |
-| **Boundary Data**        | ❌ Unchecked casts (`as unknown as Type`, `@ts-ignore`)      | ✅ Strict `Schema.decode` transforming raw bytes into branded types  |
-| **Effect Composition**   | ❌ Ambient services and eager promise invocations            | ✅ Lazy `Cell` workflows composed linearly via `.pipe()`             |
-| **Dependency Injection** | ❌ Captured instances and deep `provideService` calls        | ✅ Single `Cell.provide` at the root with `R = never` at the entry   |
-| **State Storage**        | ❌ Direct mutation and unvalidated store writes              | ✅ Tenant-bound store ports carrying write guard predicates          |
-| **Test Verification**    | ❌ Mock-heavy tests pinning internal implementation          | ✅ 100% mutation kill floor (`Stryker`) and property-based tests     |
-| **Configuration**        | ❌ Dozens of toggles that let agents bypass strictness       | ✅ Zero knobs — one proven opinionated toolchain end to end          |
-| **Package Entries**      | ❌ Star exports (`export *`) hiding dependency graphs        | ✅ Explicit named re-exports enumerated one line per symbol          |
-| **Refactoring**          | ❌ Patching around rotten legacy modules                     | ✅ Delete-first rebuild with published observable pinning            |
+| Concern               | The Naive AI-Assisted Default                                | The Endgame Architecture (`starter`)                                 |
+| --------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| **Domain Logic**      | ❌ Interleaved I/O, clocks, random generators, and mutations | ✅ Pure functions returning tagged `Decision` or `Refusal` unions    |
+| **Branching**         | ❌ Sprawling nested `if`/`else` and procedural loops         | ✅ Cyclomatic complexity 1 via exhaustive pattern matching (`Match`) |
+| **Boundary Data**     | ❌ Unchecked casts (`as unknown as Type`, `@ts-ignore`)      | ✅ Strict `Schema.decode` transforming raw bytes into branded types  |
+| **Test Verification** | ❌ Mock-heavy tests pinning internal implementation          | ✅ 100% mutation kill floor (`Stryker`) and property-based tests     |
+| **Configuration**     | ❌ Dozens of toggles that let agents bypass strictness       | ✅ Zero knobs — one proven opinionated toolchain end to end          |
+| **Package Entries**   | ❌ Star exports (`export *`) hiding dependency graphs        | ✅ Explicit named re-exports enumerated one line per symbol          |
+| **Refactoring**       | ❌ Patching around rotten legacy modules                     | ✅ Delete-first rebuild with published observable pinning            |
 
 ---
 
@@ -44,8 +41,6 @@ read (impure) ──► decode (pure) ──► decide (pure) ──► shape (p
 3. 🧠 **`decide`** — Executes domain logic with cyclomatic complexity 1 (zero I/O, zero ambient state).
 4. 📦 **`shape`** — Builds pure output documents and domain events from the decision.
 5. 📤 **`write`** — Persists changes, emits domain events, or returns responses.
-
-Phase ordering is guaranteed at compile time: each phase returns branded markers that the succeeding phase demands as input.
 
 ---
 
@@ -127,10 +122,6 @@ pnpm lint
 
 # Run unit and integration tests
 pnpm test
-
-# Run mutation tests
-pnpm mutation
-
 # Run full CI suite locally
 pnpm check:ci
 ```
@@ -142,7 +133,7 @@ pnpm check:ci
 <details>
 <summary><strong>Why does starter require Effect 4 instead of Effect 3?</strong></summary>
 
-Effect 4 introduces first-class primitives for cell composition, branded type ordering, and modern schema transformations that enable the endgame architecture. `starter` targets the future of Effect rather than supporting legacy patterns.
+Effect 4 brings the schema transformations and typed services the template's decisions and boundaries are written with. `starter` targets the future of Effect rather than supporting legacy patterns.
 
 </details>
 
@@ -156,7 +147,7 @@ Every configuration toggle provides a route for AI agents to downgrade verificat
 <details>
 <summary><strong>How does mutation testing work in this template?</strong></summary>
 
-Stryker introduces deliberate syntax and logic mutations into your code and runs your test suite against each mutant. If your tests still pass when code behavior changes, the mutant survives and the gate fails. Domain decisions require a 100% kill score.
+Stryker introduces deliberate syntax and logic mutations into your code and runs your test suite against each mutant. If your tests still pass when code behavior changes, the mutant survives and the gate fails. Domain decisions require a 100% kill score. Mutation runs only in the release gate on pushes to `main`, never locally or on pull requests.
 
 </details>
 
