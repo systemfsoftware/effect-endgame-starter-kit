@@ -57,7 +57,6 @@ read (impure) ──► decode (pure) ──► decide (pure) ──► shape (p
 | 🎨 **dprint**             | Fast, deterministic code and markdown formatting (`dprint.json`)                       |
 | 🧪 **Vitest**             | Fast unit and integration test runner with TypeScript support                          |
 | 🔬 **Stryker**            | Mutation testing ensuring tests fail when bugs are introduced                          |
-| 📦 **tsdown**             | Fast TypeScript bundler building dual ESM and type declarations                        |
 | 📝 **Changesets**         | Automated versioning and changelogs, released as git tags via shared tooling           |
 | 🪝 **Husky & Commitlint** | Git hooks enforcing conventional commit standards                                      |
 | 🌳 **Worktrunk Scripts**  | Deno-powered git worktree lifecycle hooks for isolated agent work                      |
@@ -71,13 +70,13 @@ The repository is structured into two workspace roots defined in `pnpm-workspace
 ```text
 .
 ├── packages/           # Reusable libraries, engines, and domain cores
-│   └── starter/        # Seed library template (rename to your package)
-├── apps/               # Declared workspace root for apps and CLI tools (added as needed)
+├── apps/               # The Worker and its end-to-end journeys
 ├── repos/              # Vendored subtrees (constitution, worktrunk-scripts)
 └── docs/               # Solutions, tooling decisions, and plans
 ```
 
-- [`packages/starter`](packages/starter) — The starter package scaffold with pre-configured build, lint, test, and mutation configs.
+- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site defined and deployed with Alchemy.
+- [`apps/site-e2e`](apps/site-e2e) — The end-to-end journeys that run against `pnpm dev` (`pnpm journeys`).
 
 ---
 
@@ -98,13 +97,7 @@ cd my-effect-project
 pnpm install
 ```
 
-### 3. Claim the Package
-
-1. Rename `packages/starter` to your desired package name (e.g., `packages/my-lib`).
-2. Update `name`, `description`, and `author` in `packages/starter/package.json`.
-3. Remove `"private": true` from `package.json` when you are ready to publish.
-
-### 4. Build and Verify
+### 3. Build and Verify
 
 ```bash
 pnpm build

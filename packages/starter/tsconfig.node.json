@@ -1,5 +1,0 @@
-{
-  "extends": "@systemfsoftware/tsconfig/node",
-  "compilerOptions": { "allowImportingTsExtensions": true, "noEmit": true },
-  "include": ["stryker.config.ts", "tsdown.config.ts", "vitest.config.ts", "oxlint.config.ts", "../../*.shared.ts"]
-}
