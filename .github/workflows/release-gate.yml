@@ -65,3 +65,28 @@ jobs:
             apps/*/reports/mutation-report.*
             packages/*/reports/mutation-report.*
           if-no-files-found: ignore
+
+  deploy:
+    name: deploy · production
+    needs: [plan, mutation]
+    if: ${{ !cancelled() && needs.plan.result == 'success' && (needs.mutation.result == 'success' || needs.mutation.result == 'skipped') && !github.event.repository.is_template }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      ALCHEMY_STAGE: prod
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      SITE_DOMAIN: ${{ vars.SITE_DOMAIN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/cloudflare-secrets
+      - uses: ./.github/actions/dev-shell
+      - name: Deploy production
+        run: nix develop --command pnpm run deploy
+      - name: Read the production URL
+        id: site
+        run: |
+          state="$(nix develop --command ./bin/cloud pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" | sed -n '/^{/,$p')"
+          echo "url=$(jq -er '.url' <<<"$state")" >> "$GITHUB_OUTPUT"
