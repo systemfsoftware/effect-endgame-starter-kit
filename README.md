@@ -123,6 +123,8 @@ To remove it, delete those two folders and undo its four registration points in 
 3. `src/routes/guestbook.tsx`: delete the route file.
 4. `alchemy.run.ts`: drop the `migrations` option from `Cloudflare.D1.Database('Database', …)`.
 
+Removal leaves a deployed D1 as it is: the `guestbook_entries` table and its `0001_create_guestbook_entries.sql` row in `__alchemy_migrations` stay; drop them from the D1 console in the Cloudflare dashboard with `DROP TABLE guestbook_entries; DELETE FROM __alchemy_migrations WHERE name = '0001_create_guestbook_entries.sql';`.
+
 ### 5. Deploy
 
 Your copy deploys to your own Cloudflare account; the template holds no credentials. Set `CLOUDFLARE_API_TOKEN` (a token that can edit Workers and D1) and `CLOUDFLARE_ACCOUNT_ID`, and optionally `SITE_DOMAIN` (a hostname in a zone on that account) to serve production there instead of on `workers.dev`:
