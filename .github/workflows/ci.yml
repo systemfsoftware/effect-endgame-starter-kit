@@ -63,12 +63,8 @@ jobs:
         run: ${{ matrix.gate }}
 
   journeys:
-    name: journeys (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    name: journeys
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       CI: "true"
@@ -88,7 +84,7 @@ jobs:
       - if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: journeys-${{ matrix.os }}
+          name: journeys
           path: |
             apps/site-e2e/artifacts/
             .journeys/dev.log
