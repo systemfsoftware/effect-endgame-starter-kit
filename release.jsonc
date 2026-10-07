@@ -7,8 +7,8 @@
   "branch": "changeset-release/main",
   "versioning": {
     // Each workspace package owns its version in its own package.json; the
-    // release delegates to `pnpm version -r`, as the deleted local tooling did.
-    "strategy": "pnpm",
+    // changesets libraries bump each package from the pending intents.
+    "strategy": "changesets",
   },
   // Turbo's task graph decides which packages a change touches, so an intent is
   // required for exactly the publishable packages a PR actually affects.

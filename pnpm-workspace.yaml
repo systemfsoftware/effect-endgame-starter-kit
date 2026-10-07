@@ -13,7 +13,7 @@ catalog:
   "@commitlint/cli": 21.2.3
   "@commitlint/config-conventional": 21.2.3
   "@commitlint/types": 21.2.3
-  "@effect/tsgo": 0.50.0
+  "@effect/tsgo": 0.51.0
   "@rolldown/plugin-babel": 0.2.4
   "@systemfsoftware/effect-cell-types": file:.sfs-deps/effect-cell-types-12.0.0.tgz
   "@systemfsoftware/effect-gherkin-spec": file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz
