@@ -6,6 +6,8 @@
   },
   "include": [
     "vite.config.ts",
+    "vitest.config.ts",
+    "stryker.config.ts",
     "oxlint.config.ts",
     "site-worker.ts",
     "vite-plugins.ts",

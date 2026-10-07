@@ -1,14 +1,26 @@
+import { env } from 'cloudflare:workers'
 import * as Effect from 'effect/Effect'
 import { HttpServer } from 'effect/http'
 import * as Layer from 'effect/Layer'
 import { RpcSerialization, RpcServer } from 'effect/rpc'
 
+import { CheckHealth, checkHealth, ProbeAnswered, ProbeUnanswered } from './check-health.workflow'
 import type { Health } from './health.schema'
 import { SITE_RPC_PATH, SiteRpcs } from './site-rpcs'
 
 const healthy: Health = { status: 'ok' }
 
-const HealthHandlers = SiteRpcs.toLayer({ health: () => Effect.succeed(healthy) })
+const probeDatabase = Effect.tryPromise(() => env.DB.prepare('SELECT 1').first()).pipe(
+  Effect.match({ onSuccess: () => new ProbeAnswered({}), onFailure: () => new ProbeUnanswered({}) }),
+)
+
+const HealthHandlers = SiteRpcs.toLayer({
+  health: () =>
+    probeDatabase.pipe(
+      Effect.flatMap((probe) => Effect.fromResult(checkHealth(new CheckHealth({ probe })))),
+      Effect.as(healthy),
+    ),
+})
 
 export const SiteRpcLive = RpcServer.layerHttp({ group: SiteRpcs, path: SITE_RPC_PATH, protocol: 'http' }).pipe(
   Layer.provide(HealthHandlers),
