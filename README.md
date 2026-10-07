@@ -127,7 +127,6 @@ Your copy deploys to your own Cloudflare account; the template holds no credenti
 pnpm run deploy                         # stage prod
 ALCHEMY_STAGE=pr-12 pnpm run deploy     # a preview stage
 ALCHEMY_STAGE=pr-12 pnpm run destroy
-SITE_URL=https://<your-site> pnpm journeys:deployed
 ```
 
 `pnpm run deploy`, not `pnpm deploy`: the bare form is pnpm's own built-in command.

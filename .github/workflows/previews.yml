@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: preview · deploy and journeys
+    name: preview · deploy
     if: ${{ !github.event.repository.is_template && github.event.action != 'closed' && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -45,16 +45,6 @@ jobs:
           body="$(printf '### Preview %s\n\n%s\n\n[Preview run](%s/%s/actions/runs/%s)\n' \
             "$ALCHEMY_STAGE" "$SITE_URL" "${{ github.server_url }}" "${{ github.repository }}" "${{ github.run_id }}")"
           gh pr comment "$PR" --edit-last --create-if-none --body "$body"
-      - name: Deployed journeys
-        env:
-          SITE_URL: ${{ steps.site.outputs.url }}
-        run: nix develop --command pnpm journeys:deployed
-      - if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: preview-artifacts
-          path: apps/site-e2e/artifacts/
-          if-no-files-found: ignore
 
   destroy:
     name: preview · destroy

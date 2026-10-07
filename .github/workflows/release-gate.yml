@@ -91,13 +91,3 @@ jobs:
         run: |
           state="$(nix develop --command ./bin/cloud pnpm --filter @endgame/site exec alchemy state cat --backend cloudflare "Endgame/prod/output" | sed -n '/^{/,$p')"
           echo "url=$(jq -er '.url' <<<"$state")" >> "$GITHUB_OUTPUT"
-      - name: Deployed journeys
-        env:
-          SITE_URL: ${{ steps.site.outputs.url }}
-        run: nix develop --command pnpm journeys:deployed
-      - if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: production-artifacts
-          path: apps/site-e2e/artifacts/
-          if-no-files-found: ignore
