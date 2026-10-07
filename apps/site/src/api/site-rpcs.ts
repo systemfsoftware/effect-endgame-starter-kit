@@ -4,4 +4,4 @@ import { Health } from './health.schema'
 
 export const SITE_RPC_PATH = '/api/rpc'
 
-export const SiteRpcs = RpcGroup.make(Rpc.make('Health', { success: Health }))
+export const SiteRpcs = RpcGroup.make(Rpc.make('health', { success: Health }))

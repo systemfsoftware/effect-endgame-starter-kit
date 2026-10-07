@@ -6,7 +6,7 @@ import { siteClient, SiteClientProtocol } from '../api/site-rpc-client'
 
 export const Route = createFileRoute('/')({ component: Home })
 
-const workerHealth = Effect.scoped(Effect.flatMap(siteClient, (client) => client.Health())).pipe(
+const workerHealth = Effect.scoped(Effect.flatMap(siteClient, (client) => client.health())).pipe(
   Effect.map((health) => health.status),
   Effect.orElseSucceed(() => 'unreachable'),
   Effect.provide(SiteClientProtocol),
