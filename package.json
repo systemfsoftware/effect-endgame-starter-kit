@@ -35,7 +35,6 @@
     "gate:dist": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-100%} build",
     "gate:tasks": "sandbox --allow-host jsr.io -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} --continue lint typecheck typecheck:node test test:scripts",
     "lint": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} lint",
-    "mutation": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} mutation",
     "precommit": "pnpm exec lint-staged --no-revert --config .lintstagedrc.js",
     "prepare": "effect-tsgo patch --oxlint --no-typescript --skip-missing",
     "test": "sandbox --allow-host jsr.io -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} test test:scripts && pnpm test:sandbox",
