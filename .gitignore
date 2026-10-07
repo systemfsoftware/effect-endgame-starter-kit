@@ -10,3 +10,8 @@ reports/
 .direnv/
 result
 result-*
+.alchemy/
+apps/site/.wrangler/
+apps/site/src/routeTree.gen.ts
+apps/site/.tanstack/
+apps/site-e2e/artifacts/
