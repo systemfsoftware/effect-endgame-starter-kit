@@ -39,17 +39,18 @@
             comment-checker = unwrapped;
           };
           sfs-deps = systemfsoftware.packages.${system}.workspace-tarballs;
-          pnpm-store = pkgs.callPackage ./nix/pnpm-store.nix {
-            inherit (importPnpmLock.legacyPackages.${system}) importPnpmLock;
-            nodejs = pkgs.nodejs_24;
-            pnpm = pkgs.pnpm_12;
-          } {
+          pnpm-store = pnpm-release-management.lib.mkPnpmConsumerStore {
+            inherit pkgs;
             pname = "starter";
-            lockFile = ./pnpm-lock.yaml;
-            workspaceFile = ./pnpm-workspace.yaml;
-            files = {
-              ".sfs-deps" = sfs-deps;
+            src = pkgs.lib.fileset.toSource {
+              root = ./.;
+              fileset = pkgs.lib.fileset.unions [
+                ./pnpm-lock.yaml
+                ./pnpm-workspace.yaml
+                (pkgs.lib.fileset.fileFilter (file: file.name == "package.json") ./.)
+              ];
             };
+            files.".sfs-deps" = sfs-deps;
           };
           sandbox-source = pkgs.applyPatches {
             name = "sandbox-source";
