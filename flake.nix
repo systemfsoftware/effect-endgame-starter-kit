@@ -9,11 +9,17 @@
       url = "github:systemfsoftware/comment-checker";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    pnpm-release-management.follows = "systemfsoftware/pnpm-release-management";
+    pnpm-release-management = {
+      url = "github:systemfsoftware/pnpm-release-management/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.comment-checker.follows = "comment-checker";
+      inputs.importPnpmLock.follows = "importPnpmLock";
+    };
     systemfsoftware = {
       url = "github:systemfsoftware/systemfsoftware/main";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.comment-checker.follows = "comment-checker";
+      inputs.pnpm-release-management.follows = "pnpm-release-management";
     };
     # The pnpm store is hashless: each tarball's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
     importPnpmLock = {
@@ -52,16 +58,10 @@
             };
             files.".sfs-deps" = sfs-deps;
           };
-          sandbox-source = pkgs.applyPatches {
-            name = "sandbox-source";
-            src = "${pnpm-release-management}/nix";
-            patches = [ ./nix/patches/sandbox-linked-worktree-git.patch ];
-            patchFlags = [ "-p1" "-d" "sandbox" ];
-          };
-          sandbox = pkgs.callPackage "${sandbox-source}/sandbox/default.nix" { };
+          sandbox = pkgs.callPackage "${pnpm-release-management}/nix/sandbox/default.nix" { };
         in {
           inherit dprint sfs-deps sandbox pnpm-store;
-          sandbox-proofs = (pkgs.callPackage "${sandbox-source}/sandbox/proofs.nix" {
+          sandbox-proofs = (pkgs.callPackage "${pnpm-release-management}/nix/sandbox/proofs.nix" {
             inherit pkgs sandbox;
             inherit (importPnpmLock.legacyPackages.${system}) iplConfigHook;
           }).sandbox-proofs;
