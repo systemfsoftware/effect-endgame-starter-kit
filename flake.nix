@@ -93,6 +93,7 @@
             own.dprint
             own.comment-checker
             own.sandbox
+            pnpm-release-management.packages.${pkgs.stdenv.hostPlatform.system}.release-tools
             pkgs.actionlint
             pkgs.nodejs_24
             pkgs.pnpm_12
