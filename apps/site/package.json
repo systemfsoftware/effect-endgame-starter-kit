@@ -45,7 +45,7 @@
     "preview": "vite preview",
     "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
     "mutation": "stryker run",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run",
     "typecheck": "tsr generate && tsc --noEmit --incremental && tsc -p tsconfig.node.json --noEmit"
   },
   "stryker": {
