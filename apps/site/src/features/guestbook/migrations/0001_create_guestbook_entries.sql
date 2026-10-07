@@ -1,0 +1,5 @@
+CREATE TABLE guestbook_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  guest TEXT NOT NULL,
+  message TEXT NOT NULL
+);
