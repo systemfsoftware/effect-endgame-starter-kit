@@ -15,9 +15,9 @@ permissions:
 jobs:
   release:
     name: release · shared tooling
-    uses: systemfsoftware/pnpm-release-management/.github/workflows/release.yml@prm/toolchain
+    uses: systemfsoftware/pnpm-release-management/.github/workflows/release.yml@main
     with:
-      tools-ref: prm/toolchain
+      tools-ref: main
     permissions:
       contents: write
       pull-requests: write
