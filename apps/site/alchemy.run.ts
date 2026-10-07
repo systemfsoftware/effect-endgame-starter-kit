@@ -12,14 +12,20 @@ const productionDomain = (stage: string): { readonly domain?: string } => {
   return stage === 'prod' && domain !== undefined && domain !== '' ? { domain } : {}
 }
 
+export const Database = Cloudflare.D1.Database('Database')
+
 export const Site = Cloudflare.Website.Vite(
   'Site',
-  Effect.map(Alchemy.Stage, (stage) => ({
-    main: siteWorker.main,
-    compatibility: { date: siteWorker.compatibilityDate, flags: [...siteWorker.compatibilityFlags] },
-    dev: { port: 1337, strictPort: true },
-    ...productionDomain(stage),
-  })),
+  Effect.gen(function*() {
+    const stage = yield* Alchemy.Stage
+    return {
+      main: siteWorker.main,
+      compatibility: { date: siteWorker.compatibilityDate, flags: [...siteWorker.compatibilityFlags] },
+      dev: { port: 1337, strictPort: true },
+      env: { DB: yield* Database },
+      ...productionDomain(stage),
+    }
+  }),
 )
 
 const stateOfStage = Layer.unwrap(
