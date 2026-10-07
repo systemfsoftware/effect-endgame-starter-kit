@@ -26,15 +26,29 @@ catalog:
   "@systemfsoftware/oxlint-config-cell-architecture": file:.sfs-deps/oxlint-config-cell-architecture-4.0.0.tgz
   "@systemfsoftware/oxlint-config-dmmf": file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz
   "@systemfsoftware/oxlint-config-recommended": file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz
+  "@systemfsoftware/oxlint-ignorer-config": file:.sfs-deps/oxlint-ignorer-config-0.1.1.tgz
   "@systemfsoftware/oxlint-plugin-cell-architecture": file:.sfs-deps/oxlint-plugin-cell-architecture-5.0.0.tgz
   "@systemfsoftware/oxlint-plugin-dmmf-workflow": file:.sfs-deps/oxlint-plugin-dmmf-workflow-7.0.0.tgz
   "@systemfsoftware/oxlint-plugin-effect-platform": file:.sfs-deps/oxlint-plugin-effect-platform-2.0.0.tgz
   "@systemfsoftware/oxlint-plugin-effect-schema": file:.sfs-deps/oxlint-plugin-effect-schema-6.0.0.tgz
   "@systemfsoftware/oxlint-plugin-test-discipline": file:.sfs-deps/oxlint-plugin-test-discipline-5.0.0.tgz
-  "@systemfsoftware/stryker-ignorer-effect-schema-declarations": 0.2.0
-  "@systemfsoftware/stryker-js": 15.0.1
-  "@systemfsoftware/stryker-js-typescript-checker": 8.1.1
-  "@systemfsoftware/stryker-js-vitest-runner": 8.0.3
+  "@systemfsoftware/stryker-framework-interface": file:.sfs-deps/stryker-framework-interface-0.0.0.tgz
+  "@systemfsoftware/stryker-ignorer-angular": file:.sfs-deps/stryker-ignorer-angular-0.1.2.tgz
+  "@systemfsoftware/stryker-ignorer-effect-schema-declarations": file:.sfs-deps/stryker-ignorer-effect-schema-declarations-0.2.0.tgz
+  "@systemfsoftware/stryker-ignorer-in-source-vitest-block": file:.sfs-deps/stryker-ignorer-in-source-vitest-block-0.1.1.tgz
+  "@systemfsoftware/stryker-ignorer-interface": file:.sfs-deps/stryker-ignorer-interface-0.1.1.tgz
+  "@systemfsoftware/stryker-ignorer-kit": file:.sfs-deps/stryker-ignorer-kit-0.1.1.tgz
+  "@systemfsoftware/stryker-js": file:.sfs-deps/stryker-js-17.0.2.tgz
+  "@systemfsoftware/stryker-js-angular": file:.sfs-deps/stryker-js-angular-0.0.0.tgz
+  "@systemfsoftware/stryker-js-cli-contract": file:.sfs-deps/stryker-js-cli-contract-0.3.1.tgz
+  "@systemfsoftware/stryker-js-html-reporter": file:.sfs-deps/stryker-js-html-reporter-6.0.2.tgz
+  "@systemfsoftware/stryker-js-instrumenter": file:.sfs-deps/stryker-js-instrumenter-12.1.1.tgz
+  "@systemfsoftware/stryker-js-plugin-interface": file:.sfs-deps/stryker-js-plugin-interface-14.0.0.tgz
+  "@systemfsoftware/stryker-js-plugin-runtime": file:.sfs-deps/stryker-js-plugin-runtime-7.0.2.tgz
+  "@systemfsoftware/stryker-js-svelte": file:.sfs-deps/stryker-js-svelte-0.0.1.tgz
+  "@systemfsoftware/stryker-js-typescript-checker": file:.sfs-deps/stryker-js-typescript-checker-8.2.1.tgz
+  "@systemfsoftware/stryker-js-vitest-runner": file:.sfs-deps/stryker-js-vitest-runner-8.1.1.tgz
+  "@systemfsoftware/stryker-js-vm-runner": file:.sfs-deps/stryker-js-vitest-runner-8.1.1.tgz
   "@systemfsoftware/tsconfig": file:.sfs-deps/tsconfig-2.0.1.tgz
   "@systemfsoftware/vitest": file:.sfs-deps/vitest-2.0.0.tgz
   "@tanstack/react-router": 1.170.41
@@ -66,7 +80,6 @@ minimumReleaseAgeExclude:
   - "@effect/*"
 verifyDepsBeforeRun: warn
 overrides:
-  workerd: 1.20261005.1
   "@systemfsoftware/effect-cell-types": "catalog:"
   "@systemfsoftware/effect-gherkin-spec": "catalog:"
   "@systemfsoftware/effect-schema-discovery": "catalog:"
@@ -78,13 +91,32 @@ overrides:
   "@systemfsoftware/oxlint-config-cell-architecture": "catalog:"
   "@systemfsoftware/oxlint-config-dmmf": "catalog:"
   "@systemfsoftware/oxlint-config-recommended": "catalog:"
+  "@systemfsoftware/oxlint-ignorer-config": "catalog:"
   "@systemfsoftware/oxlint-plugin-cell-architecture": "catalog:"
   "@systemfsoftware/oxlint-plugin-dmmf-workflow": "catalog:"
   "@systemfsoftware/oxlint-plugin-effect-platform": "catalog:"
   "@systemfsoftware/oxlint-plugin-effect-schema": "catalog:"
   "@systemfsoftware/oxlint-plugin-test-discipline": "catalog:"
+  "@systemfsoftware/stryker-framework-interface": "catalog:"
+  "@systemfsoftware/stryker-ignorer-angular": "catalog:"
+  "@systemfsoftware/stryker-ignorer-effect-schema-declarations": "catalog:"
+  "@systemfsoftware/stryker-ignorer-in-source-vitest-block": "catalog:"
+  "@systemfsoftware/stryker-ignorer-interface": "catalog:"
+  "@systemfsoftware/stryker-ignorer-kit": "catalog:"
+  "@systemfsoftware/stryker-js": "catalog:"
+  "@systemfsoftware/stryker-js-angular": "catalog:"
+  "@systemfsoftware/stryker-js-cli-contract": "catalog:"
+  "@systemfsoftware/stryker-js-html-reporter": "catalog:"
+  "@systemfsoftware/stryker-js-instrumenter": "catalog:"
+  "@systemfsoftware/stryker-js-plugin-interface": "catalog:"
+  "@systemfsoftware/stryker-js-plugin-runtime": "catalog:"
+  "@systemfsoftware/stryker-js-svelte": "catalog:"
+  "@systemfsoftware/stryker-js-typescript-checker": "catalog:"
+  "@systemfsoftware/stryker-js-vitest-runner": "catalog:"
+  "@systemfsoftware/stryker-js-vm-runner": "catalog:"
   "@systemfsoftware/tsconfig": "catalog:"
   "@systemfsoftware/vitest": "catalog:"
+  workerd: 1.20261005.1
 packages:
   - apps/*
   - packages/*
