@@ -61,3 +61,28 @@ jobs:
             turbo-${{ runner.os }}-
       - name: Gate
         run: ${{ matrix.gate }}
+
+  journeys:
+    name: journeys
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - name: Journeys against pnpm dev
+        run: pnpm journeys
+      - if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: journeys
+          path: |
+            apps/site-e2e/artifacts/
+            .journeys/dev.log
+          if-no-files-found: ignore

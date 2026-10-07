@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Start the app with pnpm dev, run the e2e journeys against it, then stop it.
+# A red run prints the tail of the dev server's log.
+set -uo pipefail
+# Job control gives pnpm dev its own process group, so one SIGINT reaches
+# alchemy dev and lets it stop its local sidecar instead of orphaning it.
+set -m
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
+
+readonly site=http://localhost:1337
+readonly log=.journeys/dev.log
+mkdir -p .journeys
+
+pnpm dev >"$log" 2>&1 &
+readonly dev=$!
+
+status=0
+curl -sS -o /dev/null --retry 90 --retry-delay 2 --retry-all-errors --max-time 5 "$site/" || status=1
+[ "$status" = 0 ] && { SITE_URL=$site pnpm --filter @endgame/site-e2e journeys || status=1; }
+[ "$status" = 0 ] || { echo "--- last 60 lines of pnpm dev ---"; tail -n 60 "$log"; }
+kill -INT -- "-$dev" 2>/dev/null
+wait "$dev" 2>/dev/null
+exit "$status"
