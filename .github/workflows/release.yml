@@ -11,13 +11,15 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 jobs:
   release:
     name: release · shared tooling
     uses: systemfsoftware/pnpm-release-management/.github/workflows/release.yml@main
     with:
-      tools-ref: main
+      ci-workflow: ci.yml
     permissions:
       contents: write
       pull-requests: write
+      actions: write

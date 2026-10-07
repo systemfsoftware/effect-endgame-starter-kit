@@ -73,8 +73,15 @@
             files.".sfs-deps" = sfs-deps;
           };
           sandbox = pkgs.callPackage "${pnpm-release-management}/nix/sandbox/default.nix" { };
+          workspace = pnpm-release-management.lib.mkPnpmWorkspacePackages {
+            inherit pkgs;
+            src = self;
+            pname = "starter";
+            pnpm = pkgs.pnpm_12;
+          };
         in {
           inherit dprint sfs-deps sandbox pnpm-store;
+          inherit (workspace) workspace-tarballs;
           sandbox-proofs = (pkgs.callPackage "${pnpm-release-management}/nix/sandbox/proofs.nix" {
             inherit pkgs sandbox;
             inherit (importPnpmLock.legacyPackages.${system}) iplConfigHook;
