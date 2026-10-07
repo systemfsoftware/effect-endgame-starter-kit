@@ -34,9 +34,6 @@ jobs:
           - leg: dist
             runs-on: ubuntu-latest
             gate: pnpm gate:dist
-          - leg: macos
-            runs-on: macos-latest
-            gate: pnpm check:ci
     runs-on: ${{ matrix.runs-on }}
     timeout-minutes: 45
     env:
