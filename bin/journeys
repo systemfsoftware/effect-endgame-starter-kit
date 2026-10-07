@@ -13,6 +13,14 @@ readonly site=http://localhost:1337
 readonly log=.journeys/dev.log
 mkdir -p .journeys
 
+# curl exits 7 only when nothing accepts the connection; anything else means
+# a stale server would answer the journeys instead of this run's pnpm dev.
+curl -sS -o /dev/null --max-time 2 "$site/" 2>/dev/null
+if [ "$?" != 7 ]; then
+  echo "journeys: port 1337 is already in use; stop whatever is serving $site and run again" >&2
+  exit 1
+fi
+
 pnpm --filter @endgame/site dev >"$log" 2>&1 &
 readonly dev=$!
 
