@@ -1,0 +1,7 @@
+import { Rpc, RpcGroup } from 'effect/rpc'
+
+import { Health } from './health.schema'
+
+export const SITE_RPC_PATH = '/api/rpc'
+
+export const SiteRpcs = RpcGroup.make(Rpc.make('Health', { success: Health }))

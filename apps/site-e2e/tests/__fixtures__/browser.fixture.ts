@@ -93,3 +93,22 @@ export const visitHomePage = (scenario: string): Effect.Effect<HomePageVisit, ne
       (context) => Effect.promise(() => context.close()),
     )
   })
+
+const healthChecked = (): boolean => document.querySelector('[role=status]')?.textContent.endsWith('checking') === false
+
+export const readWorkerHealth: Effect.Effect<string, never, Chromium> = Effect.gen(function*() {
+  const origin = yield* siteUrl
+  const browser = yield* Chromium
+  return yield* Effect.acquireUseRelease(
+    Effect.promise(() => browser.newContext()),
+    (context) =>
+      Effect.gen(function*() {
+        const page = yield* Effect.promise(() => context.newPage())
+        yield* Effect.promise(() => page.goto(`${origin}/`))
+        yield* Effect.promise(() => page.waitForFunction(healthChecked))
+        const status = yield* Effect.promise(() => page.getByRole('status').textContent())
+        return status ?? ''
+      }),
+    (context) => Effect.promise(() => context.close()),
+  )
+})

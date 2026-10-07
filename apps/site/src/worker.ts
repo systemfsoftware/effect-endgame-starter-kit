@@ -3,12 +3,13 @@ import * as Effect from 'effect/Effect'
 import { HttpRouter } from 'effect/http'
 import * as S from 'effect/Schema'
 
-import { SiteApiLive } from './api/site-api-handlers'
+import { SiteRpcLive } from './api/site-rpc-server'
+import { SITE_RPC_PATH } from './api/site-rpcs'
 import { contentSecurityPolicyOf, CspNonce } from './csp/content-security-policy.schema'
 
-const siteApi = HttpRouter.toWebHandler(SiteApiLive)
+const siteRpc = HttpRouter.toWebHandler(SiteRpcLive)
 
-const isApiRequest = (request: Request): boolean => new URL(request.url).pathname.startsWith('/api/')
+const isRpcRequest = (request: Request): boolean => new URL(request.url).pathname === SITE_RPC_PATH
 
 const drawNonce = (random: Crypto) =>
   S.decodeEffect(CspNonce)(btoa(String.fromCharCode(...random.getRandomValues(new Uint8Array(16)))))
@@ -28,5 +29,5 @@ const serve = (request: Request, random: Crypto) =>
 
 export default {
   fetch: (request: Request): Promise<Response> =>
-    isApiRequest(request) ? siteApi.handler(request) : Effect.runPromise(serve(request, globalThis.crypto)),
+    isRpcRequest(request) ? siteRpc.handler(request) : Effect.runPromise(serve(request, globalThis.crypto)),
 }
