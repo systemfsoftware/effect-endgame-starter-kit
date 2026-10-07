@@ -1,0 +1,9 @@
+#!/usr/bin/env sh
+# Usage: bin/sandboxed [launcher flags] -- command...
+# Runs the command through `sandbox`. A script turbo reaches through
+# `gate:tasks` is already inside one, and the launcher cannot start a second,
+# so there the launcher flags are dropped and the command runs as is.
+if [ "${SANDBOX:-}" != 1 ]; then exec sandbox "$@"; fi
+while [ "$#" -gt 0 ] && [ "$1" != -- ]; do shift; done
+shift
+exec "$@"
