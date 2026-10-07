@@ -9,12 +9,12 @@ export const GuestbookHandlers = GuestbookRpcs.toLayer(
   Effect.gen(function*() {
     const store = yield* GuestbookStore
     return {
-      SignGuestbook: (command) =>
+      sign: (command) =>
         signGuestbook(command).pipe(
           Effect.fromResult,
           Effect.flatMap((entry) => Effect.orDie(store.sign(entry))),
         ),
-      LatestGuestbookEntries: () => Effect.orDie(store.latest),
+      list: () => Effect.orDie(store.latest),
     }
   }),
 ).pipe(Layer.provide(GuestbookStoreLive))

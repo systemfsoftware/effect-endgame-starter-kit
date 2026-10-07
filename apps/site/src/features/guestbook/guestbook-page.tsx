@@ -15,7 +15,7 @@ const UNAVAILABLE = 'The guestbook is unavailable right now.'
 const loading: GuestbookView = { entries: [], notice: '' }
 
 const latestEntries: Effect.Effect<GuestbookView> = Effect.scoped(
-  Effect.flatMap(siteClient, (client) => client.LatestGuestbookEntries()),
+  Effect.flatMap(siteClient, (client) => client.list()),
 ).pipe(
   Effect.map((entries): GuestbookView => ({ entries, notice: '' })),
   Effect.catchCause(() => Effect.succeed<GuestbookView>({ entries: [], notice: UNAVAILABLE })),
@@ -23,7 +23,7 @@ const latestEntries: Effect.Effect<GuestbookView> = Effect.scoped(
 )
 
 const signEntry = (command: SignGuestbook): Effect.Effect<string> =>
-  Effect.scoped(Effect.flatMap(siteClient, (client) => client.SignGuestbook(command))).pipe(
+  Effect.scoped(Effect.flatMap(siteClient, (client) => client.sign(command))).pipe(
     Effect.as(''),
     Effect.catchTags({
       NameMissing: (refusal) => Effect.succeed(refusal.message),

@@ -80,7 +80,7 @@ The repository is structured into two workspace roots defined in `pnpm-workspace
 └── docs/               # Solutions, tooling decisions, and plans
 ```
 
-- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site that calls its Worker through effect/rpc (one RpcGroup served at `/api/rpc`, a typed RpcClient in the page) over one D1 database, defined and deployed with Alchemy. `pnpm dev` emulates the database locally; the Health procedure answers `ok` only when the database answers.
+- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site that calls its Worker through effect/rpc (one RpcGroup served at `/api/rpc`, a typed RpcClient in the page) over one D1 database, defined and deployed with Alchemy. `pnpm dev` emulates the database locally; the `health` procedure answers `ok` only when the database answers.
 - [`apps/site-e2e`](apps/site-e2e) — The end-to-end journeys that run against `pnpm dev` (`pnpm journeys`).
 
 ---
@@ -119,7 +119,7 @@ pnpm dev       # the whole app at http://localhost:1337, Alchemy's local emulati
 pnpm journeys  # the end-to-end journeys in a real browser against pnpm dev
 ```
 
-The site ships one example feature, a guestbook at `/guestbook`: a pure decision (`sign-guestbook.workflow.ts`, built with `Workflow.make`) trims a name and a message and refuses them with typed errors, two RPC procedures sign and list entries in D1, and the page shows the entries or the refusal. Everything it owns lives in [`apps/site/src/features/guestbook`](apps/site/src/features/guestbook) and [`apps/site-e2e/tests/features/guestbook`](apps/site-e2e/tests/features/guestbook).
+The site ships one example feature, a guestbook at `/guestbook`: a pure decision (`sign-guestbook.workflow.ts`, built with `Workflow.make`) trims a name and a message and refuses them with typed errors; the RPC procedures `sign` and `list` write and read entries in D1, with the decision's tagged refusals as `sign`'s error schema; and the page shows the entries or the refusal. Everything it owns lives in [`apps/site/src/features/guestbook`](apps/site/src/features/guestbook) and [`apps/site-e2e/tests/features/guestbook`](apps/site-e2e/tests/features/guestbook).
 
 To remove it, delete those two folders and undo its four registration points in `apps/site`:
 
