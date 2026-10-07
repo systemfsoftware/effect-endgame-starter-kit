@@ -18,8 +18,8 @@ piece must answer "does a good starter need this?". If not, it is out.
    @systemfsoftware/vitest, constitution subtree, commitlint + changesets as today. Mutation testing (Stryker)
    runs only on push to main.
 2. App: one Cloudflare Worker serving a TanStack Start site, defined and deployed with Alchemy v2. The site calls
-   its Worker through effect/rpc (RpcGroup + RpcServer over HTTP at one route, typed RpcClient in the site). No
-   HttpApi, no OpenAPI document. Storage: D1 through Alchemy.
+   its Worker through effect/rpc (RpcGroup + RpcServer over HTTP at one route, typed RpcClient in the site; Ryan
+   2026-10-06). No HttpApi, no OpenAPI document. Storage: D1 through Alchemy.
 3. Local: `pnpm dev` runs the whole app locally with Alchemy's local emulation. One command, no cloud.
 4. Tests: unit and property tests; end-to-end journeys in a real browser against the local app. CI runs the gate
    and the journeys on every PR (Linux and macOS).
