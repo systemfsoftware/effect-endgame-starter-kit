@@ -75,7 +75,7 @@ The repository is structured into two workspace roots defined in `pnpm-workspace
 └── docs/               # Solutions, tooling decisions, and plans
 ```
 
-- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site that calls its Worker through effect/rpc (one RpcGroup served at `/api/rpc`, a typed RpcClient in the page) over one D1 database, defined and deployed with Alchemy. `pnpm dev` emulates the database locally; the `health` procedure answers `ok` only when the database answers.
+- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site that calls its Worker through effect/rpc (one RpcGroup served at `/api/rpc`, a typed RpcClient in the page) over one D1 database, defined and deployed with Alchemy. `pnpm dev` emulates the database locally; the `health` procedure probes the database and answers `ok` only when the pure decision `check-health.workflow.ts` finds the probe answered, refusing with `DatabaseUnreachable` otherwise.
 - [`apps/site-e2e`](apps/site-e2e) — The end-to-end journeys that run against `pnpm dev` (`pnpm journeys`).
 
 ---
@@ -113,17 +113,6 @@ pnpm check:ci
 pnpm dev       # the whole app at http://localhost:1337, Alchemy's local emulation, no cloud
 pnpm journeys  # the end-to-end journeys in a real browser against pnpm dev
 ```
-
-The site ships one example feature, a guestbook at `/guestbook`: a pure decision (`sign-guestbook.workflow.ts`, built with `Workflow.make`) trims a name and a message and refuses them with typed errors; the RPC procedures `sign` and `list` write and read entries in D1, with the decision's tagged refusals as `sign`'s error schema; and the page shows the entries or the refusal. Everything it owns lives in [`apps/site/src/features/guestbook`](apps/site/src/features/guestbook) and [`apps/site-e2e/tests/features/guestbook`](apps/site-e2e/tests/features/guestbook).
-
-To remove it, delete those two folders and undo its four registration points in `apps/site`:
-
-1. `src/api/site-rpcs.ts`: drop the `GuestbookRpcs` import and make `SiteRpcs` just `HealthRpcs`.
-2. `src/api/site-rpc-server.ts`: drop the `GuestbookHandlers` import and its `Layer.provide(GuestbookHandlers)` line.
-3. `src/routes/guestbook.tsx`: delete the route file.
-4. `alchemy.run.ts`: drop the `migrations` option from `Cloudflare.D1.Database('Database', …)`.
-
-Removal leaves a deployed D1 as it is: the `guestbook_entries` table and its `0001_create_guestbook_entries.sql` row in `__alchemy_migrations` stay; drop them from the D1 console in the Cloudflare dashboard with `DROP TABLE guestbook_entries; DELETE FROM __alchemy_migrations WHERE name = '0001_create_guestbook_entries.sql';`.
 
 ### 5. Deploy
 
