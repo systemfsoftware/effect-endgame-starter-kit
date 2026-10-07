@@ -17,8 +17,9 @@ piece must answer "does a good starter need this?". If not, it is out.
    TypeScript 7 (tsgo), oxlint with the published systemfsoftware presets, dprint,
    @systemfsoftware/vitest, constitution subtree, commitlint + changesets as today. Mutation testing (Stryker)
    runs only on push to main.
-2. App: one Cloudflare Worker serving a TanStack Start site, defined and deployed with Alchemy v2. HTTP API with
-   Effect HttpApi + OpenAPI. Storage: D1 through Alchemy.
+2. App: one Cloudflare Worker serving a TanStack Start site, defined and deployed with Alchemy v2. The site calls
+   its Worker through effect/rpc (RpcGroup + RpcServer over HTTP at one route, typed RpcClient in the site). No
+   HttpApi, no OpenAPI document. Storage: D1 through Alchemy.
 3. Local: `pnpm dev` runs the whole app locally with Alchemy's local emulation. One command, no cloud.
 4. Tests: unit and property tests; end-to-end journeys in a real browser against the local app. CI runs the gate
    and the journeys on every PR (Linux and macOS).
@@ -26,7 +27,7 @@ piece must answer "does a good starter need this?". If not, it is out.
 6. Deploy: `pnpm run deploy` through Alchemy (`pnpm deploy` is pnpm's own command). Deploy and
    preview workflows exist for adopters' copies and never run in the template
    (`if: !github.event.repository.is_template`). No credentials in the template, ever.
-7. One small example feature end to end (a pure decision function, one HttpApi endpoint, one page, its tests)
+7. One small example feature end to end (a pure decision function, its RPC procedures, one page, its tests)
    that an adopter can delete in one step.
 8. Distribution of our own packages through the systemfsoftware Nix flake (Ryan's npm rule).
 
