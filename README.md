@@ -119,6 +119,15 @@ pnpm dev       # the whole app at http://localhost:1337, Alchemy's local emulati
 pnpm journeys  # the end-to-end journeys in a real browser against pnpm dev
 ```
 
+The site ships one example feature, a guestbook at `/guestbook`: a pure decision (`sign-guestbook.workflow.ts`, built with `Workflow.make`) trims a name and a message and refuses them with typed errors, two RPC procedures sign and list entries in D1, and the page shows the entries or the refusal. Everything it owns lives in [`apps/site/src/features/guestbook`](apps/site/src/features/guestbook) and [`apps/site-e2e/tests/features/guestbook`](apps/site-e2e/tests/features/guestbook).
+
+To remove it, delete those two folders and undo its four registration points in `apps/site`:
+
+1. `src/api/site-rpcs.ts`: drop the `GuestbookRpcs` import and make `SiteRpcs` just `HealthRpcs`.
+2. `src/api/site-rpc-server.ts`: drop the `GuestbookHandlers` import and its `Layer.provide(GuestbookHandlers)` line.
+3. `src/routes/guestbook.tsx`: delete the route file.
+4. `alchemy.run.ts`: drop the `migrations` option from `Cloudflare.D1.Database('Database', …)`.
+
 ### 5. Deploy
 
 Your copy deploys to your own Cloudflare account; the template holds no credentials. Set `CLOUDFLARE_API_TOKEN` (a token that can edit Workers and D1) and `CLOUDFLARE_ACCOUNT_ID`, and optionally `SITE_DOMAIN` (a hostname in a zone on that account) to serve production there instead of on `workers.dev`:

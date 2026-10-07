@@ -2,6 +2,7 @@
   "author": "TODO <todo@example.com>",
   "description": "The one Worker: the starter's TanStack Start site",
   "dependencies": {
+    "@systemfsoftware/effect-cell-types": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-start": "catalog:",
     "effect": "catalog:",
@@ -15,7 +16,12 @@
     "@cloudflare/workers-types": "catalog:",
     "@rolldown/plugin-babel": "catalog:",
     "@systemfsoftware/oxlint-config-recommended": "catalog:",
+    "@systemfsoftware/stryker-ignorer-effect-schema-declarations": "catalog:",
+    "@systemfsoftware/stryker-js": "catalog:",
+    "@systemfsoftware/stryker-js-typescript-checker": "catalog:",
+    "@systemfsoftware/stryker-js-vitest-runner": "catalog:",
     "@systemfsoftware/tsconfig": "catalog:",
+    "@systemfsoftware/vitest": "catalog:",
     "@tanstack/router-cli": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
@@ -26,6 +32,7 @@
     "oxlint": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
+    "vitest": "catalog:",
     "wrangler": "catalog:"
   },
   "license": "Apache-2.0",
@@ -37,7 +44,14 @@
     "generate": "tsr generate",
     "preview": "vite preview",
     "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
+    "mutation": "stryker run",
+    "test": "vitest run --passWithNoTests",
     "typecheck": "tsr generate && tsc --noEmit --incremental && tsc -p tsconfig.node.json --noEmit"
+  },
+  "stryker": {
+    "mutate": [
+      "src/**/*.workflow.ts"
+    ]
   },
   "type": "module",
   "version": "0.0.0"

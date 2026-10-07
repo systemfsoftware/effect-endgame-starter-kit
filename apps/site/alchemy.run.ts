@@ -12,7 +12,7 @@ const productionDomain = (stage: string): { readonly domain?: string } => {
   return stage === 'prod' && domain !== undefined && domain !== '' ? { domain } : {}
 }
 
-export const Database = Cloudflare.D1.Database('Database')
+export const Database = Cloudflare.D1.Database('Database', { migrations: 'src/features/guestbook/migrations' })
 
 export const Site = Cloudflare.Website.Vite(
   'Site',
