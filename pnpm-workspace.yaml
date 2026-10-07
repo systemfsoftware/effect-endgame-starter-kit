@@ -13,7 +13,7 @@ catalog:
   "@commitlint/cli": 21.2.3
   "@commitlint/config-conventional": 21.2.3
   "@commitlint/types": 21.2.3
-  "@effect/tsgo": 0.48.1
+  "@effect/tsgo": 0.50.0
   "@rolldown/plugin-babel": 0.2.4
   "@systemfsoftware/effect-gherkin-spec": 7.0.1
   "@systemfsoftware/oxlint-config-recommended": 4.0.0
