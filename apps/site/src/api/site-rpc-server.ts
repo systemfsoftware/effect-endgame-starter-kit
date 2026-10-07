@@ -4,7 +4,6 @@ import { HttpServer } from 'effect/http'
 import * as Layer from 'effect/Layer'
 import { RpcSerialization, RpcServer } from 'effect/rpc'
 
-import { GuestbookHandlers } from '../features/guestbook/guestbook-handlers'
 import { CheckHealth, checkHealth, ProbeAnswered, ProbeUnanswered } from './check-health.workflow'
 import type { Health } from './health.schema'
 import { HealthRpcs, SITE_RPC_PATH, SiteRpcs } from './site-rpcs'
@@ -25,7 +24,6 @@ const HealthHandlers = HealthRpcs.toLayer({
 
 export const SiteRpcLive = RpcServer.layerHttp({ group: SiteRpcs, path: SITE_RPC_PATH, protocol: 'http' }).pipe(
   Layer.provide(HealthHandlers),
-  Layer.provide(GuestbookHandlers),
   Layer.provide(RpcSerialization.layerJson),
   Layer.provide(HttpServer.layerServices),
 )
