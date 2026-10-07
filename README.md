@@ -1,7 +1,7 @@
 # starter
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Effect: 4.x](https://img.shields.io/badge/Effect-4.0_RC-purple.svg)](https://effect.website)
+[![Effect: 4.0](https://img.shields.io/badge/Effect-4.0-purple.svg)](https://effect.website)
 [![CI](https://github.com/systemfsoftware/starter/actions/workflows/ci.yml/badge.svg)](https://github.com/systemfsoftware/starter/actions/workflows/ci.yml)
 
 > 🏛️ **starter** is an opinionated monorepo template for serious TypeScript with Effect and AI coding agents.
@@ -138,7 +138,7 @@ pnpm check:ci
 ## ❓ Frequently Asked Questions
 
 <details>
-<summary><strong>Why does starter pin Effect 4 RC instead of Effect 3?</strong></summary>
+<summary><strong>Why does starter require Effect 4 instead of Effect 3?</strong></summary>
 
 Effect 4 brings the schema transformations and typed services the template's decisions and boundaries are written with. `starter` targets the future of Effect rather than supporting legacy patterns.
 
