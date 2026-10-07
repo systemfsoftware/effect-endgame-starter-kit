@@ -1,15 +1,3 @@
-diff -r a/darwin.sb b/darwin.sb
---- a/darwin.sb	2026-10-06 11:52:32.479657573 +0000
-+++ b/darwin.sb	2026-10-06 11:53:02.740215397 +0000
-@@ -70,6 +70,8 @@
-   (subpath (param "HOME"))
-   (subpath (param "TMP")))
- 
-+;;GIT;;
-+
- ;;BIND;;
- 
- (allow network-inbound (local ip "localhost:*"))
 diff -r a/sandbox.sh b/sandbox.sh
 --- a/sandbox.sh	2026-10-06 11:52:32.549658863 +0000
 +++ b/sandbox.sh	2026-10-06 12:19:03.271276317 +0000
@@ -50,33 +38,3 @@ diff -r a/sandbox.sh b/sandbox.sh
      if [ -n "${store_view:-}" ]; then args+=(--bind "$store_view" "$store_view"); fi
  
      pubdir=""
-@@ -317,6 +340,17 @@
-     bind_ports=""
-     for spec in "${publishes[@]}"; do bind_ports+="(local ip \"localhost:${spec##*:}\") "; done
-     for port in "${listens[@]}"; do bind_ports+="(local ip \"localhost:$port\") "; done
-+    git_read_write=""
-+    git_read=""
-+    git_ancestors=""
-+    for entry in "${git_rw[@]}"; do
-+      git_read_write+="(subpath \"$entry\") "
-+      git_ancestors+="(path-ancestors \"$entry\") "
-+    done
-+    for entry in "${git_ro[@]}"; do
-+      git_read+="(subpath \"$entry\") "
-+      git_ancestors+="(path-ancestors \"$entry\") "
-+    done
- 
-     profile="$work/profile.sb"
-     while IFS= read -r line; do
-@@ -326,6 +360,11 @@
-         ';;BIND;;')
-           if [ -n "$bind_ports" ]; then printf '(allow network-bind %s)\n' "$bind_ports"; fi
-           ;;
-+        ';;GIT;;')
-+          if [ -n "$git_read_write" ]; then printf '(allow file-read* file-write* %s)\n' "$git_read_write"; fi
-+          if [ -n "$git_read" ]; then printf '(allow file-read* %s)\n' "$git_read"; fi
-+          if [ -n "$git_ancestors" ]; then printf '(allow file-read-metadata %s)\n' "$git_ancestors"; fi
-+          ;;
-         *) printf '%s\n' "$line" ;;
-       esac
-     done <"@darwinProfile@" >"$profile"
