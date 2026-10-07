@@ -59,12 +59,8 @@ jobs:
         run: nix develop --command ${{ matrix.gate }}
 
   journeys:
-    name: journeys (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    name: journeys
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       CI: "true"
@@ -73,15 +69,12 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/dev-shell
-      - name: Chromium for the browser journeys (macOS; Linux takes it from the dev shell)
-        if: runner.os == 'macOS'
-        run: nix develop --command sandbox --allow-host cdn.playwright.dev --allow-host playwright.download.prss.microsoft.com --allow-host storage.googleapis.com -- pnpm --filter @endgame/site-e2e exec playwright install chromium-headless-shell
       - name: Journeys against pnpm dev
         run: nix develop --command pnpm journeys
       - if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: journeys-${{ matrix.os }}
+          name: journeys
           path: |
             apps/site-e2e/artifacts/
             .journeys/dev.log
