@@ -54,10 +54,13 @@ const refusedInside = async (worktree: string, script: string, env?: Record<stri
   return outcome
 }
 
+const providesSandbox = (dir: string): Promise<boolean> =>
+  Deno.stat(`${dir}/sandbox`).then((info) => info.isFile, () => false)
+
 const withoutSandboxOnPath = async (): Promise<string> => {
-  const launcher = await must('sh', ['-c', 'command -v sandbox'])
-  const launcherDir = launcher.slice(0, launcher.lastIndexOf('/'))
-  return (Deno.env.get('PATH') ?? '').split(':').filter((dir) => dir !== launcherDir).join(':')
+  const dirs = (Deno.env.get('PATH') ?? '').split(':')
+  const provides = await Promise.all(dirs.map(providesSandbox))
+  return dirs.filter((_, i) => !provides[i]).join(':')
 }
 
 Deno.test('git hooks run their dependency code inside the sandbox from a linked worktree', async (t) => {
