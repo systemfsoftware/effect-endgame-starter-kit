@@ -128,6 +128,9 @@
         "CI",
         "AGENT"
       ],
+      "passThroughEnv": [
+        "GITHUB_ACTIONS"
+      ],
       "cache": true
     },
     "lint": {

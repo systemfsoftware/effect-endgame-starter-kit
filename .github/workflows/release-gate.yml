@@ -56,7 +56,7 @@ jobs:
           key: stryker-${{ matrix.package }}-${{ github.sha }}
           restore-keys: stryker-${{ matrix.package }}-
       - name: Mutation at break 100
-        run: nix develop --command pnpm exec sandbox -- turbo run mutation --filter="${{ matrix.package }}"
+        run: nix develop --command pnpm exec sandbox --pass-env GITHUB_ACTIONS -- turbo run mutation --filter="${{ matrix.package }}"
       - if: always()
         uses: actions/upload-artifact@v6
         with:
