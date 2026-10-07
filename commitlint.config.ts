@@ -83,14 +83,20 @@ const ALLOWED_BY_SHAPE: readonly {
   },
 ]
 
-const stagedFiles = (): readonly string[] =>
-  execFileSync('git', ['diff', '--cached', '--name-only'], {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'inherit'] as const,
-  })
-    .split('\n')
-    .map((l: string) => l.trim())
-    .filter((l: string) => l.length > 0)
+const stagedFiles = (): readonly string[] => {
+  try {
+    const output = execFileSync('git', ['diff', '--cached', '--name-only'], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'] as const,
+    })
+    return output
+      .split('\n')
+      .map((l: string) => l.trim())
+      .filter((l: string) => l.length > 0)
+  } catch {
+    return []
+  }
+}
 
 const configuration: UserConfig = {
   extends: ['@commitlint/config-conventional'],
