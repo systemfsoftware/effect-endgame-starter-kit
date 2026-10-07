@@ -75,7 +75,7 @@ The repository is structured into two workspace roots defined in `pnpm-workspace
 └── docs/               # Solutions, tooling decisions, and plans
 ```
 
-- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site that calls its Worker through effect/rpc (one RpcGroup served at `/api/rpc`, a typed RpcClient in the page) over one D1 database, defined and deployed with Alchemy. `pnpm dev` emulates the database locally; the Health procedure answers `ok` only when the database answers.
+- [`apps/site`](apps/site) — The one Cloudflare Worker: a TanStack Start site that calls its Worker through effect/rpc (one RpcGroup served at `/api/rpc`, a typed RpcClient in the page) over one D1 database, defined and deployed with Alchemy. `pnpm dev` emulates the database locally; the `health` procedure probes the database and answers `ok` only when the pure decision `check-health.workflow.ts` finds the probe answered, refusing with `DatabaseUnreachable` otherwise.
 - [`apps/site-e2e`](apps/site-e2e) — The end-to-end journeys that run against `pnpm dev` (`pnpm journeys`).
 
 ---
