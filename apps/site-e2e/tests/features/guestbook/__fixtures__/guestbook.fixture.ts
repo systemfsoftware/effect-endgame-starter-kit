@@ -44,13 +44,24 @@ const sign = (page: Page, origin: string, entry: Entry) =>
     return { entries, notice: notice ?? '' } satisfies PageVisit
   })
 
-export const signOnPage = (entry: Entry): Effect.Effect<PageVisit, never, Chromium> =>
+const inFreshContext = <A>(use: (page: Page, origin: string) => Effect.Effect<A>): Effect.Effect<A, never, Chromium> =>
   Effect.gen(function*() {
     const origin = yield* siteUrl
     const browser = yield* Chromium
     return yield* Effect.acquireUseRelease(
       Effect.promise(() => browser.newContext()),
-      (context) => Effect.flatMap(Effect.promise(() => context.newPage()), (page) => sign(page, origin, entry)),
+      (context) => Effect.flatMap(Effect.promise(() => context.newPage()), (page) => use(page, origin)),
       (context) => Effect.promise(() => context.close()),
     )
   })
+
+export const signOnPage = (entry: Entry): Effect.Effect<PageVisit, never, Chromium> =>
+  inFreshContext((page, origin) => sign(page, origin, entry))
+
+export const listedOnPage: Effect.Effect<ReadonlyArray<string>, never, Chromium> = inFreshContext((page, origin) =>
+  Effect.gen(function*() {
+    yield* Effect.promise(() => page.goto(`${origin}/guestbook`))
+    yield* Effect.promise(() => page.waitForFunction(submitEnabled))
+    return yield* Effect.promise(() => page.locator('ol li').allTextContents())
+  })
+)

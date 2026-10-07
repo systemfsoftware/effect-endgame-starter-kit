@@ -2,7 +2,7 @@ import { Gherkin, it, makeFeature, Then, When } from '@systemfsoftware/effect-gh
 import { Effect } from 'effect'
 
 import { ChromiumLive } from '../../__fixtures__/browser.fixture'
-import { signOnPage, uniqueMessage } from './__fixtures__/guestbook.fixture'
+import { listedOnPage, signOnPage, uniqueMessage } from './__fixtures__/guestbook.fixture'
 
 const Feature = makeFeature({ it })
 
@@ -13,20 +13,35 @@ Feature('Signing the guestbook from its page', { timeout: CHROMIUM_TIMEOUT_MS })
   .live('a real Chromium drives the page the running Worker serves, over its local D1 database')
   .body(({ scenario }) => {
     scenario(
-      'A visitor signs with spaces around their words and sees the entry listed, trimmed',
+      'A visitor signs the guestbook and is not refused',
       Gherkin.Do.pipe(
-        When('a visitor signs the guestbook')('signed', () =>
-          Effect.flatMap(uniqueMessage, (message) =>
-            Effect.map(
-              signOnPage({ name: '  Grace  ', message: `  ${message}  ` }),
-              (visit) => ({ message, visit }),
-            ))),
-        Then('the entry appears in the list with no notice')((s, expect) =>
+        When('a visitor signs with spaces around their words')(
+          'signed',
+          () =>
+            Effect.flatMap(uniqueMessage, (message) =>
+              Effect.map(
+                signOnPage({ name: '  Grace  ', message: `  ${message}  ` }),
+                (visit) => ({ message, visit }),
+              )),
+        ),
+        Then('the entry is accepted, trimmed, with no notice')((s, expect) =>
           expect(s.signed.visit).toEqual({
             notice: '',
             entries: expect.arrayContaining([`Grace ${s.signed.message}`]),
           })
         ),
+      ),
+    )
+
+    scenario(
+      'Another visitor sees a signed entry in the list',
+      Gherkin.Do.pipe(
+        When('a guest signs the guestbook')(
+          'message',
+          () => Effect.flatMap(uniqueMessage, (message) => Effect.as(signOnPage({ name: 'Ada', message }), message)),
+        ),
+        When('another visitor opens the guestbook in their own browser')('listed', () => listedOnPage),
+        Then('the entry is in the list')((s, expect) => expect(s.listed).toContain(`Ada ${s.message}`)),
       ),
     )
 
