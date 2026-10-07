@@ -53,6 +53,14 @@
             pkgs.nodejs_24
             pkgs.deno
           ];
+          env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
+            PLAYWRIGHT_BROWSERS_PATH = "${pkgs.playwright-driver.browsers.override {
+              withChromium = false;
+              withFirefox = false;
+              withWebkit = false;
+              withFfmpeg = false;
+            }}";
+          };
         };
       });
     };

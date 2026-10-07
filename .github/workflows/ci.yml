@@ -77,7 +77,7 @@ jobs:
           cache: true
       - run: pnpm install --frozen-lockfile
       - name: Journeys against pnpm dev
-        run: pnpm journeys
+        run: nix develop --command pnpm journeys
       - if: always()
         uses: actions/upload-artifact@v6
         with:
