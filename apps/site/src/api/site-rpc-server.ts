@@ -10,7 +10,7 @@ import { SITE_RPC_PATH, SiteRpcs } from './site-rpcs'
 const healthy: Health = { status: 'ok' }
 
 const HealthHandlers = SiteRpcs.toLayer({
-  Health: () => Effect.promise(() => env.DB.prepare('SELECT 1').first()).pipe(Effect.as(healthy)),
+  health: () => Effect.promise(() => env.DB.prepare('SELECT 1').first()).pipe(Effect.as(healthy)),
 })
 
 export const SiteRpcLive = RpcServer.layerHttp({ group: SiteRpcs, path: SITE_RPC_PATH, protocol: 'http' }).pipe(
