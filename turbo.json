@@ -3,6 +3,7 @@
   "agentGuidance": false,
   "globalPassThroughEnv": [
     "XDG_CACHE_HOME",
+    "SANDBOX",
     "HTTPS_PROXY",
     "HTTP_PROXY",
     "NO_PROXY",
@@ -126,6 +127,9 @@
         "NODE_ENV",
         "CI",
         "AGENT"
+      ],
+      "passThroughEnv": [
+        "GITHUB_ACTIONS"
       ],
       "cache": true
     },
