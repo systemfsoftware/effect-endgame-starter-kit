@@ -78,7 +78,7 @@ jobs:
       - uses: ./.github/actions/dev-shell
       - name: Chromium for the browser journeys (macOS; Linux takes it from the dev shell)
         if: runner.os == 'macOS'
-        run: nix develop --command sandbox --allow-host cdn.playwright.dev --allow-host playwright.download.prss.microsoft.com -- pnpm --filter @endgame/site-e2e exec playwright install chromium-headless-shell
+        run: nix develop --command sandbox --allow-host cdn.playwright.dev --allow-host playwright.download.prss.microsoft.com --allow-host storage.googleapis.com -- pnpm --filter @endgame/site-e2e exec playwright install chromium-headless-shell
       - name: Journeys against pnpm dev
         run: nix develop --command pnpm journeys
       - if: always()
