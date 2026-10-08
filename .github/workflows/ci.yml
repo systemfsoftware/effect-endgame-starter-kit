@@ -79,3 +79,19 @@ jobs:
             apps/site-e2e/artifacts/
             .journeys/dev.log
           if-no-files-found: ignore
+
+  rules:
+    name: rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/dev-shell
+      - name: Main's active rules require every pull-request check
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: nix develop --command pnpm check:branch-rules

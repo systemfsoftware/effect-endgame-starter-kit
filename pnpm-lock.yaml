@@ -322,6 +322,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.1
+      effect:
+        specifier: 'catalog:'
+        version: 4.0.1
       lint-staged:
         specifier: 'catalog:'
         version: 17.6.0

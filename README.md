@@ -127,7 +127,17 @@ To remove it:
 
 Removal leaves a deployed D1 as it is: the `guestbook_entries` table and its `0001_create_guestbook_entries.sql` row in `__alchemy_migrations` stay; drop them from the D1 console in the Cloudflare dashboard with `DROP TABLE guestbook_entries; DELETE FROM __alchemy_migrations WHERE name = '0001_create_guestbook_entries.sql';`.
 
-### 5. Deploy
+### 5. Make the Gates Block Merges
+
+A copy gets the template's files, not its repository settings, so nothing stops a pull request with failing checks from merging until `main` has a ruleset that requires them. Install the "gates" ruleset from [`.github/rulesets/gates.json`](.github/rulesets/gates.json) once, with your own GitHub credentials:
+
+```bash
+gh api -X POST repos/{owner}/{repo}/rulesets --input .github/rulesets/gates.json
+```
+
+Until it is installed, CI's `rules` check fails on every pull request and every push to `main`, and the production deploy waits on it.
+
+### 6. Deploy
 
 Your copy deploys to your own Cloudflare account; the template holds no credentials. Set `CLOUDFLARE_API_TOKEN` (a token that can edit Workers and D1) and `CLOUDFLARE_ACCOUNT_ID`, and optionally `SITE_DOMAIN` (a hostname in a zone on that account) to serve production there instead of on `workers.dev`:
 
