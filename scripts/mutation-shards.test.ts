@@ -68,12 +68,16 @@ Deno.test('a mutation script without declared mutate globs is refused', async ()
   })
 })
 
-Deno.test('a workspace without a single *.workflow.ts file has no decisions to mutate', async () => {
+Deno.test('a workspace without a single *.workflow.ts file is refused as an empty set', async () => {
   const root = await workspaceOf([
     { name: 'site', mutate: ['src/**/*.workflow.ts'], files: ['src/page.tsx'] },
     { name: 'tools', mutation: false, files: ['src/cli.ts'] },
   ])
-  assertEquals(await planMutationShards(root), { packages: [], refusals: [], decisions: 0 })
+  assertEquals(await planMutationShards(root), {
+    packages: [],
+    refusals: ['no workspace package has a *.workflow.ts file; the release gate refuses an empty set'],
+    decisions: 0,
+  })
 })
 
 Deno.test('decisions that no package mutates are refused as an empty set', async () => {
