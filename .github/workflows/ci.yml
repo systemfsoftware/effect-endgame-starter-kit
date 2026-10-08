@@ -92,8 +92,6 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/dev-shell
-        with:
-          install: "false"
       - name: Main's active rules require every pull-request check
         env:
           GITHUB_TOKEN: ${{ github.token }}
