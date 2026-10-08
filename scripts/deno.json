@@ -3,12 +3,12 @@
     "strict": true,
     "noImplicitOverride": true
   },
+  "nodeModulesDir": "manual",
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "@std/cli/parse-args": "jsr:@std/cli@1/parse-args",
     "@std/fs/expand-glob": "jsr:@std/fs@1/expand-glob",
     "@std/path": "jsr:@std/path@1",
-    "@std/yaml": "jsr:@std/yaml@1",
-    "effect": "npm:effect@4.0.1"
+    "@std/yaml": "jsr:@std/yaml@1"
   }
 }
