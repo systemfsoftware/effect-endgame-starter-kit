@@ -62,8 +62,7 @@
         "commitlint.config.ts",
         ".lintstagedrc.js",
         "oxlint.shared.ts",
-        "stryker.shared.ts",
-        "vitest.shared.ts"
+        "stryker.shared.ts"
       ],
       "outputs": [],
       "cache": true
@@ -83,7 +82,6 @@
         "$TURBO_DEFAULT$",
         "vitest.config.ts",
         "vitest.config.*",
-        "$TURBO_ROOT$/vitest.shared.ts",
         "src/**/*.test.ts",
         "src/**/*.spec.ts",
         "!**/README.md",
@@ -114,7 +112,6 @@
         "stryker.config.ts",
         "vitest.config.ts",
         "$TURBO_ROOT$/stryker.shared.ts",
-        "$TURBO_ROOT$/vitest.shared.ts",
         "vitest.setup.ts",
         "reports/stryker-incremental.json",
         "!**/*.md"
