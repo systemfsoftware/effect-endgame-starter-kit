@@ -42,7 +42,13 @@ export const planMutationShards = async (root: string): Promise<ShardPlan> => {
       }
     }
   }
-  if (decisions === 0) return { packages: [], refusals: [], decisions }
+  if (decisions === 0) {
+    return {
+      packages: [],
+      refusals: ['no workspace package has a *.workflow.ts file; the release gate refuses an empty set'],
+      decisions,
+    }
+  }
   if (packages.length === 0 && refusals.length === 0) {
     refusals.push(
       `${decisions} *.workflow.ts file(s) but no workspace package declares a \`mutation\` script; the release gate refuses an empty set`,
@@ -57,9 +63,6 @@ if (import.meta.main) {
   if (plan.refusals.length > 0) {
     for (const refusal of plan.refusals) console.error(`mutation-shards: ${refusal}`)
     Deno.exit(1)
-  }
-  if (plan.decisions === 0) {
-    console.log('::notice title=Release gate::No decisions to mutate: no workspace package has a *.workflow.ts file.')
   }
   const line = `packages=${JSON.stringify(plan.packages)}`
   console.error(`mutation-shards: ${line}`)
