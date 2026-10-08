@@ -107,7 +107,6 @@ const configuration: UserConfig = {
     'body-leading-blank': [1, 'always'],
     'footer-leading-blank': [1, 'always'],
     'references-empty': [1, 'never'],
-
     // DELETED: 'type-matches-diff-shape' — heuristic that hard-failed agents
     // and its plugin for no downstream benefit. Do not reintroduce.
   },
