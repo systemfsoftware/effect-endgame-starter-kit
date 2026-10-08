@@ -1,4 +1,4 @@
 {
   "extends": "@systemfsoftware/tsconfig/node",
-  "include": ["commitlint.config.ts", ".lintstagedrc.js", "oxlint.shared.ts", "stryker.shared.ts", "vitest.shared.ts"]
+  "include": ["commitlint.config.ts", ".lintstagedrc.js", "oxlint.shared.ts", "stryker.shared.ts"]
 }
