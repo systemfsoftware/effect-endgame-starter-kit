@@ -17,7 +17,7 @@ export const REQUIRED_CHECKS = [
 const StatusChecksRule = S.Struct({
   type: S.Literal('required_status_checks'),
   parameters: S.Struct({
-    required_status_checks: S.Array(S.Struct({ context: S.String, integration_id: S.optionalKey(S.Int) })),
+    required_status_checks: S.Array(S.Struct({ context: S.String, integration_id: S.optionalKey(S.NullOr(S.Int)) })),
   }),
 })
 type StatusChecksRule = S.Schema.Type<typeof StatusChecksRule>

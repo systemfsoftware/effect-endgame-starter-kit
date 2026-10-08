@@ -40,6 +40,8 @@ const PULL_REQUEST = {
   },
 }
 
+const INTEGRATION_IDS = [{ integration_id: 15368 }, { integration_id: null }, {}]
+
 const statusChecks = (contexts: readonly string[]) => ({
   type: 'required_status_checks',
   ruleset_source_type: 'Repository',
@@ -47,7 +49,10 @@ const statusChecks = (contexts: readonly string[]) => ({
   ruleset_id: 1,
   parameters: {
     strict_required_status_checks_policy: false,
-    required_status_checks: contexts.map((context) => ({ context, integration_id: 15368 })),
+    required_status_checks: contexts.map((context, index) => ({
+      context,
+      ...INTEGRATION_IDS[index % INTEGRATION_IDS.length],
+    })),
   },
 })
 
