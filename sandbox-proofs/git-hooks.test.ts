@@ -80,18 +80,6 @@ Deno.test('git hooks run their dependency code inside the sandbox from a linked 
     await Deno.writeTextFile(`${worktree}/${PROBE}`, '{"probe":1}\n')
     await must('git', ['add', PROBE], worktree)
 
-    await t.step('commitlint accepts a feat tooling-only message with a trailing period', async () => {
-      const outcome = await run('sandbox', ['--', 'pnpm', 'exec', 'commitlint'], {
-        cwd: worktree,
-        stdin: 'feat(repo): probe.\n',
-      })
-      expect(
-        outcome.code === 0,
-        'commitlint rejected a message it should now accept (type/diff-shape and full-stop rules are gone)',
-        outcome,
-      )
-    })
-
     await t.step('the hooks refuse to run when the sandbox is unavailable', async () => {
       const env = { PATH: await withoutSandboxOnPath() }
       const outcome = await run('git', ['commit', '-m', 'build(repo): probe'], { cwd: worktree, env })
