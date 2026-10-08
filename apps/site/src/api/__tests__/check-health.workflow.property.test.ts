@@ -11,7 +11,10 @@ describe('checkHealth — the Worker is healthy exactly when the database answer
     (subject, { command }) =>
       Result.match(subject(command), {
         onSuccess: () => S.is(ProbeAnswered)(command.probe),
-        onFailure: (refused) => S.is(DatabaseUnreachable)(refused) && !S.is(ProbeAnswered)(command.probe),
+        onFailure: (refused) =>
+          S.is(DatabaseUnreachable)(refused) &&
+          refused.message === 'The database did not answer the health probe.' &&
+          !S.is(ProbeAnswered)(command.probe),
       }),
   )
 })
