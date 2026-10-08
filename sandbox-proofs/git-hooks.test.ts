@@ -80,11 +80,14 @@ Deno.test('git hooks run their dependency code inside the sandbox from a linked 
     await Deno.writeTextFile(`${worktree}/${PROBE}`, '{"probe":1}\n')
     await must('git', ['add', PROBE], worktree)
 
-    await t.step('a feat commit of a tooling-only change is refused by commitlint', async () => {
-      const outcome = await run('git', ['commit', '-m', 'feat(repo): probe'], { cwd: worktree })
+    await t.step('commitlint accepts a feat tooling-only message with a trailing period', async () => {
+      const outcome = await run('sandbox', ['--', 'pnpm', 'exec', 'commitlint'], {
+        cwd: worktree,
+        stdin: 'feat(repo): probe.\n',
+      })
       expect(
-        outcome.code !== 0 && outcome.out.includes('100% tooling paths'),
-        'the diff-shape rule did not refuse',
+        outcome.code === 0,
+        'commitlint rejected a message it should now accept (type/diff-shape and full-stop rules are gone)',
         outcome,
       )
     })
@@ -118,12 +121,6 @@ Deno.test('git hooks run their dependency code inside the sandbox from a linked 
 
     await t.step("a commit of named paths is graded and formatted against git's temporary index", async () => {
       await Deno.writeTextFile(`${worktree}/${PROBE}`, '{"probe":2}\n')
-      const refused = await run('git', ['commit', '-m', 'feat(repo): probe', PROBE], { cwd: worktree })
-      expect(
-        refused.code !== 0 && refused.out.includes('100% tooling paths'),
-        'the hooks graded the wrong index',
-        refused,
-      )
       const landed = await run('git', ['commit', '-m', 'build(repo): named path probe', PROBE], { cwd: worktree })
       const subject = await must('git', ['log', '-1', '--format=%s'], worktree)
       const committed = await must('git', ['show', `HEAD:${PROBE}`], worktree)
@@ -132,18 +129,6 @@ Deno.test('git hooks run their dependency code inside the sandbox from a linked 
           subject === 'build(repo): named path probe' && committed === '{ "probe": 2 }',
         'a commit of named paths failed in the hooks',
         landed,
-      )
-    })
-
-    await t.step("commitlint fails with git's error when git cannot read the index", async () => {
-      const outcome = await run('sandbox', ['--', 'env', 'GIT_DIR=/nonexistent', 'pnpm', 'exec', 'commitlint'], {
-        cwd: worktree,
-        stdin: 'feat(repo): probe\n',
-      })
-      expect(
-        outcome.code !== 0 && outcome.out.includes('Command failed: git diff --cached --name-only'),
-        'git failed silently',
-        outcome,
       )
     })
 
