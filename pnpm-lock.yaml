@@ -292,6 +292,7 @@ overrides:
   '@systemfsoftware/stryker-js-vm-runner': file:.sfs-deps/stryker-js-vitest-runner-8.1.1.tgz
   '@systemfsoftware/tsconfig': file:.sfs-deps/tsconfig-2.0.1.tgz
   '@systemfsoftware/vitest': file:.sfs-deps/vitest-2.0.0.tgz
+  '@systemfsoftware/xstate': file:.sfs-deps/xstate-6.0.0-alpha.64.tgz
   workerd: 1.20261005.1
 
 importers:
@@ -352,6 +353,9 @@ importers:
       '@systemfsoftware/effect-cell-types':
         specifier: file:../../.sfs-deps/effect-cell-types-12.0.0.tgz
         version: file:.sfs-deps/effect-cell-types-12.0.0.tgz(effect@4.0.1)
+      '@systemfsoftware/xstate':
+        specifier: file:../../.sfs-deps/xstate-6.0.0-alpha.64.tgz
+        version: file:.sfs-deps/xstate-6.0.0-alpha.64.tgz
       '@tanstack/react-router':
         specifier: 'catalog:'
         version: 1.170.41(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -2847,6 +2851,10 @@ packages:
     peerDependencies:
       effect: ^4
       vitest: ^5
+
+  '@systemfsoftware/xstate@file:.sfs-deps/xstate-6.0.0-alpha.64.tgz':
+    resolution: {integrity: sha512-NsN1kippHN4OJ5BR2wijgo3Qn04PTL1L5wwwoWUFgDGTmpZLoaq1RQuuXV4UjGTTDAJpTUew+6U+Lfq6YwUd4Q==, tarball: file:.sfs-deps/xstate-6.0.0-alpha.64.tgz}
+    version: 6.0.0-alpha.64
 
   '@tanstack/history@1.162.4':
     resolution: {integrity: sha512-utTS5L2OkeYUzXGohL1Z8sefu1GLNOJcxe8Hd6iIdc/Xo1K1nDB2JEp4iSFhvYh33xKC9V91TxrS8qfrpoKobQ==}
@@ -6370,6 +6378,8 @@ snapshots:
       - bufferutil
       - redis
       - utf-8-validate
+
+  '@systemfsoftware/xstate@file:.sfs-deps/xstate-6.0.0-alpha.64.tgz': {}
 
   '@tanstack/history@1.162.4': {}
 

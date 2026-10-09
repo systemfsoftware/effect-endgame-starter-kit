@@ -1,5 +1,22 @@
 {
   "nodes": {
+    "are-the-types-wrong-effect": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789533049,
+        "narHash": "sha256-UsnhLvTURM27VB3T/gxc6Oql/av0FYYI6nLv5UBKusw=",
+        "owner": "systemfsoftware",
+        "repo": "are-the-types-wrong-effect",
+        "rev": "d43a8020f7dc82a32de410823c6da5298c53a3b6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "are-the-types-wrong-effect",
+        "rev": "d43a8020f7dc82a32de410823c6da5298c53a3b6",
+        "type": "github"
+      }
+    },
     "comment-checker": {
       "inputs": {
         "nixpkgs": [
@@ -13,6 +30,75 @@
         "owner": "systemfsoftware",
         "repo": "comment-checker",
         "rev": "00cc6a6bac7756d1e59d30fd566623e9b21443eb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "type": "github"
+      }
+    },
+    "comment-checker_2": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_3"
+      },
+      "locked": {
+        "lastModified": 1790884787,
+        "narHash": "sha256-XZz0bdSY5zjlRDme0dfC98oYcAf3WOpMCueoU39iXjY=",
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "rev": "3bfedd853c1d6dca666e65e71e9f8a31d47db336",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "type": "github"
+      }
+    },
+    "comment-checker_3": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "release-tools",
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_4"
+      },
+      "locked": {
+        "lastModified": 1790884787,
+        "narHash": "sha256-XZz0bdSY5zjlRDme0dfC98oYcAf3WOpMCueoU39iXjY=",
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "rev": "3bfedd853c1d6dca666e65e71e9f8a31d47db336",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "type": "github"
+      }
+    },
+    "comment-checker_4": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "systemfsoftware",
+          "pnpm-release-management",
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_5"
+      },
+      "locked": {
+        "lastModified": 1790884787,
+        "narHash": "sha256-XZz0bdSY5zjlRDme0dfC98oYcAf3WOpMCueoU39iXjY=",
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "rev": "3bfedd853c1d6dca666e65e71e9f8a31d47db336",
         "type": "github"
       },
       "original": {
@@ -42,7 +128,70 @@
         "type": "github"
       }
     },
+    "importPnpmLock_2": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "nixpkgs"
+        ],
+        "systems": "systems_2"
+      },
+      "locked": {
+        "lastModified": 1790096829,
+        "narHash": "sha256-mnjMXjY/fo5OQH/iYNPijIqo0jAb/z7EhHtfXLlzOrs=",
+        "owner": "Scrumplex",
+        "repo": "importPnpmLock.nix",
+        "rev": "ca18d47b0e98a4b51404f69ce5ab51efb6ebc151",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Scrumplex",
+        "repo": "importPnpmLock.nix",
+        "type": "github"
+      }
+    },
+    "importPnpmLock_3": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "systemfsoftware",
+          "pnpm-release-management",
+          "nixpkgs"
+        ],
+        "systems": "systems_3"
+      },
+      "locked": {
+        "lastModified": 1790096829,
+        "narHash": "sha256-mnjMXjY/fo5OQH/iYNPijIqo0jAb/z7EhHtfXLlzOrs=",
+        "owner": "Scrumplex",
+        "repo": "importPnpmLock.nix",
+        "rev": "ca18d47b0e98a4b51404f69ce5ab51efb6ebc151",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Scrumplex",
+        "repo": "importPnpmLock.nix",
+        "rev": "ca18d47b0e98a4b51404f69ce5ab51efb6ebc151",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
+      "locked": {
+        "lastModified": 1791191277,
+        "narHash": "sha256-i8KuaINOYLvB2oQikGvtRmdZRxATRxsI9Yad2pp7dEA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "aa48d347080940b8a2b8d2f48228674e280a3514",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
       "locked": {
         "lastModified": 1791191277,
         "narHash": "sha256-i8KuaINOYLvB2oQikGvtRmdZRxATRxsI9Yad2pp7dEA=",
@@ -85,6 +234,77 @@
         "type": "github"
       }
     },
+    "pnpm-release-management_2": {
+      "inputs": {
+        "comment-checker": [
+          "systemfsoftware-xstate",
+          "comment-checker"
+        ],
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791289049,
+        "narHash": "sha256-EaB7hYyD684/oCH9VgDiHcJw2vAuLf8InlZGFPxN2hE=",
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "8f1984418fef130956a3d1f50dc471fd1984d2ec",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "8f1984418fef130956a3d1f50dc471fd1984d2ec",
+        "type": "github"
+      }
+    },
+    "pnpm-release-management_3": {
+      "inputs": {
+        "comment-checker": "comment-checker_4",
+        "importPnpmLock": "importPnpmLock_3",
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "systemfsoftware",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791325964,
+        "narHash": "sha256-csqhLDOiIfTNnDDIkxHTYyTPnk6Zs/cPwnOIbsDeRrw=",
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "5eb4c5d5a607d2f9470a21237b2316a858ae1776",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "5eb4c5d5a607d2f9470a21237b2316a858ae1776",
+        "type": "github"
+      }
+    },
+    "release-tools": {
+      "inputs": {
+        "comment-checker": "comment-checker_3",
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1791338691,
+        "narHash": "sha256-08KabPJqTo7qKVyxH0H8EM+utl24QKOTAhqGaKjItlI=",
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "c10c1c47121110b6fc5217251c07e6f7f3eb812d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "c10c1c47121110b6fc5217251c07e6f7f3eb812d",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "comment-checker": "comment-checker",
@@ -92,7 +312,8 @@
         "nixpkgs": "nixpkgs",
         "pnpm-release-management": "pnpm-release-management",
         "stryker-js-effect": "stryker-js-effect",
-        "systemfsoftware": "systemfsoftware"
+        "systemfsoftware": "systemfsoftware",
+        "systemfsoftware-xstate": "systemfsoftware-xstate"
       }
     },
     "rust-overlay": {
@@ -119,6 +340,97 @@
     "rust-overlay_2": {
       "inputs": {
         "nixpkgs": [
+          "systemfsoftware",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790928989,
+        "narHash": "sha256-5r3MN/Rx7N9tLapCBmUq6/zCc3C9J7gNif1HybD1fJQ=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "368fee9beaab04ca6fe7af28db63caa9badb22fa",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "comment-checker",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790756160,
+        "narHash": "sha256-NPs4nNLxCpho3Ctj8O7t/bzmX0zR8r0zndKghAFEz5U=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "ed3a19fd0439ed618ec5fe1e12f0ba69a8be38b5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_4": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "release-tools",
+          "comment-checker",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790756160,
+        "narHash": "sha256-NPs4nNLxCpho3Ctj8O7t/bzmX0zR8r0zndKghAFEz5U=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "ed3a19fd0439ed618ec5fe1e12f0ba69a8be38b5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_5": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "systemfsoftware",
+          "pnpm-release-management",
+          "comment-checker",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790756160,
+        "narHash": "sha256-NPs4nNLxCpho3Ctj8O7t/bzmX0zR8r0zndKghAFEz5U=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "ed3a19fd0439ed618ec5fe1e12f0ba69a8be38b5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_6": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
           "systemfsoftware",
           "nixpkgs"
         ]
@@ -170,6 +482,23 @@
         "type": "github"
       }
     },
+    "stryker-js-effect_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1791330724,
+        "narHash": "sha256-e7AS4Mmt3qsW5UvUzXZYhR1qJkrklZkZl2ir707nJAU=",
+        "owner": "systemfsoftware",
+        "repo": "stryker-js-effect",
+        "rev": "3db0c428530803e6b425a834a64b2764fd6ee41b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "stryker-js-effect",
+        "rev": "3db0c428530803e6b425a834a64b2764fd6ee41b",
+        "type": "github"
+      }
+    },
     "systemfsoftware": {
       "inputs": {
         "comment-checker": [
@@ -198,7 +527,111 @@
         "type": "github"
       }
     },
+    "systemfsoftware-effect-cell-types-7": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1789152418,
+        "narHash": "sha256-j6RoO74XnpW0zJX6CKdp6eW88WkptcqXWPFEXZsiELY=",
+        "owner": "systemfsoftware",
+        "repo": "systemfsoftware",
+        "rev": "4cf0f77016f1827fc54ed00144cc85e00eb729a1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "systemfsoftware",
+        "rev": "4cf0f77016f1827fc54ed00144cc85e00eb729a1",
+        "type": "github"
+      }
+    },
+    "systemfsoftware-xstate": {
+      "inputs": {
+        "are-the-types-wrong-effect": "are-the-types-wrong-effect",
+        "comment-checker": "comment-checker_2",
+        "importPnpmLock": "importPnpmLock_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "pnpm-release-management": "pnpm-release-management_2",
+        "release-tools": "release-tools",
+        "stryker-js-effect": "stryker-js-effect_2",
+        "systemfsoftware": "systemfsoftware_2",
+        "systemfsoftware-effect-cell-types-7": "systemfsoftware-effect-cell-types-7"
+      },
+      "locked": {
+        "lastModified": 1791513925,
+        "narHash": "sha256-Us5JhH7g3hHjTufGedIuM5rpnzr+HHjfEGM7vJTPkpQ=",
+        "owner": "systemfsoftware",
+        "repo": "xstate",
+        "rev": "84e602e77a562be7ac3c293f7b39eed23e503d69",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "ref": "main",
+        "repo": "xstate",
+        "type": "github"
+      }
+    },
+    "systemfsoftware_2": {
+      "inputs": {
+        "comment-checker": [
+          "systemfsoftware-xstate",
+          "comment-checker"
+        ],
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "nixpkgs"
+        ],
+        "pnpm-release-management": "pnpm-release-management_3",
+        "rust-overlay": "rust-overlay_6"
+      },
+      "locked": {
+        "lastModified": 1791330870,
+        "narHash": "sha256-2L8GdzF71zucIf/qS5fdSg0daiItvOrP1/j7Er2hicI=",
+        "owner": "systemfsoftware",
+        "repo": "systemfsoftware",
+        "rev": "217c80d5d52c17d03d4aeb83b580ef97ed986c85",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "systemfsoftware",
+        "rev": "217c80d5d52c17d03d4aeb83b580ef97ed986c85",
+        "type": "github"
+      }
+    },
     "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_2": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_3": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",

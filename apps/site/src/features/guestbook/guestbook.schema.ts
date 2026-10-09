@@ -12,6 +12,12 @@ export const EntryId = S.Int.pipe(
 )
 export type EntryId = S.Schema.Type<typeof EntryId>
 
+export const EntryState = S.Literals(['Visible', 'Flagged', 'Hidden'])
+export type EntryState = S.Schema.Type<typeof EntryState>
+
+export const LifecycleEvent = S.Literals(['Flag', 'Vouch'])
+export type LifecycleEvent = S.Schema.Type<typeof LifecycleEvent>
+
 export const GuestbookEntry = S.Struct({ id: EntryId, guest: GuestName, message: GuestMessage })
 export type GuestbookEntry = S.Schema.Type<typeof GuestbookEntry>
 
