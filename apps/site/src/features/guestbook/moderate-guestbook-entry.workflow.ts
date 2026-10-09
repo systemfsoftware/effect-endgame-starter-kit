@@ -1,5 +1,5 @@
 import { Workflow } from '@systemfsoftware/effect-cell-types'
-import { createMachine, type StateMachine } from '@systemfsoftware/xstate'
+import { createMachine } from '@systemfsoftware/xstate'
 import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
@@ -32,53 +32,14 @@ export class IllegalTransition extends S.TaggedError<IllegalTransition>()('Illeg
   }
 }
 
-const machine = createMachine({
+const lifecycle = createMachine({
   initial: 'Visible',
   states: {
     Visible: { on: { Flag: { target: 'Flagged' } } },
     Flagged: { on: { Vouch: { target: 'Visible' }, Flag: { target: 'Hidden' } } },
     Hidden: {},
   },
-})
-
-type MachineWidenedToStateMachine = typeof machine extends StateMachine<
-  infer Context,
-  infer Event,
-  infer Children,
-  infer Value,
-  infer Tag,
-  infer Input,
-  infer Output,
-  infer Emitted,
-  infer Meta,
-  infer Config,
-  infer Actions,
-  infer Actors,
-  infer Guards,
-  infer Delays,
-  infer InternalEvent,
-  infer TransitionMeta
-> ? StateMachine<
-    Context,
-    Event,
-    Children,
-    Value,
-    Tag,
-    Input,
-    Output,
-    Emitted,
-    Meta,
-    Config,
-    Actions,
-    Actors,
-    Guards,
-    Delays,
-    InternalEvent,
-    TransitionMeta
-  >
-  : never
-
-const lifecycle: MachineWidenedToStateMachine = machine
+}).provide({})
 
 export const moderateGuestbookEntry = Workflow.make({
   command: ModerateGuestbookEntry,
