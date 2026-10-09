@@ -51,6 +51,7 @@ catalog:
   "@systemfsoftware/stryker-js-vm-runner": file:.sfs-deps/stryker-js-vitest-runner-8.1.1.tgz
   "@systemfsoftware/tsconfig": file:.sfs-deps/tsconfig-2.0.1.tgz
   "@systemfsoftware/vitest": file:.sfs-deps/vitest-2.0.0.tgz
+  "@systemfsoftware/xstate": file:.sfs-deps/xstate-6.0.0-alpha.64.tgz
   "@tanstack/react-router": 1.170.41
   "@tanstack/react-start": 1.168.60
   "@tanstack/router-cli": 1.167.40
@@ -116,6 +117,7 @@ overrides:
   "@systemfsoftware/stryker-js-vm-runner": "catalog:"
   "@systemfsoftware/tsconfig": "catalog:"
   "@systemfsoftware/vitest": "catalog:"
+  "@systemfsoftware/xstate": "catalog:"
   workerd: 1.20261005.1
 packages:
   - apps/*

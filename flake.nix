@@ -29,6 +29,10 @@
       inputs.pnpm-release-management.follows = "pnpm-release-management";
       inputs.systemfsoftware.follows = "systemfsoftware";
     };
+    systemfsoftware-xstate = {
+      url = "github:systemfsoftware/xstate/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # The pnpm store is hashless: each tarball's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
     importPnpmLock = {
       url = "github:Scrumplex/importPnpmLock.nix";
@@ -36,7 +40,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware, stryker-js-effect, importPnpmLock }:
+  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware, stryker-js-effect, systemfsoftware-xstate, importPnpmLock }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" ];
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
@@ -54,10 +58,10 @@
           };
           sfs-deps = pkgs.runCommand "sfs-deps" { nativeBuildInputs = [ pkgs.jq ]; } ''
             mkdir $out
-            for dir in ${systemfsoftware.packages.${system}.workspace-tarballs} ${stryker-js-effect.packages.${system}.workspace-tarballs}; do
+            for dir in ${systemfsoftware.packages.${system}.workspace-tarballs} ${stryker-js-effect.packages.${system}.workspace-tarballs} ${systemfsoftware-xstate.packages.${system}.workspace-tarballs}; do
               cp "$dir"/*.tgz $out/
             done
-            jq -s add ${systemfsoftware.packages.${system}.workspace-tarballs}/index.json ${stryker-js-effect.packages.${system}.workspace-tarballs}/index.json > $out/index.json
+            jq -s add ${systemfsoftware.packages.${system}.workspace-tarballs}/index.json ${stryker-js-effect.packages.${system}.workspace-tarballs}/index.json ${systemfsoftware-xstate.packages.${system}.workspace-tarballs}/index.json > $out/index.json
           '';
           pnpm-store = pnpm-release-management.lib.mkPnpmConsumerStore {
             inherit pkgs;

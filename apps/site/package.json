@@ -3,6 +3,7 @@
   "description": "The one Worker: the starter's TanStack Start site",
   "dependencies": {
     "@systemfsoftware/effect-cell-types": "catalog:",
+    "@systemfsoftware/xstate": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-start": "catalog:",
     "effect": "catalog:",

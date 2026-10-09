@@ -124,6 +124,10 @@ To remove it:
 4. `apps/site/src/api/site-rpcs.ts`: drop the `GuestbookRpcs` import and make `SiteRpcs` just `HealthRpcs`.
 5. `apps/site/src/api/site-rpc-server.ts`: drop the `GuestbookHandlers` import and its `Layer.provide(GuestbookHandlers)` line.
 6. `apps/site/alchemy.run.ts`: drop the `migrations` option from `Cloudflare.D1.Database('Database', …)`.
+7. `pnpm-workspace.yaml`: drop the `@systemfsoftware/xstate` line under `catalog:` and its mirror under `overrides:`; `apps/site/package.json`: drop the `@systemfsoftware/xstate` dependency.
+8. `flake.nix`: drop the `systemfsoftware-xstate` input, its name in the `outputs` arguments, and its two places in the `sfs-deps` derivation (the copy loop and the `jq -s add` merge); then run `nix flake lock`.
+9. Run `pnpm install`.
+10. Delete this README's guestbook text, from "The site ships one example feature" through the D1 note below.
 
 Removal leaves a deployed D1 as it is: the `guestbook_entries` table and its `0001_create_guestbook_entries.sql` row in `__alchemy_migrations` stay; drop them from the D1 console in the Cloudflare dashboard with `DROP TABLE guestbook_entries; DELETE FROM __alchemy_migrations WHERE name = '0001_create_guestbook_entries.sql';`.
 
