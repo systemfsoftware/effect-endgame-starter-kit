@@ -313,6 +313,9 @@ importers:
       '@systemfsoftware/oxlint-config-recommended':
         specifier: file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz
         version: file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz(effect@4.0.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)
+      '@systemfsoftware/oxlint-plugin-test-discipline':
+        specifier: file:.sfs-deps/oxlint-plugin-test-discipline-5.0.0.tgz
+        version: file:.sfs-deps/oxlint-plugin-test-discipline-5.0.0.tgz(effect@4.0.1)(typescript@7.0.2)
       '@systemfsoftware/stryker-js':
         specifier: file:.sfs-deps/stryker-js-17.0.2.tgz
         version: file:.sfs-deps/stryker-js-17.0.2.tgz(@opentelemetry/api-logs@0.222.0)(@opentelemetry/resources@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.43.0)(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
@@ -967,8 +970,8 @@ packages:
     peerDependencies:
       effect: ^4.0.1
 
-  '@effect/tsgo-darwin-arm64@0.45.0':
-    resolution: {integrity: sha512-WUoiEVcm8E19QK6fl63lsssM4dkT9IFnULbmqQ6LBfv7H9uRkpE9S3thj8ZtZ+vl/QY8atwfuaTf+3A1m/kGtQ==}
+  '@effect/tsgo-darwin-arm64@0.50.0':
+    resolution: {integrity: sha512-CtpXnQbf2BXavXeY3g/LZinyXWEsMftVcbla0zbwe4HiGqueUaacCqI1HTGZ2JUFYo/3M5MsnFFe2VCWW0wj4w==}
     cpu: [arm64]
     os: [darwin]
 
@@ -977,8 +980,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@effect/tsgo-darwin-x64@0.45.0':
-    resolution: {integrity: sha512-s3yz7ZfIzvObXJ/r5xd9sEPxHKC3L+D+yedS1BV2Kpn47Je2svYCNYKxzXIpqFLkNjK+RcOQrcfYbYEpKZZa6g==}
+  '@effect/tsgo-darwin-x64@0.50.0':
+    resolution: {integrity: sha512-SC3Tk1nDtjUA+UYg3qyyKUz62/mhpPOdhL9HmBBI+Cksg3XXjYw8cenmDT24yJKiwFxO3AbYQ0siXy3QrYaOdQ==}
     cpu: [x64]
     os: [darwin]
 
@@ -987,8 +990,8 @@ packages:
     cpu: [x64]
     os: [darwin]
 
-  '@effect/tsgo-linux-arm64@0.45.0':
-    resolution: {integrity: sha512-N+lyzixtylOOn49demDaqg0kb/U8ISxM10Gphs1pIMSGlqlfqC4inYEoFpYej+f4T/cRlkA11Ue7wJzNz83ePA==}
+  '@effect/tsgo-linux-arm64@0.50.0':
+    resolution: {integrity: sha512-u6oBSeK9bL7Ta5OJX/v92AErjl+9YQXZuHPuWGsajia6cV2IpyR5UwbOX2ekk4V2QhVpSzmSIYVIEkq9jOL6Pg==}
     cpu: [arm64]
     os: [linux]
 
@@ -997,8 +1000,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  '@effect/tsgo-linux-arm@0.45.0':
-    resolution: {integrity: sha512-f6zL6YbWA9lXdfJ//KOjUz/U3CdGtajKi5NsR/lcQaKfZiJwHfeeLBB3yetF3qbPGSA149/kuMoDMWL13RUH3A==}
+  '@effect/tsgo-linux-arm@0.50.0':
+    resolution: {integrity: sha512-qLJdYvGw4mrMrjonhqzSkwByR4X5SlUhG2Pg0LIlKVSy21B0RxLQ2Sg1Re90XpwQCcFCV1byoqW4QLT6A1YDcQ==}
     cpu: [arm]
     os: [linux]
 
@@ -1007,8 +1010,8 @@ packages:
     cpu: [arm]
     os: [linux]
 
-  '@effect/tsgo-linux-x64@0.45.0':
-    resolution: {integrity: sha512-aWt0G8celAxJOis4+xiILkyMP/3J+vukimUhSoCmUAPt8zoT9qhZcN64XYZE7jfqp88ByRdgN9GK1/C7YfPtcQ==}
+  '@effect/tsgo-linux-x64@0.50.0':
+    resolution: {integrity: sha512-x7Xz7IPP/4CKHaWk58tm+LpgMPAwNXGQcLXZAkWUoarjcXzrDG3QCoEjnIpCRSzL7O8ykShApgGcYv0Pd2tJkA==}
     cpu: [x64]
     os: [linux]
 
@@ -1017,8 +1020,8 @@ packages:
     cpu: [x64]
     os: [linux]
 
-  '@effect/tsgo-win32-arm64@0.45.0':
-    resolution: {integrity: sha512-EAdeV366ja+M4XCx6xjXMv4Xkc0Fgzy4bapa0saDWcGhllNLqJDfOk4lk0BgAEjBUI8+0xC+PXKVB5SMz4EpVA==}
+  '@effect/tsgo-win32-arm64@0.50.0':
+    resolution: {integrity: sha512-VK3PTybFLmwKI50FMcNeX1LpPv9m55coKv+PKLj7gkb91YZIUooQ7hQJdSUhiuCTaUU3kikHQpnW7UbN9q4zDw==}
     cpu: [arm64]
     os: [win32]
 
@@ -1027,8 +1030,8 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@effect/tsgo-win32-x64@0.45.0':
-    resolution: {integrity: sha512-1Hsr/sT5dmIafoY9L0ASJo4VqGyPNzM1nwTb4Wj1Lmjq6kGuwO/PVozFg3WZZ0piChFmgiU3nx1AKZfyqgjGUw==}
+  '@effect/tsgo-win32-x64@0.50.0':
+    resolution: {integrity: sha512-ANbPqHKT/owJ9vIjyOWai+vO0IZAKZd3nN6QlPBBJyHe5BWMjz+MpntNwGxSvvp2PTMb4ZPBLQ2ixh4c9IMOMg==}
     cpu: [x64]
     os: [win32]
 
@@ -1037,8 +1040,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@effect/tsgo@0.45.0':
-    resolution: {integrity: sha512-gPG0ixVHgtYBUe5DbKX9vzHlhqd9+ZEfs4m/XWy0808av0A2XqMzaG3F5rnPBN7EUJRPlo9TluIi8WHx/pBV+A==}
+  '@effect/tsgo@0.50.0':
+    resolution: {integrity: sha512-BCRwWFBVfQGhFPXmLlNCbYhohTPoIzCL+0iSrDkSpSN2TRtGbbxCB1Mi4oBPr1jRk5VgMB0jOFEvXmPt3SqCDg==}
     hasBin: true
 
   '@effect/tsgo@0.51.0':
@@ -2696,7 +2699,7 @@ packages:
       effect: ^4
 
   '@systemfsoftware/effect-gherkin-spec@file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz':
-    resolution: {integrity: sha512-Uyr2LKkWp1e6cqmSEKZtGxuYCZ6kyj/HD1pt90RcCk6x20s6e76l5s5SAhYFyfn7N14D4XFH8YFu7cHUtaLBOA==, tarball: file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz}
+    resolution: {integrity: sha512-RmyM6qdT88AzjcCdZVHXFP/32ky3zEy0pOABYocCIYKYhkr86EL07Mnxgwxm+UFhbgbgc65KfsA5alTuAlLR3w==, tarball: file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz}
     version: 7.0.1
     peerDependencies:
       '@systemfsoftware/vitest': ^2.0.0
@@ -2726,7 +2729,7 @@ packages:
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-config-dmmf@file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz':
-    resolution: {integrity: sha512-W63LvrwwhnAyJG1xlMYLJ+lzYxg4uUEHZUSn0BhXQKrdfjnkNoyqHXyjtakzImnYFCGgEr0uIsaO9LIGOSkCdw==, tarball: file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz}
+    resolution: {integrity: sha512-IuShg+/z4sKNQkjWi7DvTOizE/Olt+OCrplfv6KNcRUJOsMYciM65lXErzP2pV0lDFtvXVLMbl60PK06xmGR5Q==, tarball: file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz}
     version: 2.0.0
     peerDependencies:
       effect: ^4
@@ -2735,7 +2738,7 @@ packages:
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-config-recommended@file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz':
-    resolution: {integrity: sha512-k7P015w5WoLFdeW2UxMuNPZC/4Ay/aMqZ4KEHqQcCLGPrL2DjAxvBWc1R7+mLiBjeK/yz7OUb89ojePFogr0gA==, tarball: file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz}
+    resolution: {integrity: sha512-3YWMP3r9noWcppx4EHSYNV8F+J0V+up8Msmb1HLrTmQtsnBkC0I7qVJP1QJ9uqDEERyKQZM6h+1FNZ2X4XFuhg==, tarball: file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz}
     version: 4.0.0
     peerDependencies:
       effect: ^4
@@ -2772,8 +2775,9 @@ packages:
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-plugin-test-discipline@file:.sfs-deps/oxlint-plugin-test-discipline-5.0.0.tgz':
-    resolution: {integrity: sha512-iF3Wv1antaW1cjdWAlR/7TkWr9C8z1Hca03QnYbD+4nTIYuEyhWNURVFB98SZO4+VopCrPSvJWeyMKSuhSEieg==, tarball: file:.sfs-deps/oxlint-plugin-test-discipline-5.0.0.tgz}
+    resolution: {integrity: sha512-wJvbLIGuuhqeQQ17F7dXHs4uCKGtZG7bBn3nGN/XI4wQh9GrRVZzlajARwv07pZ+dVSwsjAnkuSc9uX/dG0PEQ==, tarball: file:.sfs-deps/oxlint-plugin-test-discipline-5.0.0.tgz}
     version: 5.0.0
+    hasBin: true
     peerDependencies:
       effect: ^4
       typescript: '>=5.0.0'
@@ -4901,57 +4905,57 @@ snapshots:
     dependencies:
       effect: 4.0.1
 
-  '@effect/tsgo-darwin-arm64@0.45.0':
+  '@effect/tsgo-darwin-arm64@0.50.0':
     optional: true
 
   '@effect/tsgo-darwin-arm64@0.51.0':
     optional: true
 
-  '@effect/tsgo-darwin-x64@0.45.0':
+  '@effect/tsgo-darwin-x64@0.50.0':
     optional: true
 
   '@effect/tsgo-darwin-x64@0.51.0':
     optional: true
 
-  '@effect/tsgo-linux-arm64@0.45.0':
+  '@effect/tsgo-linux-arm64@0.50.0':
     optional: true
 
   '@effect/tsgo-linux-arm64@0.51.0':
     optional: true
 
-  '@effect/tsgo-linux-arm@0.45.0':
+  '@effect/tsgo-linux-arm@0.50.0':
     optional: true
 
   '@effect/tsgo-linux-arm@0.51.0':
     optional: true
 
-  '@effect/tsgo-linux-x64@0.45.0':
+  '@effect/tsgo-linux-x64@0.50.0':
     optional: true
 
   '@effect/tsgo-linux-x64@0.51.0':
     optional: true
 
-  '@effect/tsgo-win32-arm64@0.45.0':
+  '@effect/tsgo-win32-arm64@0.50.0':
     optional: true
 
   '@effect/tsgo-win32-arm64@0.51.0':
     optional: true
 
-  '@effect/tsgo-win32-x64@0.45.0':
+  '@effect/tsgo-win32-x64@0.50.0':
     optional: true
 
   '@effect/tsgo-win32-x64@0.51.0':
     optional: true
 
-  '@effect/tsgo@0.45.0':
+  '@effect/tsgo@0.50.0':
     optionalDependencies:
-      '@effect/tsgo-darwin-arm64': 0.45.0
-      '@effect/tsgo-darwin-x64': 0.45.0
-      '@effect/tsgo-linux-arm': 0.45.0
-      '@effect/tsgo-linux-arm64': 0.45.0
-      '@effect/tsgo-linux-x64': 0.45.0
-      '@effect/tsgo-win32-arm64': 0.45.0
-      '@effect/tsgo-win32-x64': 0.45.0
+      '@effect/tsgo-darwin-arm64': 0.50.0
+      '@effect/tsgo-darwin-x64': 0.50.0
+      '@effect/tsgo-linux-arm': 0.50.0
+      '@effect/tsgo-linux-arm64': 0.50.0
+      '@effect/tsgo-linux-x64': 0.50.0
+      '@effect/tsgo-win32-arm64': 0.50.0
+      '@effect/tsgo-win32-x64': 0.50.0
 
   '@effect/tsgo@0.51.0':
     optionalDependencies:
@@ -6171,7 +6175,7 @@ snapshots:
 
   '@systemfsoftware/oxlint-config-recommended@file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz(effect@4.0.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)':
     dependencies:
-      '@effect/tsgo': 0.45.0
+      '@effect/tsgo': 0.50.0
       '@systemfsoftware/oxlint-config-cell-architecture': file:.sfs-deps/oxlint-config-cell-architecture-4.0.0.tgz(effect@4.0.1)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)
       '@systemfsoftware/oxlint-config-dmmf': file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz(effect@4.0.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)
       '@systemfsoftware/oxlint-plugin-effect-platform': file:.sfs-deps/oxlint-plugin-effect-platform-2.0.0.tgz(effect@4.0.1)(oxlint-tsgolint@7.0.2001)(typescript@7.0.2)
@@ -6224,6 +6228,7 @@ snapshots:
       '@oxc-project/types': 0.150.0
       '@oxlint/plugins': 1.82.0
       effect: 4.0.1
+      oxc-parser: 0.150.0
       typescript: 7.0.2
 
   '@systemfsoftware/stryker-framework-interface@file:.sfs-deps/stryker-framework-interface-0.0.0.tgz':

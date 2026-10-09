@@ -77,6 +77,10 @@
       "outputs": [],
       "cache": true
     },
+    "//#lint:suppressions": {
+      "outputLogs": "errors-only",
+      "cache": false
+    },
     "test": {
       "inputs": [
         "$TURBO_DEFAULT$",
