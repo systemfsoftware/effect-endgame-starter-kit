@@ -14,9 +14,9 @@ execution: code
 
 - **Objective:** Any visitor can flag and vouch for a guestbook entry. Two flags with no vouch between them hide it. The lifecycle runs as a pure transition on a machine from our XState fork, over a state name stored in D1, behind effect/rpc. The repo gains a stateful decision that agents can copy.
 - **Scope:** Area A of the origin document (R1-R12, F1, AE1-AE4). Area C has its own plan (`docs/plans/2026-10-08-0705-feat-gates-bind-and-inline-suppression-plan.md`).
-- **Authority:** The origin document's R-IDs win on behavior. This plan's KTDs win on mechanism within those R-IDs. The conductor reviews this plan before U2 starts.
-- **Stop conditions:** If U1 shows the fork can't do what R3 needs, A stops and goes back to Ryan. There is no fallback to upstream xstate or npm (origin Q1). If U1 shows the house lint refuses every way a decision can reach the fork, A stops and goes back to the conductor (KTD3).
-- **Execution profile:** A `gh stack` on `main` with two layers (see Sequencing), plain pushes only. No local Stryker; mutation runs only at the release gate.
+- **Authority:** The origin document's R-IDs win on behavior. This plan's KTDs win on mechanism within those R-IDs. The conductor approved this plan in ruling A-3 (2026-10-09). See "Decided (conductor ruling A-3)".
+- **Stop conditions:** If U1 shows the fork can't do what R3 needs, A stops and goes back to the conductor with the commands and their output. There is no fallback to upstream xstate or npm (origin Q1). If U1 shows the house lint refuses every way a decision can reach the fork, A stops and goes back to the conductor (KTD3).
+- **Execution profile:** A `gh stack` on `main` with two layers (see Sequencing). This plan file is the first commit of layer 1. Plain pushes only. No local Stryker; mutation runs only at the release gate.
 
 ## Product Contract
 
@@ -142,19 +142,15 @@ A destructive review (Edge-First lens) tested three assumptions in the first dra
 
 The radical alternative was an in-process D1 fake with no e2e. It was rejected: it needs a fake with no contract test against real D1, or a new package (Miniflare), and the brief forbids new packages.
 
-### Assumptions
+### Decided (conductor ruling A-3, 2026-10-09)
 
-Agent bets the conductor has not confirmed:
-
-- An unknown entry id gets a typed `EntryNotFound` refusal. R6 forbids a 500 for bad stored data, and this extends the same treatment to a bad id.
-- The moderation RPC is one method, `moderate`, with payload `{ id, event }`, not one method per event. One decision serves both events.
-- The page shows `Flagged` next to a flagged entry and gives each listed entry `Flag` and `Vouch` buttons. R10's journey needs a visible handle for each step.
-- A successful `moderate` returns the entry's new state.
-
-### Open Questions
-
-- **Resolve before U6: R12's grep matches the planning docs.** `git grep -nI xstate -- . ':!*.lock'` already exits 0 on `main` because of `docs/brainstorms/2026-10-08-0340-…` (checked 2026-10-09), and this plan adds another match. Either the predicate excludes `docs/` (recommended: these docs are records, not wiring), or the removal procedure deletes those docs. That is the conductor's call, because it changes R12's text.
-- **Decide before layer 2 merges: is review enough proof for R5?** If U5's probe shows the race test can't catch a missing compare, R5 rests on review of KTD6's SQL. A deterministic test would need a test-only delay hook in the Worker, or an in-process D1 (Miniflare, a new package). The brief rules out the package, and the hook puts test code in production. Recommended: accept review, declared in the layer-2 PR.
+- **Assumptions accepted:**
+  - A typed `EntryNotFound` for an unknown id.
+  - One `moderate` RPC with `{ id, event }`.
+  - `Flag` and `Vouch` buttons and a `Flagged` marker on the page.
+  - A successful `moderate` returns the new state.
+- **R12's grep excludes `docs/`.** The predicate is that `git grep -nI xstate -- . ':!*.lock' ':!docs/'` exits 1 after removal. The docs are records, not wiring.
+- **R5's proof.** If U5's sabotage probe can't turn the race test red in 3 of 3 runs, R5 rests on review of KTD6's SQL, and the layer-2 PR says so. There is no test-only delay hook and no Miniflare.
 
 ## Implementation Units
 
@@ -170,7 +166,7 @@ Agent bets the conductor has not confirmed:
     5. Types: `snapshot.value` comes out as the three-name union, so `EntryMoved.to` needs no cast. Also record the effect element type for this machine.
     6. Lint: a scratch decision written per KTD3 passes `make-body-purity`, complexity 1 and `workflow-match-exhaustive`, and its refusal agrees with `isUnhandled` on all six pairs. A scratch reference to the free `isUnhandled` inside `decide` is reported, which confirms KTD3's reading.
     7. Pick how R8's "empty action list" law is observed from the public decision (the machine is module-private, CONST-T8). It must add no unreachable branch, because a NoCoverage mutant fails `break: 100`. Candidates: the outcome carries the transition's effect count as data and the law pins it at zero; or a type-level `never` on the effect list from item 5, plus a law over the outcome.
-  - **Verification:** The PR body for layer 1 records each item's command and output. Stop and go back to Ryan if item 1, 2 or 4 shows behavior R3 can't be built on. Stop and go back to the conductor if item 6 shows that every form reaching the fork from `decide` is refused (KTD3). The throwaway workflow file is gone before layer 1 is committed.
+  - **Verification:** The PR body for layer 1 records each item's command and output. Stop and go back to the conductor if item 1, 2 or 4 shows behavior R3 can't be built on, or if item 6 shows that every form reaching the fork from `decide` is refused (KTD3). The throwaway workflow file is gone before layer 1 is committed.
 
 - U2. **The fork as a starter dependency.**
   - **Goal:** `@systemfsoftware/xstate` resolves from `.sfs-deps` in the devshell, in CI and in the Worker bundle. Nothing resolves from npm.
@@ -246,7 +242,7 @@ Agent bets the conductor has not confirmed:
     - Extend the D1 note: also delete the `0002_add_guestbook_entry_state.sql` row from `__alchemy_migrations`.
     - Layer 1 adds the dependency lines; layer 2 adds the migration line.
   - **Test expectation:** none. This is documentation, proved by running it.
-  - **Verification:** In a scratch clone of the layer-2 head, follow the README steps literally. `pnpm install` succeeds. `git grep -nI xstate` exits 1 under the pathspec the Open Question settles.
+  - **Verification:** In a scratch clone of the layer-2 head, follow the README steps literally. `pnpm install` succeeds, and `git grep -nI xstate -- . ':!*.lock' ':!docs/'` exits 1.
 
 ## Verification Contract
 
@@ -260,5 +256,5 @@ Agent bets the conductor has not confirmed:
 - R1-R12 hold. U3's property file, U5's scenarios, `check:sfs-sources` and the release gate's 100 on the moderation decision show them, and Test Admission names what carries R5 and R6.
 - None of the "Outcomes that must not count" for area A is present.
 - Layer 1 declares its judgment surfaces (`flake.nix`, `flake.lock`).
-- The R12 grep question is settled by the conductor and U6 passes under that answer.
+- U6 passes under ruling A-3's grep predicate.
 - No spike file, throwaway workflow or sabotage edit is left behind.
