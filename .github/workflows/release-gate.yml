@@ -44,6 +44,7 @@ jobs:
         shard: ${{ fromJSON(needs.plan.outputs.shards) }}
     env:
       CI: "true"
+      PACKAGE: ${{ matrix.shard.package }}
       MUTATE: ${{ join(matrix.shard.mutate, ',') }}
     steps:
       - uses: actions/checkout@v7
@@ -58,8 +59,14 @@ jobs:
             packages/*/reports/stryker-incremental.json
           key: stryker-${{ matrix.shard.package }}-${{ github.sha }}
           restore-keys: stryker-${{ matrix.shard.package }}-
+      - name: Mutation dependencies
+        shell: bash
+        run: |
+          deps="$(nix develop --command pnpm exec turbo run mutation --filter="$PACKAGE" --dry=json | jq -r --arg self "$PACKAGE#mutation" '[.tasks[].taskId | select(. != $self)] | join(" ")')"
+          read -ra tasks <<< "$deps"
+          if [ "${#tasks[@]}" -gt 0 ]; then nix develop --command pnpm exec sandbox -- turbo run "${tasks[@]}"; fi
       - name: Mutation at break 100
-        run: nix develop --command pnpm exec sandbox --pass-env GITHUB_ACTIONS -- turbo run mutation --filter="${{ matrix.shard.package }}" -- --mutate "$MUTATE"
+        run: nix develop --command pnpm exec sandbox --pass-env GITHUB_ACTIONS -- turbo run mutation --filter="$PACKAGE" --only -- --mutate "$MUTATE"
       - if: always()
         uses: actions/upload-artifact@v6
         with:

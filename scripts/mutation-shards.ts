@@ -5,7 +5,7 @@ import { expandGlob } from '@std/fs/expand-glob'
 import { dirname, join, relative } from '@std/path'
 import { parse } from '@std/yaml'
 
-import { WORKFLOW_FILES } from '../stryker.shared.ts'
+import { packageStrykerConfig, WORKFLOW_FILES } from '../stryker.shared.ts'
 
 type Manifest = { name?: string; scripts?: Record<string, string>; stryker?: { mutate?: unknown } }
 
@@ -16,11 +16,16 @@ export type Refusal =
   | { readonly _tag: 'MutationScriptNotStrykerRun'; readonly dir: string; readonly script: string }
   | { readonly _tag: 'NoWorkflowFiles'; readonly dir: string }
   | { readonly _tag: 'WorkflowFilesNotMutated'; readonly dir: string; readonly workflows: number }
+  | { readonly _tag: 'UnsafeWorkflowPath'; readonly dir: string; readonly path: string }
   | { readonly _tag: 'NoWorkflowFilesInWorkspace' }
 
 export type ShardPlan = { readonly shards: Shard[]; readonly refusals: Refusal[] }
 
 const STRYKER_RUN = 'stryker run'
+
+const UNSAFE_PATH = /[,*?[\]{}()!\\]/
+
+const IGNORED_DIRS = [...(packageStrykerConfig.ignorePatterns ?? []), 'node_modules', '.stryker-tmp']
 
 export const describeRefusal = (refusal: Refusal): string => {
   switch (refusal._tag) {
@@ -35,7 +40,11 @@ export const describeRefusal = (refusal: Refusal): string => {
     case 'NoWorkflowFiles':
       return `${refusal.dir}: declares a mutation script but has no ${WORKFLOW_FILES} file`
     case 'WorkflowFilesNotMutated':
-      return `${refusal.dir}: has ${refusal.workflows} ${WORKFLOW_FILES} file(s) but no package name and \`mutation\` script to mutate them`
+      return `${refusal.dir}: has ${refusal.workflows} ${WORKFLOW_FILES} file(s) but no package name or \`mutation\` script to mutate them`
+    case 'UnsafeWorkflowPath':
+      return `${refusal.dir}: ${
+        JSON.stringify(refusal.path)
+      } holds a comma or glob metacharacter, so the --mutate list would split or expand it; rename the file`
     case 'NoWorkflowFilesInWorkspace':
       return `no workspace package has a ${WORKFLOW_FILES} file; the release gate refuses an empty set`
   }
@@ -45,7 +54,7 @@ const workflowFilesOf = async (dir: string): Promise<string[]> => {
   const files: string[] = []
   const walk = expandGlob(WORKFLOW_FILES, {
     root: dir,
-    exclude: ['**/node_modules/**', '**/.stryker-tmp/**'],
+    exclude: IGNORED_DIRS.map((ignored) => `**/${ignored}/**`),
     includeDirs: false,
   })
   for await (const entry of walk) files.push(relative(dir, entry.path))
@@ -74,6 +83,10 @@ export const planMutationShards = async (root: string): Promise<ShardPlan> => {
         refusals.push({ _tag: 'MutationScriptNotStrykerRun', dir, script })
       } else if (files.length === 0) {
         refusals.push({ _tag: 'NoWorkflowFiles', dir })
+      } else if (files.some((path) => UNSAFE_PATH.test(path))) {
+        for (const path of files.filter((path) => UNSAFE_PATH.test(path))) {
+          refusals.push({ _tag: 'UnsafeWorkflowPath', dir, path })
+        }
       } else {
         shards.push({ package: manifest.name, mutate: files })
       }

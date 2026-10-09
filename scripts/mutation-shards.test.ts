@@ -131,3 +131,25 @@ Deno.test('decisions that no package mutates are refused', async () => {
     refusals: [{ _tag: 'WorkflowFilesNotMutated', dir: 'packages/core', workflows: 1 }],
   })
 })
+
+Deno.test('a workflow copy in a directory Stryker ignores is not planned', async () => {
+  const root = await workspaceOf([{ name: 'core', files: ['src/order.workflow.ts', 'dist/order.workflow.ts'] }])
+  assertEquals(await planMutationShards(root), {
+    shards: [{ package: '@fixture/core', mutate: ['src/order.workflow.ts'] }],
+    refusals: [],
+  })
+})
+
+Deno.test('a workflow path the comma-joined --mutate list would split or expand is refused by name', async () => {
+  const root = await workspaceOf([{
+    name: 'core',
+    files: ['src/order.workflow.ts', 'src/a,b.workflow.ts', 'src/page[1].workflow.ts'],
+  }])
+  assertEquals(await planMutationShards(root), {
+    shards: [],
+    refusals: [
+      { _tag: 'UnsafeWorkflowPath', dir: 'packages/core', path: 'src/a,b.workflow.ts' },
+      { _tag: 'UnsafeWorkflowPath', dir: 'packages/core', path: 'src/page[1].workflow.ts' },
+    ],
+  })
+})

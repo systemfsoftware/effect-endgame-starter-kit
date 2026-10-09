@@ -198,7 +198,7 @@ Every configuration toggle provides a route for AI agents to downgrade verificat
 <details>
 <summary><strong>How does mutation testing work in this template?</strong></summary>
 
-Stryker introduces deliberate syntax and logic mutations into your code and runs your test suite against each mutant. If your tests still pass when code behavior changes, the mutant survives and the gate fails. The release gate mutates only `*.workflow.ts` decision files: its planner (`scripts/mutation-shards.ts`) lists each package's workflow files and hands exactly that list to Stryker, and it refuses a package that sets its own `stryker.mutate` or whose `mutation` script is anything but `stryker run`. Those files require a 100% kill score. Mutation runs only in the release gate on pushes to `main`, never locally or on pull requests.
+Stryker introduces deliberate syntax and logic mutations into your code and runs your test suite against each mutant. If your tests still pass when code behavior changes, the mutant survives and the gate fails. The release gate mutates only `*.workflow.ts` decision files. Its planner (`scripts/mutation-shards.ts`) lists each package's workflow files and hands exactly that list to Stryker, and it refuses anything that would change that set before Stryker starts. Those files require a 100% kill score. Mutation runs only in the release gate on pushes to `main`, never locally or on pull requests.
 
 </details>
 
