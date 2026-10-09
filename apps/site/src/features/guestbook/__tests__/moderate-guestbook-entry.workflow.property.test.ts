@@ -71,7 +71,7 @@ const takes = ([from, on, to]: Move) => (events: ReadonlyArray<LifecycleEvent>):
   tableMovesOf(events).some(([state, event, target]) => state === from && event === on && target === to)
 
 const decodeCommand = (input: { readonly state: string; readonly event: LifecycleEvent }) =>
-  S.decodeUnknownResult(ModerateGuestbookEntry)(input)
+  S.decodeResult(ModerateGuestbookEntry)(input)
 
 describe('moderateGuestbookEntry — a visitor event moves an entry along R1, or is refused', () => {
   it.prop(

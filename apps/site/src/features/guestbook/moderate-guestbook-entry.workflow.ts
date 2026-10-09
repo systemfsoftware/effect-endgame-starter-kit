@@ -4,12 +4,12 @@ import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
-import { EntryState, LifecycleEvent } from './guestbook.schema.ts'
+import { EntryState, LifecycleEvent, StoredEntryState } from './guestbook.schema.ts'
 
 const ModerateGuestbookEntryTypeId: unique symbol = Symbol()
 
 export class ModerateGuestbookEntry extends S.Class<ModerateGuestbookEntry>('ModerateGuestbookEntry')({
-  state: EntryState,
+  state: StoredEntryState,
   event: LifecycleEvent,
 }) {
   static readonly [Workflow.InstrumentationBrand]: Record<never, never> = {}
