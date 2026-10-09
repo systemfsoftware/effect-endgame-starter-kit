@@ -24,12 +24,12 @@ if (keys.length === 0) {
 }
 if (fromRegistry.length > 0) {
   console.error(
-    `check-sfs-sources: ${fromRegistry.length} @systemfsoftware/* package(s) resolve from the npm registry, not from our flakes (systemfsoftware, stryker-js-effect):\n${
+    `check-sfs-sources: ${fromRegistry.length} @systemfsoftware/* package(s) resolve from the npm registry, not from the .sfs-deps tarballs our flake inputs build:\n${
       fromRegistry.map((key) => `  ${key}`).join('\n')
     }`,
   )
   Deno.exit(1)
 }
 console.log(
-  `check-sfs-sources: all ${keys.length} @systemfsoftware/* packages resolve from our flakes (systemfsoftware, stryker-js-effect)`,
+  `check-sfs-sources: all ${keys.length} @systemfsoftware/* packages resolve from the .sfs-deps tarballs our flake inputs build`,
 )
