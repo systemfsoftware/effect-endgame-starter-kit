@@ -1,11 +1,11 @@
 import { assertEquals } from '@std/assert'
-import { join } from '@std/path'
+import { dirname, join } from '@std/path'
 
 import { planMutationShards } from './mutation-shards.ts'
 
 type PackageFixture = {
   readonly name: string
-  readonly mutation?: false
+  readonly mutation?: string | false
   readonly mutate?: string[]
   readonly files: string[]
 }
@@ -15,78 +15,119 @@ const workspaceOf = async (packages: PackageFixture[]): Promise<string> => {
   await Deno.writeTextFile(join(root, 'pnpm-workspace.yaml'), 'packages:\n  - packages/*\n')
   for (const fixture of packages) {
     const dir = join(root, 'packages', fixture.name)
-    await Deno.mkdir(join(dir, 'src'), { recursive: true })
+    await Deno.mkdir(dir, { recursive: true })
     const stryker = fixture.mutate === undefined ? {} : { stryker: { mutate: fixture.mutate } }
-    const scripts = fixture.mutation === false ? {} : { scripts: { mutation: 'stryker run' } }
+    const scripts = fixture.mutation === false ? {} : { scripts: { mutation: fixture.mutation ?? 'stryker run' } }
     await Deno.writeTextFile(
       join(dir, 'package.json'),
       JSON.stringify({ name: `@fixture/${fixture.name}`, ...scripts, ...stryker }),
     )
-    for (const file of fixture.files) await Deno.writeTextFile(join(dir, file), 'export {}\n')
+    for (const file of fixture.files) {
+      await Deno.mkdir(dirname(join(dir, file)), { recursive: true })
+      await Deno.writeTextFile(join(dir, file), 'export {}\n')
+    }
   }
   return root
 }
 
-Deno.test('a package whose mutate globs match files becomes a shard', async () => {
-  const root = await workspaceOf([{ name: 'core', mutate: ['src/**/*.workflow.ts'], files: ['src/order.workflow.ts'] }])
-  assertEquals(await planMutationShards(root), { packages: ['@fixture/core'], refusals: [], decisions: 1 })
-})
-
-Deno.test('a package whose mutate globs match no file is refused by name and globs', async () => {
-  const root = await workspaceOf([
-    { name: 'core', mutate: ['src/**/*.workflow.ts'], files: ['src/order.workflow.ts'] },
-    { name: 'site', mutate: ['src/**/*.workflow.ts'], files: ['src/page.tsx'] },
-  ])
-  assertEquals(await planMutationShards(root), {
-    packages: ['@fixture/core'],
-    refusals: ['@fixture/site (packages/site): stryker.mutate ["src/**/*.workflow.ts"] matches no files'],
-    decisions: 1,
-  })
-})
-
-Deno.test('negated globs that remove every match leave the package refused', async () => {
+Deno.test('a shard mutates exactly the package workflow files, never tests, other source or dependencies', async () => {
   const root = await workspaceOf([{
     name: 'core',
-    mutate: ['src/**/*.ts', '!src/**/*.test.ts', '!src/**/*.workflow.ts'],
-    files: ['src/a.test.ts', 'src/order.workflow.ts'],
+    files: [
+      'src/order.workflow.ts',
+      'src/billing/invoice.workflow.ts',
+      'src/order.test.ts',
+      'src/__tests__/order.workflow.property.test.ts',
+      'src/page.tsx',
+      'src/order.schema.ts',
+      'node_modules/dep/x.workflow.ts',
+      '.stryker-tmp/sandbox-1/src/order.workflow.ts',
+    ],
   }])
   assertEquals(await planMutationShards(root), {
-    packages: [],
-    refusals: [
-      '@fixture/core (packages/core): stryker.mutate ["src/**/*.ts","!src/**/*.test.ts","!src/**/*.workflow.ts"] matches no files',
-    ],
-    decisions: 1,
+    shards: [{ package: '@fixture/core', mutate: ['src/billing/invoice.workflow.ts', 'src/order.workflow.ts'] }],
+    refusals: [],
   })
 })
 
-Deno.test('a mutation script without declared mutate globs is refused', async () => {
-  const root = await workspaceOf([{ name: 'core', files: ['src/order.workflow.ts'] }])
+Deno.test('a package that widens its own mutated set is refused', async () => {
+  const root = await workspaceOf([{ name: 'core', mutate: ['src/**/*.ts'], files: ['src/order.workflow.ts'] }])
+  assertEquals((await planMutationShards(root)).refusals, [
+    { _tag: 'OwnMutate', dir: 'packages/core', mutate: ['src/**/*.ts'] },
+  ])
+})
+
+Deno.test('a package that points its mutated set at test files is refused', async () => {
+  const root = await workspaceOf([{
+    name: 'core',
+    mutate: ['src/**/*.test.ts'],
+    files: ['src/order.workflow.ts', 'src/order.test.ts'],
+  }])
+  assertEquals((await planMutationShards(root)).refusals, [
+    { _tag: 'OwnMutate', dir: 'packages/core', mutate: ['src/**/*.test.ts'] },
+  ])
+})
+
+Deno.test('a package that sets its own mutated set without a mutation script is still refused', async () => {
+  const root = await workspaceOf([
+    { name: 'core', files: ['src/order.workflow.ts'] },
+    { name: 'tools', mutation: false, mutate: ['src/**/*.ts'], files: ['src/cli.ts'] },
+  ])
+  assertEquals((await planMutationShards(root)).refusals, [
+    { _tag: 'OwnMutate', dir: 'packages/tools', mutate: ['src/**/*.ts'] },
+  ])
+})
+
+Deno.test('a mutation script that passes its own files to stryker is refused', async () => {
+  const root = await workspaceOf([{
+    name: 'core',
+    mutation: 'stryker run -m src/**/*.ts',
+    files: ['src/order.workflow.ts'],
+  }])
   assertEquals(await planMutationShards(root), {
-    packages: [],
-    refusals: ['@fixture/core (packages/core): stryker.mutate [] matches no files'],
-    decisions: 1,
+    shards: [],
+    refusals: [{
+      _tag: 'MutationScriptNotStrykerRun',
+      dir: 'packages/core',
+      script: 'stryker run -m src/**/*.ts',
+    }],
+  })
+})
+
+Deno.test('a mutating package without a workflow file is refused by name', async () => {
+  const root = await workspaceOf([
+    { name: 'core', files: ['src/order.workflow.ts'] },
+    { name: 'site', files: ['src/page.tsx'] },
+  ])
+  assertEquals(await planMutationShards(root), {
+    shards: [{ package: '@fixture/core', mutate: ['src/order.workflow.ts'] }],
+    refusals: [{ _tag: 'NoWorkflowFiles', dir: 'packages/site' }],
   })
 })
 
 Deno.test('a workspace without a single *.workflow.ts file is refused as an empty set', async () => {
   const root = await workspaceOf([
-    { name: 'site', mutate: ['src/**/*.workflow.ts'], files: ['src/page.tsx'] },
+    { name: 'site', files: ['src/page.tsx'] },
     { name: 'tools', mutation: false, files: ['src/cli.ts'] },
   ])
+  assertEquals(await planMutationShards(root), { shards: [], refusals: [{ _tag: 'NoWorkflowFilesInWorkspace' }] })
+})
+
+Deno.test('workflow files in a package without a mutation script are refused by package', async () => {
+  const root = await workspaceOf([
+    { name: 'core', files: ['src/order.workflow.ts'] },
+    { name: 'billing', mutation: false, files: ['src/invoice.workflow.ts', 'src/refund.workflow.ts'] },
+  ])
   assertEquals(await planMutationShards(root), {
-    packages: [],
-    refusals: ['no workspace package has a *.workflow.ts file; the release gate refuses an empty set'],
-    decisions: 0,
+    shards: [{ package: '@fixture/core', mutate: ['src/order.workflow.ts'] }],
+    refusals: [{ _tag: 'WorkflowFilesNotMutated', dir: 'packages/billing', workflows: 2 }],
   })
 })
 
-Deno.test('decisions that no package mutates are refused as an empty set', async () => {
+Deno.test('decisions that no package mutates are refused', async () => {
   const root = await workspaceOf([{ name: 'core', mutation: false, files: ['src/order.workflow.ts'] }])
   assertEquals(await planMutationShards(root), {
-    packages: [],
-    refusals: [
-      '1 *.workflow.ts file(s) but no workspace package declares a `mutation` script; the release gate refuses an empty set',
-    ],
-    decisions: 1,
+    shards: [],
+    refusals: [{ _tag: 'WorkflowFilesNotMutated', dir: 'packages/core', workflows: 1 }],
   })
 })

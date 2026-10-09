@@ -71,6 +71,7 @@
       "outputLogs": "errors-only",
       "inputs": [
         "scripts/**",
+        "stryker.shared.ts",
         "flake.nix",
         "flake.lock"
       ],

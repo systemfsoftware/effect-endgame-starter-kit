@@ -5,66 +5,92 @@ import { expandGlob } from '@std/fs/expand-glob'
 import { dirname, join, relative } from '@std/path'
 import { parse } from '@std/yaml'
 
-type Manifest = { name?: string; scripts?: Record<string, string>; stryker?: { mutate?: string[] } }
+import { WORKFLOW_FILES } from '../stryker.shared.ts'
 
-export type ShardPlan = { readonly packages: string[]; readonly refusals: string[]; readonly decisions: number }
+type Manifest = { name?: string; scripts?: Record<string, string>; stryker?: { mutate?: unknown } }
 
-const DECISIONS = ['**/*.workflow.ts', '!**/.stryker-tmp/**']
+export type Shard = { readonly package: string; readonly mutate: string[] }
 
-const matchedFileCount = async (dir: string, mutate: string[]): Promise<number> => {
-  const exclude = ['**/node_modules/**', ...mutate.filter((glob) => glob.startsWith('!')).map((glob) => glob.slice(1))]
-  let count = 0
-  for (const glob of mutate.filter((glob) => !glob.startsWith('!'))) {
-    for await (const _ of expandGlob(glob, { root: dir, exclude, includeDirs: false })) count++
+export type Refusal =
+  | { readonly _tag: 'OwnMutate'; readonly dir: string; readonly mutate: unknown }
+  | { readonly _tag: 'MutationScriptNotStrykerRun'; readonly dir: string; readonly script: string }
+  | { readonly _tag: 'NoWorkflowFiles'; readonly dir: string }
+  | { readonly _tag: 'WorkflowFilesNotMutated'; readonly dir: string; readonly workflows: number }
+  | { readonly _tag: 'NoWorkflowFilesInWorkspace' }
+
+export type ShardPlan = { readonly shards: Shard[]; readonly refusals: Refusal[] }
+
+const STRYKER_RUN = 'stryker run'
+
+export const describeRefusal = (refusal: Refusal): string => {
+  switch (refusal._tag) {
+    case 'OwnMutate':
+      return `${refusal.dir}: sets its own stryker.mutate ${
+        JSON.stringify(refusal.mutate)
+      }; the release gate mutates exactly the package's ${WORKFLOW_FILES} files`
+    case 'MutationScriptNotStrykerRun':
+      return `${refusal.dir}: the mutation script is ${
+        JSON.stringify(refusal.script)
+      }, not exactly "${STRYKER_RUN}"; the release gate passes the mutated files itself`
+    case 'NoWorkflowFiles':
+      return `${refusal.dir}: declares a mutation script but has no ${WORKFLOW_FILES} file`
+    case 'WorkflowFilesNotMutated':
+      return `${refusal.dir}: has ${refusal.workflows} ${WORKFLOW_FILES} file(s) but no package name and \`mutation\` script to mutate them`
+    case 'NoWorkflowFilesInWorkspace':
+      return `no workspace package has a ${WORKFLOW_FILES} file; the release gate refuses an empty set`
   }
-  return count
+}
+
+const workflowFilesOf = async (dir: string): Promise<string[]> => {
+  const files: string[] = []
+  const walk = expandGlob(WORKFLOW_FILES, {
+    root: dir,
+    exclude: ['**/node_modules/**', '**/.stryker-tmp/**'],
+    includeDirs: false,
+  })
+  for await (const entry of walk) files.push(relative(dir, entry.path))
+  return files.sort()
 }
 
 export const planMutationShards = async (root: string): Promise<ShardPlan> => {
   const workspace = parse(await Deno.readTextFile(join(root, 'pnpm-workspace.yaml'))) as { packages?: string[] }
-  const packages: string[] = []
-  const refusals: string[] = []
-  let decisions = 0
+  const shards: Shard[] = []
+  const refusals: Refusal[] = []
+  let workflows = 0
   for (const glob of workspace.packages ?? []) {
     for await (const entry of expandGlob(join(glob, 'package.json'), { root, exclude: ['**/node_modules/**'] })) {
-      decisions += await matchedFileCount(dirname(entry.path), DECISIONS)
+      const packageDir = dirname(entry.path)
+      const dir = relative(root, packageDir)
+      const files = await workflowFilesOf(packageDir)
+      workflows += files.length
       const manifest = JSON.parse(await Deno.readTextFile(entry.path)) as Manifest
-      if (manifest.name === undefined || manifest.scripts?.mutation === undefined) continue
-      const mutate = manifest.stryker?.mutate ?? []
-      if (await matchedFileCount(dirname(entry.path), mutate) === 0) {
-        refusals.push(
-          `${manifest.name} (${relative(root, dirname(entry.path))}): stryker.mutate ${
-            JSON.stringify(mutate)
-          } matches no files`,
-        )
+      if (manifest.stryker?.mutate !== undefined) {
+        refusals.push({ _tag: 'OwnMutate', dir, mutate: manifest.stryker.mutate })
+      }
+      const script = manifest.scripts?.mutation
+      if (manifest.name === undefined || script === undefined) {
+        if (files.length > 0) refusals.push({ _tag: 'WorkflowFilesNotMutated', dir, workflows: files.length })
+      } else if (script !== STRYKER_RUN) {
+        refusals.push({ _tag: 'MutationScriptNotStrykerRun', dir, script })
+      } else if (files.length === 0) {
+        refusals.push({ _tag: 'NoWorkflowFiles', dir })
       } else {
-        packages.push(manifest.name)
+        shards.push({ package: manifest.name, mutate: files })
       }
     }
   }
-  if (decisions === 0) {
-    return {
-      packages: [],
-      refusals: ['no workspace package has a *.workflow.ts file; the release gate refuses an empty set'],
-      decisions,
-    }
-  }
-  if (packages.length === 0 && refusals.length === 0) {
-    refusals.push(
-      `${decisions} *.workflow.ts file(s) but no workspace package declares a \`mutation\` script; the release gate refuses an empty set`,
-    )
-  }
-  return { packages: packages.sort(), refusals, decisions }
+  if (workflows === 0) return { shards: [], refusals: [{ _tag: 'NoWorkflowFilesInWorkspace' }] }
+  return { shards: shards.sort((a, b) => a.package.localeCompare(b.package)), refusals }
 }
 
 if (import.meta.main) {
   const { output, root = '.' } = parseArgs(Deno.args, { string: ['output', 'root'] })
   const plan = await planMutationShards(root)
   if (plan.refusals.length > 0) {
-    for (const refusal of plan.refusals) console.error(`mutation-shards: ${refusal}`)
+    for (const refusal of plan.refusals) console.error(`mutation-shards: ${describeRefusal(refusal)}`)
     Deno.exit(1)
   }
-  const line = `packages=${JSON.stringify(plan.packages)}`
+  const line = `shards=${JSON.stringify(plan.shards)}`
   console.error(`mutation-shards: ${line}`)
   if (output) await Deno.writeTextFile(output, `${line}\n`, { append: true })
   else console.log(line)
