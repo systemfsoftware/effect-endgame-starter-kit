@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
-      packages: ${{ steps.shards.outputs.packages }}
+      shards: ${{ steps.shards.outputs.shards }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -34,16 +34,18 @@ jobs:
           cat .cache/mutation-shards.out >> "$GITHUB_OUTPUT"
 
   mutation:
-    name: mutation · ${{ matrix.package }}
+    name: mutation · ${{ matrix.shard.package }}
     needs: [plan]
     runs-on: ubuntu-latest
     timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
-        package: ${{ fromJSON(needs.plan.outputs.packages) }}
+        shard: ${{ fromJSON(needs.plan.outputs.shards) }}
     env:
       CI: "true"
+      PACKAGE: ${{ matrix.shard.package }}
+      MUTATE: ${{ join(matrix.shard.mutate, ',') }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -55,10 +57,16 @@ jobs:
           path: |
             apps/*/reports/stryker-incremental.json
             packages/*/reports/stryker-incremental.json
-          key: stryker-${{ matrix.package }}-${{ github.sha }}
-          restore-keys: stryker-${{ matrix.package }}-
+          key: stryker-${{ matrix.shard.package }}-${{ github.sha }}
+          restore-keys: stryker-${{ matrix.shard.package }}-
+      - name: Mutation dependencies
+        shell: bash
+        run: |
+          deps="$(nix develop --command pnpm exec turbo run mutation --filter="$PACKAGE" --dry=json | jq -r --arg self "$PACKAGE#mutation" '[.tasks[].taskId | select(. != $self)] | join(" ")')"
+          read -ra tasks <<< "$deps"
+          if [ "${#tasks[@]}" -gt 0 ]; then nix develop --command pnpm exec sandbox -- turbo run "${tasks[@]}"; fi
       - name: Mutation at break 100
-        run: nix develop --command pnpm exec sandbox --pass-env GITHUB_ACTIONS -- turbo run mutation --filter="${{ matrix.package }}"
+        run: nix develop --command pnpm exec sandbox --pass-env GITHUB_ACTIONS -- turbo run mutation --filter="$PACKAGE" --only -- --mutate "$MUTATE"
       - if: always()
         uses: actions/upload-artifact@v6
         with:

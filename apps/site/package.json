@@ -49,11 +49,6 @@
     "test": "vitest run",
     "typecheck": "tsr generate && tsc --noEmit --incremental && tsc -p tsconfig.node.json --noEmit"
   },
-  "stryker": {
-    "mutate": [
-      "src/**/*.workflow.ts"
-    ]
-  },
   "type": "module",
   "version": "0.0.0"
 }
