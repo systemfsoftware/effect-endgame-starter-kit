@@ -72,7 +72,7 @@ jobs:
       - name: Journeys against pnpm dev
         run: nix develop --command pnpm journeys
       - if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: journeys
           path: |
