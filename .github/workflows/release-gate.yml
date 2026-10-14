@@ -68,7 +68,7 @@ jobs:
       - name: Mutation at break 100
         run: nix develop --command pnpm exec sandbox --pass-env GITHUB_ACTIONS -- turbo run mutation --filter="$PACKAGE" --only -- --mutate "$MUTATE"
       - if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mutation-report-${{ strategy.job-index }}
           path: |
