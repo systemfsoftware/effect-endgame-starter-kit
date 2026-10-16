@@ -1,117 +1,72 @@
-import * as Effect from 'effect/Effect'
-import { type SubmitEvent, useEffect, useState } from 'react'
+import { AtomReact } from '@systemfsoftware/effect-atom-react'
+import type { SubmitEvent } from 'react'
 
-import { siteClient, SiteClientProtocol } from '../../api/site-rpc-client'
-import type { GuestbookEntries, GuestbookEntry, LifecycleEvent, ModerationRequest } from './guestbook.schema'
-import { SignGuestbook } from './sign-guestbook.workflow'
-
-interface GuestbookView {
-  readonly entries: GuestbookEntries
-  readonly notice: string
-}
-
-const UNAVAILABLE = 'The guestbook is unavailable right now.'
-
-const loading: GuestbookView = { entries: [], notice: '' }
-
-const latestEntries: Effect.Effect<GuestbookView> = Effect.scoped(
-  Effect.flatMap(siteClient, (client) => client.list()),
-).pipe(
-  Effect.map((entries): GuestbookView => ({ entries, notice: '' })),
-  Effect.catchCause(() => Effect.succeed<GuestbookView>({ entries: [], notice: UNAVAILABLE })),
-  Effect.provide(SiteClientProtocol),
-)
-
-const signEntry = (command: SignGuestbook): Effect.Effect<string> =>
-  Effect.scoped(Effect.flatMap(siteClient, (client) => client.sign(command))).pipe(
-    Effect.as(''),
-    Effect.catchTags({
-      NameMissing: (refusal) => Effect.succeed(refusal.message),
-      NameTooLong: (refusal) => Effect.succeed(refusal.message),
-      MessageMissing: (refusal) => Effect.succeed(refusal.message),
-      MessageTooLong: (refusal) => Effect.succeed(refusal.message),
-    }),
-    Effect.catchCause(() => Effect.succeed(UNAVAILABLE)),
-    Effect.provide(SiteClientProtocol),
-  )
-
-const moderateEntry = (request: ModerationRequest): Effect.Effect<string> =>
-  Effect.scoped(Effect.flatMap(siteClient, (client) => client.moderate(request))).pipe(
-    Effect.as(''),
-    Effect.catchTags({
-      IllegalTransition: (refusal) => Effect.succeed(refusal.message),
-      StoredStateInvalid: (refusal) => Effect.succeed(refusal.message),
-      TransitionConflict: (refusal) => Effect.succeed(refusal.message),
-      EntryNotFound: (refusal) => Effect.succeed(refusal.message),
-    }),
-    Effect.catchCause(() => Effect.succeed(UNAVAILABLE)),
-    Effect.provide(SiteClientProtocol),
-  )
+import {
+  guestbookNotice,
+  guestbookReady,
+  listedEntries,
+  moderateGuestbookEntry,
+  moderationInFlight,
+  signDraft,
+  signGuestbookEntry,
+  statusLabelOf,
+} from './guestbook-atoms'
 
 export function GuestbookPage() {
-  const [view, setView] = useState(loading)
-  const [ready, setReady] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [name, setName] = useState('')
-  const [message, setMessage] = useState('')
+  const [draft, writeDraft] = AtomReact.useAtom(signDraft)
+  const entries = AtomReact.useAtomValue(listedEntries)
+  const ready = AtomReact.useAtomValue(guestbookReady)
+  const notice = AtomReact.useAtomValue(guestbookNotice)
+  const busy = AtomReact.useAtomValue(moderationInFlight)
+  const sign = AtomReact.useAtomSet(signGuestbookEntry)
+  const moderate = AtomReact.useAtomSet(moderateGuestbookEntry)
 
-  useEffect(() => {
-    void Effect.runPromise(latestEntries).then((loaded) => {
-      setView(loaded)
-      setReady(true)
-    })
-  }, [])
-
-  const sign = (event: SubmitEvent<HTMLFormElement>) => {
+  const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault()
-    void Effect.runPromise(signEntry(new SignGuestbook({ name, message }))).then((notice) =>
-      notice === ''
-        ? Effect.runPromise(latestEntries).then((loaded) => {
-          setView(loaded)
-          setMessage('')
-        })
-        : setView({ entries: view.entries, notice })
-    )
-  }
-
-  const moderate = (entry: GuestbookEntry, event: LifecycleEvent) => {
-    setBusy(true)
-    void Effect.runPromise(moderateEntry({ id: entry.id, event })).then((notice) =>
-      Effect.runPromise(latestEntries).then((loaded) => {
-        setView({ entries: loaded.entries, notice: notice === '' ? loaded.notice : notice })
-        setBusy(false)
-      })
-    )
+    sign(draft)
   }
 
   return (
     <main>
       <h1>Guestbook</h1>
-      <form onSubmit={sign}>
+      <form onSubmit={submit}>
         <label>
-          Name <input name='name' value={name} onChange={(event) => setName(event.target.value)} />
+          Name{' '}
+          <input
+            name='name'
+            value={draft.name}
+            onChange={(event) => writeDraft({ name: event.target.value, message: draft.message })}
+          />
         </label>
         <label>
-          Message <textarea name='message' value={message} onChange={(event) => setMessage(event.target.value)} />
+          Message{' '}
+          <textarea
+            name='message'
+            value={draft.message}
+            onChange={(event) => writeDraft({ name: draft.name, message: event.target.value })}
+          />
         </label>
         <button type='submit' disabled={!ready || busy}>Sign the guestbook</button>
       </form>
-      <p role='alert'>{view.notice}</p>
+      <p role='alert'>{notice}</p>
       <ol aria-label='Entries'>
-        {view.entries.map((entry) => (
-          <li key={entry.id}>
-            <span>
-              <strong>{entry.guest}</strong> {entry.message}
-            </span>
-            {entry.state === 'Flagged' && <span>Flagged</span>}
-            <button type='button' disabled={busy} onClick={() => moderate(entry, 'Flag')}>
-              Flag {entry.guest}'s entry
-            </button>
-            <button type='button' disabled={busy} onClick={() => moderate(entry, 'Vouch')}>
-              Vouch for {entry.guest}'s entry
-            </button>
-          </li>
-        ))}
+        {entries.map((entry) => {
+          const statusLabel = statusLabelOf(entry)
+          return (
+            <li key={entry.id}>
+              <span>
+                <strong>{entry.guest}</strong> {entry.message}
+              </span>
+              {statusLabel === null ? null : <span>{statusLabel}</span>}
+              <button type='button' disabled={busy} onClick={() => moderate({ id: entry.id, event: 'Flag' })}>
+                Flag {entry.guest}'s entry
+              </button>
+              <button type='button' disabled={busy} onClick={() => moderate({ id: entry.id, event: 'Vouch' })}>
+                Vouch for {entry.guest}'s entry
+              </button>
+            </li>
+          )
+        })}
       </ol>
     </main>
   )

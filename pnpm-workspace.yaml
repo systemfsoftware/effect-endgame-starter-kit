@@ -15,6 +15,8 @@ catalog:
   "@commitlint/types": 21.2.3
   "@effect/tsgo": 0.51.0
   "@rolldown/plugin-babel": 0.2.4
+  "@systemfsoftware/effect-atom": file:.sfs-deps/effect-atom-6.0.0.tgz
+  "@systemfsoftware/effect-atom-react": file:.sfs-deps/effect-atom-react-2.0.0.tgz
   "@systemfsoftware/effect-cell-types": file:.sfs-deps/effect-cell-types-12.0.0.tgz
   "@systemfsoftware/effect-gherkin-spec": file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz
   "@systemfsoftware/effect-schema-discovery": file:.sfs-deps/effect-schema-discovery-2.0.0.tgz
@@ -82,6 +84,8 @@ minimumReleaseAgeExclude:
   - "@effect/*"
 verifyDepsBeforeRun: warn
 overrides:
+  "@systemfsoftware/effect-atom": "catalog:"
+  "@systemfsoftware/effect-atom-react": "catalog:"
   "@systemfsoftware/effect-cell-types": "catalog:"
   "@systemfsoftware/effect-gherkin-spec": "catalog:"
   "@systemfsoftware/effect-schema-discovery": "catalog:"

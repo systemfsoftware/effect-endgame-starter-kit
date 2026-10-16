@@ -1,23 +1,12 @@
+import { AtomReact } from '@systemfsoftware/effect-atom-react'
 import { createFileRoute } from '@tanstack/react-router'
-import * as Effect from 'effect/Effect'
-import { useEffect, useState } from 'react'
 
-import { siteClient, SiteClientProtocol } from '../api/site-rpc-client'
+import { workerHealthStatus } from '../api/health-atoms'
 
 export const Route = createFileRoute('/')({ component: Home })
 
-const workerHealth = Effect.scoped(Effect.flatMap(siteClient, (client) => client.health())).pipe(
-  Effect.map((health) => health.status),
-  Effect.catchCause(() => Effect.succeed('unreachable')),
-  Effect.provide(SiteClientProtocol),
-)
-
 function Home() {
-  const [health, setHealth] = useState('checking')
-
-  useEffect(() => {
-    void Effect.runPromise(workerHealth).then(setHealth)
-  }, [])
+  const health = AtomReact.useAtomValue(workerHealthStatus)
 
   return (
     <main>
