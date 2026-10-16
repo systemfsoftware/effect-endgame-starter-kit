@@ -16,6 +16,8 @@
     "@cloudflare/vite-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@rolldown/plugin-babel": "catalog:",
+    "@systemfsoftware/effect-schema-law": "catalog:",
+    "@systemfsoftware/effect-schema-vite": "catalog:",
     "@systemfsoftware/oxlint-config-recommended": "catalog:",
     "@systemfsoftware/stryker-ignorer-effect-schema-declarations": "catalog:",
     "@systemfsoftware/stryker-js": "catalog:",
