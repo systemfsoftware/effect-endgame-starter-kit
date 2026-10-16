@@ -29,6 +29,7 @@ catalog:
   "@systemfsoftware/oxlint-config-dmmf": file:.sfs-deps/oxlint-config-dmmf-2.0.0.tgz
   "@systemfsoftware/oxlint-config-recommended": file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz
   "@systemfsoftware/oxlint-ignorer-config": file:.sfs-deps/oxlint-ignorer-config-0.1.1.tgz
+  "@systemfsoftware/oxlint-config-rule-authoring": file:.sfs-deps/oxlint-config-rule-authoring-1.1.0.tgz
   "@systemfsoftware/oxlint-plugin-cell-architecture": file:.sfs-deps/oxlint-plugin-cell-architecture-5.0.0.tgz
   "@systemfsoftware/oxlint-plugin-dmmf-workflow": file:.sfs-deps/oxlint-plugin-dmmf-workflow-7.0.0.tgz
   "@systemfsoftware/oxlint-plugin-effect-platform": file:.sfs-deps/oxlint-plugin-effect-platform-2.0.0.tgz
@@ -98,6 +99,7 @@ overrides:
   "@systemfsoftware/oxlint-config-dmmf": "catalog:"
   "@systemfsoftware/oxlint-config-recommended": "catalog:"
   "@systemfsoftware/oxlint-ignorer-config": "catalog:"
+  "@systemfsoftware/oxlint-config-rule-authoring": "catalog:"
   "@systemfsoftware/oxlint-plugin-cell-architecture": "catalog:"
   "@systemfsoftware/oxlint-plugin-dmmf-workflow": "catalog:"
   "@systemfsoftware/oxlint-plugin-effect-platform": "catalog:"
