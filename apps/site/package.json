@@ -2,6 +2,8 @@
   "author": "TODO <todo@example.com>",
   "description": "The one Worker: the starter's TanStack Start site",
   "dependencies": {
+    "@systemfsoftware/effect-atom": "catalog:",
+    "@systemfsoftware/effect-atom-react": "catalog:",
     "@systemfsoftware/effect-cell-types": "catalog:",
     "@systemfsoftware/xstate": "catalog:",
     "@tanstack/react-router": "catalog:",

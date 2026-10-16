@@ -256,6 +256,8 @@ catalogs:
       version: 4.147.0
 
 overrides:
+  '@systemfsoftware/effect-atom': file:.sfs-deps/effect-atom-6.0.0.tgz
+  '@systemfsoftware/effect-atom-react': file:.sfs-deps/effect-atom-react-2.0.0.tgz
   '@systemfsoftware/effect-cell-types': file:.sfs-deps/effect-cell-types-12.0.0.tgz
   '@systemfsoftware/effect-gherkin-spec': file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz
   '@systemfsoftware/effect-schema-discovery': file:.sfs-deps/effect-schema-discovery-2.0.0.tgz
@@ -350,6 +352,12 @@ importers:
 
   apps/site:
     dependencies:
+      '@systemfsoftware/effect-atom':
+        specifier: file:../../.sfs-deps/effect-atom-6.0.0.tgz
+        version: file:.sfs-deps/effect-atom-6.0.0.tgz(effect@4.0.1)
+      '@systemfsoftware/effect-atom-react':
+        specifier: file:../../.sfs-deps/effect-atom-react-2.0.0.tgz
+        version: file:.sfs-deps/effect-atom-react-2.0.0.tgz(effect@4.0.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
       '@systemfsoftware/effect-cell-types':
         specifier: file:../../.sfs-deps/effect-cell-types-12.0.0.tgz
         version: file:.sfs-deps/effect-cell-types-12.0.0.tgz(effect@4.0.1)
@@ -2695,6 +2703,21 @@ packages:
 
   '@speed-highlight/core@1.2.24':
     resolution: {integrity: sha512-qeW2e1l78afw8VhRPfPQ1Gjj+KU5XFQ/OFV5ti6eTa9bruO7mJyZtA4vw0ofqmA3tKCkROE9xLk3VZoeRc98nw==}
+
+  '@systemfsoftware/effect-atom-react@file:.sfs-deps/effect-atom-react-2.0.0.tgz':
+    resolution: {integrity: sha512-bzCCbvxS/JbpNPlOYQQ4q70v0R4szW15sYKaf5nQurOUSz2muogy9V/D7vUx9NheivRRMPeZ1vhqKK6n4sQOqA==, tarball: file:.sfs-deps/effect-atom-react-2.0.0.tgz}
+    version: 2.0.0
+    peerDependencies:
+      effect: ^4
+      react: ^19.3.0
+      react-dom: ^19.3.0
+      scheduler: '*'
+
+  '@systemfsoftware/effect-atom@file:.sfs-deps/effect-atom-6.0.0.tgz':
+    resolution: {integrity: sha512-JuL3ZkGtbszByQ3K8jW7L+GmAXnZUgMHvSD+fsJVMXyeN13sRapo9LrF7+MA+arJNZwtN9g4eD8mZYHf1bfGQA==, tarball: file:.sfs-deps/effect-atom-6.0.0.tgz}
+    version: 6.0.0
+    peerDependencies:
+      effect: ^4
 
   '@systemfsoftware/effect-cell-types@file:.sfs-deps/effect-cell-types-12.0.0.tgz':
     resolution: {integrity: sha512-3pmbmzGrUe//NOacyRToZZtv/ow+DREFxL05LiS7Z8ZhPriIKwpvCBACWQ8kPFzkcSAIVPZV+XMx56LkU266EQ==, tarball: file:.sfs-deps/effect-cell-types-12.0.0.tgz}
@@ -6140,6 +6163,20 @@ snapshots:
       tslib: 2.8.1
 
   '@speed-highlight/core@1.2.24': {}
+
+  '@systemfsoftware/effect-atom-react@file:.sfs-deps/effect-atom-react-2.0.0.tgz(effect@4.0.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@systemfsoftware/effect-atom': file:.sfs-deps/effect-atom-6.0.0.tgz(effect@4.0.1)
+      '@systemfsoftware/effect-cell-types': file:.sfs-deps/effect-cell-types-12.0.0.tgz(effect@4.0.1)
+      effect: 4.0.1
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+      scheduler: 0.28.0
+
+  '@systemfsoftware/effect-atom@file:.sfs-deps/effect-atom-6.0.0.tgz(effect@4.0.1)':
+    dependencies:
+      '@systemfsoftware/effect-cell-types': file:.sfs-deps/effect-cell-types-12.0.0.tgz(effect@4.0.1)
+      effect: 4.0.1
 
   '@systemfsoftware/effect-cell-types@file:.sfs-deps/effect-cell-types-12.0.0.tgz(effect@4.0.1)':
     dependencies:
