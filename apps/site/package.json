@@ -5,6 +5,8 @@
     "#guestbook/*": "./src/features/guestbook/*"
   },
   "dependencies": {
+    "@systemfsoftware/effect-atom": "catalog:",
+    "@systemfsoftware/effect-atom-react": "catalog:",
     "@systemfsoftware/effect-cell-types": "catalog:",
     "@systemfsoftware/xstate": "catalog:",
     "@tanstack/react-router": "catalog:",
