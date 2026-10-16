@@ -63,6 +63,7 @@ catalog:
   babel-plugin-react-compiler: 1.0.0
   effect: 4.0.1
   lint-staged: 17.6.0
+  miniflare: 5.20261001.0-alpha
   oxlint: 1.82.0
   oxlint-tsgolint: 7.0.2001
   playwright: 1.63.0

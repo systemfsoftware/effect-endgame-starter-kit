@@ -224,6 +224,9 @@ catalogs:
     lint-staged:
       specifier: 17.6.0
       version: 17.6.0
+    miniflare:
+      specifier: 5.20261001.0-alpha
+      version: 5.20261001.0-alpha
     oxlint:
       specifier: 1.82.0
       version: 1.82.0
@@ -387,6 +390,9 @@ importers:
       '@rolldown/plugin-babel':
         specifier: 'catalog:'
         version: 0.2.4(@babel/core@8.0.6)(rolldown@1.2.12)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))
+      '@systemfsoftware/effect-gherkin-spec':
+        specifier: file:../../.sfs-deps/effect-gherkin-spec-7.0.1.tgz
+        version: file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
       '@systemfsoftware/oxlint-config-recommended':
         specifier: file:../../.sfs-deps/oxlint-config-recommended-4.0.0.tgz
         version: file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz(effect@4.0.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)
@@ -429,6 +435,9 @@ importers:
       babel-plugin-react-compiler:
         specifier: 'catalog:'
         version: 1.0.0
+      miniflare:
+        specifier: 'catalog:'
+        version: 5.20261001.0-alpha(@types/node@24.19.1)
       oxlint:
         specifier: 'catalog:'
         version: 1.82.0(oxlint-tsgolint@7.0.2001)

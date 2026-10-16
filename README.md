@@ -118,13 +118,13 @@ The site ships one example feature, a guestbook at `/guestbook`: a pure decision
 
 To remove it:
 
-1. Delete `apps/site/src/features/guestbook`.
+1. Delete `apps/site/src/features/guestbook` and the guestbook store law suite at `apps/site/tests/features/guestbook`.
 2. Delete `apps/site-e2e/tests/features/guestbook`.
 3. Delete the route file `apps/site/src/routes/guestbook.tsx`.
 4. `apps/site/src/api/site-rpcs.ts`: drop the `GuestbookRpcs` import and make `SiteRpcs` just `HealthRpcs`.
 5. `apps/site/src/api/site-rpc-server.ts`: drop the five `../features/guestbook/…` imports and the `GuestbookStoreLive` line; build the context from `SiteDatabaseLive` alone (the health check still probes D1); and delete the `guestbook` record, so the `toLayer` effect returns only `health`.
 6. `apps/site/alchemy.run.ts`: drop the `migrations` option from `Cloudflare.D1.Database('Database', …)`.
-7. `pnpm-workspace.yaml`: drop the `@systemfsoftware/xstate` line under `catalog:` and its mirror under `overrides:`; `apps/site/package.json`: drop the `@systemfsoftware/xstate` dependency.
+7. `pnpm-workspace.yaml`: drop the `@systemfsoftware/xstate` line under `catalog:` and its mirror under `overrides:`; `apps/site/package.json`: drop the `@systemfsoftware/xstate` dependency. Do the same for the guestbook store law suite's dev-only dependencies — `miniflare` and `@systemfsoftware/effect-gherkin-spec` (the `catalog:` line for miniflare, and both entries in `apps/site/package.json`'s `devDependencies`).
 8. Run `pnpm install --no-frozen-lockfile` from the shell you already have open. It rewrites `pnpm-lock.yaml` without its xstate entries; `--frozen-lockfile` (pnpm's default when `CI` is set) refuses that rewrite. The devshell builds its pnpm store from `pnpm-lock.yaml`, so it can't start again until the lockfile drops xstate.
 9. `flake.nix`: drop the `systemfsoftware-xstate` input, its name in the `outputs` arguments, and its two places in the `sfs-deps` derivation (the copy loop and the `jq -s add` merge); then run `nix flake lock`.
 10. Delete this README's guestbook text, from "The site ships one example feature" through the D1 note below.

@@ -1,6 +1,9 @@
 {
   "author": "TODO <todo@example.com>",
   "description": "The one Worker: the starter's TanStack Start site",
+  "imports": {
+    "#guestbook/*": "./src/features/guestbook/*"
+  },
   "dependencies": {
     "@systemfsoftware/effect-cell-types": "catalog:",
     "@systemfsoftware/xstate": "catalog:",
@@ -16,6 +19,7 @@
     "@cloudflare/vite-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
     "@rolldown/plugin-babel": "catalog:",
+    "@systemfsoftware/effect-gherkin-spec": "catalog:",
     "@systemfsoftware/oxlint-config-recommended": "catalog:",
     "@systemfsoftware/stryker-ignorer-effect-schema-declarations": "catalog:",
     "@systemfsoftware/stryker-js": "catalog:",
@@ -30,6 +34,7 @@
     "@vitejs/plugin-react": "catalog:",
     "alchemy": "catalog:",
     "babel-plugin-react-compiler": "catalog:",
+    "miniflare": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",
