@@ -393,6 +393,12 @@ importers:
       '@systemfsoftware/effect-gherkin-spec':
         specifier: file:../../.sfs-deps/effect-gherkin-spec-7.0.1.tgz
         version: file:.sfs-deps/effect-gherkin-spec-7.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
+      '@systemfsoftware/effect-schema-law':
+        specifier: file:../../.sfs-deps/effect-schema-law-5.0.1.tgz
+        version: file:.sfs-deps/effect-schema-law-5.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
+      '@systemfsoftware/effect-schema-vite':
+        specifier: file:../../.sfs-deps/effect-schema-vite-3.0.1.tgz
+        version: file:.sfs-deps/effect-schema-vite-3.0.1.tgz(@systemfsoftware/effect-schema-law@file:.sfs-deps/effect-schema-law-5.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
       '@systemfsoftware/oxlint-config-recommended':
         specifier: file:../../.sfs-deps/oxlint-config-recommended-4.0.0.tgz
         version: file:.sfs-deps/oxlint-config-recommended-4.0.0.tgz(effect@4.0.1)(oxlint-tsgolint@7.0.2001)(oxlint@1.82.0(oxlint-tsgolint@7.0.2001))(typescript@7.0.2)
@@ -2717,6 +2723,33 @@ packages:
     peerDependencies:
       '@systemfsoftware/vitest': ^2.0.0
       effect: ^4
+      vitest: ^5
+
+  '@systemfsoftware/effect-schema-discovery@file:.sfs-deps/effect-schema-discovery-2.0.0.tgz':
+    resolution: {integrity: sha512-Mlod6zaKFZ4FVRaRBSJ9++3tyYkBxEFCRml0lGgWe6xKFxEZ9x+MjFm8PMfU5qRV1+39A9wBs+V1TDGdVklmDA==, tarball: file:.sfs-deps/effect-schema-discovery-2.0.0.tgz}
+    version: 2.0.0
+
+  '@systemfsoftware/effect-schema-law@file:.sfs-deps/effect-schema-law-5.0.1.tgz':
+    resolution: {integrity: sha512-Xgwf5kFdTNBIvWptua1Q1qnFWARx7HHon6dI3LBCcTnxzSudKh6hwafbT4RYL9eJPP0W5pjRS2/nDnoSxWbyDw==, tarball: file:.sfs-deps/effect-schema-law-5.0.1.tgz}
+    version: 5.0.1
+    peerDependencies:
+      '@systemfsoftware/vitest': ^2.0.0
+      effect: ^4
+      vitest: ^5
+
+  '@systemfsoftware/effect-schema-recursion-budget@file:.sfs-deps/effect-schema-recursion-budget-2.0.0.tgz':
+    resolution: {integrity: sha512-txecn8NzPp1RSG2HL+02hKfqeBu5+EsE/O9g/JQOYD69AAppVPAD6PpqtuI8w6DawKiqDnnikpCBHwSLwjyJ3g==, tarball: file:.sfs-deps/effect-schema-recursion-budget-2.0.0.tgz}
+    version: 2.0.0
+    peerDependencies:
+      effect: ^4
+
+  '@systemfsoftware/effect-schema-vite@file:.sfs-deps/effect-schema-vite-3.0.1.tgz':
+    resolution: {integrity: sha512-WYrP0Y7l2662cVmDziJElk+yHFr/AaMgKYDhcmmXvc7dCHNpDMiKqxs6+DxSTUyUH9difNikEZZmxPwjiBI9UQ==, tarball: file:.sfs-deps/effect-schema-vite-3.0.1.tgz}
+    version: 3.0.1
+    peerDependencies:
+      '@systemfsoftware/effect-schema-law': 5.0.1
+      effect: ^4
+      vite: '>5.0.0'
       vitest: ^5
 
   '@systemfsoftware/effect-sim-kernel@file:.sfs-deps/effect-sim-kernel-1.0.0.tgz':
@@ -6159,6 +6192,34 @@ snapshots:
       '@systemfsoftware/effect-spec-runtime': file:.sfs-deps/effect-spec-runtime-1.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
       '@systemfsoftware/vitest': file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
       effect: 4.0.1
+      vitest: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))
+
+  '@systemfsoftware/effect-schema-discovery@file:.sfs-deps/effect-schema-discovery-2.0.0.tgz':
+    dependencies:
+      '@oxc-project/types': 0.150.0
+      oxc-parser: 0.150.0
+
+  '@systemfsoftware/effect-schema-law@file:.sfs-deps/effect-schema-law-5.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))':
+    dependencies:
+      '@systemfsoftware/vitest': file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
+      effect: 4.0.1
+      vitest: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))
+
+  '@systemfsoftware/effect-schema-recursion-budget@file:.sfs-deps/effect-schema-recursion-budget-2.0.0.tgz(effect@4.0.1)':
+    dependencies:
+      '@oxc-project/types': 0.150.0
+      effect: 4.0.1
+      oxc-parser: 0.150.0
+
+  '@systemfsoftware/effect-schema-vite@file:.sfs-deps/effect-schema-vite-3.0.1.tgz(@systemfsoftware/effect-schema-law@file:.sfs-deps/effect-schema-law-5.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))':
+    dependencies:
+      '@oxc-project/types': 0.150.0
+      '@systemfsoftware/effect-schema-discovery': file:.sfs-deps/effect-schema-discovery-2.0.0.tgz
+      '@systemfsoftware/effect-schema-law': file:.sfs-deps/effect-schema-law-5.0.1.tgz(@systemfsoftware/vitest@file:.sfs-deps/vitest-2.0.0.tgz(effect@4.0.1)(redis@6.2.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))))(effect@4.0.1)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)))
+      '@systemfsoftware/effect-schema-recursion-budget': file:.sfs-deps/effect-schema-recursion-budget-2.0.0.tgz(effect@4.0.1)
+      effect: 4.0.1
+      oxc-parser: 0.150.0
+      vite: 8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1)
       vitest: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.2)(jiti@2.6.1)(yaml@2.9.1))
 
   '@systemfsoftware/effect-sim-kernel@file:.sfs-deps/effect-sim-kernel-1.0.0.tgz(effect@4.0.1)':
