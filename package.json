@@ -38,7 +38,7 @@
     "gate:dist": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-100%} build",
     "gate:tasks": "sandbox --allow-host jsr.io -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} --continue lint lint:suppressions typecheck typecheck:node test test:scripts",
     "lint": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} lint lint:suppressions",
-    "lint:suppressions": "./bin/sandboxed -- no-inline-suppression",
+    "lint:suppressions": "git ls-files -z -- '*.ts' '*.tsx' '*.mts' '*.cts' '*.js' '*.jsx' '*.mjs' '*.cjs' ':(exclude)repos' | xargs -0 -r ./bin/sandboxed -- no-inline-suppression",
     "precommit": "pnpm exec lint-staged --no-revert --config .lintstagedrc.js",
     "prepare": "effect-tsgo patch --oxlint --no-typescript --skip-missing",
     "test": "sandbox --allow-host jsr.io -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} test test:scripts && pnpm test:sandbox",
