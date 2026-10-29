@@ -38,7 +38,7 @@ Feature('Signing the guestbook from its page', { timeout: CHROMIUM_TIMEOUT_MS })
       Gherkin.Do.pipe(
         When('a guest signs the guestbook')(
           'message',
-          () => Effect.flatMap(uniqueMessage, (message) => Effect.as(signOnPage({ name: 'Ada', message }), message)),
+          () => Effect.tap(uniqueMessage, (message) => signOnPage({ name: 'Ada', message })),
         ),
         When('another visitor opens the guestbook in their own browser')('listed', () => listedOnPage),
         Then('the entry is in the list')((s, expect) => expect(s.listed).toContain(`Ada ${s.message}`)),

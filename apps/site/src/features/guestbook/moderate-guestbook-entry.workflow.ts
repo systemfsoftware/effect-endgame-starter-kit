@@ -8,14 +8,16 @@ import { EntryState, LifecycleEvent, StoredEntryState } from './guestbook.schema
 
 const ModerateGuestbookEntryTypeId: unique symbol = Symbol()
 
-export class ModerateGuestbookEntry extends S.Class<ModerateGuestbookEntry>('ModerateGuestbookEntry')({
-  state: StoredEntryState,
-  event: LifecycleEvent,
-}) {
+export class ModerateGuestbookEntry
+  extends S.Class<ModerateGuestbookEntry, { readonly brand: unique symbol }>('ModerateGuestbookEntry')({
+    state: StoredEntryState,
+    event: LifecycleEvent,
+  })
+{
   static readonly [Workflow.InstrumentationBrand]: Record<never, never> = {}
 }
 
-export class EntryMoved extends S.TaggedClass<EntryMoved>()('EntryMoved', {
+export class EntryMoved extends S.TaggedClass<EntryMoved, { readonly brand: unique symbol }>()('EntryMoved', {
   from: EntryState,
   to: EntryState,
   actions: S.Int,
@@ -23,10 +25,12 @@ export class EntryMoved extends S.TaggedClass<EntryMoved>()('EntryMoved', {
   readonly [ModerateGuestbookEntryTypeId] = ModerateGuestbookEntryTypeId
 }
 
-export class IllegalTransition extends S.TaggedError<IllegalTransition>()('IllegalTransition', {
-  state: EntryState,
-  event: LifecycleEvent,
-}) {
+export class IllegalTransition
+  extends S.TaggedError<IllegalTransition, { readonly brand: unique symbol }>()('IllegalTransition', {
+    state: EntryState,
+    event: LifecycleEvent,
+  })
+{
   override get message(): string {
     return `An entry that is ${this.state} can't take ${this.event}.`
   }
