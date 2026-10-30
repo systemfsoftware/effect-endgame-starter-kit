@@ -1,0 +1,30 @@
+# Mergify: policy lives in systemfsoftware/.github (.mergify.yml). This file only names this repo's CI checks.
+extends: .github
+queue_rules:
+  - name: default
+    # Checked on the PR itself before it enters the queue.
+    queue_conditions:
+      - check-success = check (dist)
+      - check-success = check (format)
+      - check-success = check (lint)
+      - check-success = check (sfs-sources)
+      - check-success = check (test)
+      - check-success = check (typecheck)
+      - check-success = journeys
+      - check-success = rules
+      - or:
+          - check-success = lint PR commits
+          - check-skipped = lint PR commits
+      - or:
+          - check-success = changeset · shared tooling / a publishable-package change needs an intent
+          - check-skipped = changeset · shared tooling / a publishable-package change needs an intent
+    # Checked on Mergify's queue draft PR (mergify/merge-queue/*), i.e. CI on the PR rebased with main and any batch.
+    merge_conditions:
+      - check-success = check (dist)
+      - check-success = check (format)
+      - check-success = check (lint)
+      - check-success = check (sfs-sources)
+      - check-success = check (test)
+      - check-success = check (typecheck)
+      - check-success = journeys
+      - check-success = rules
