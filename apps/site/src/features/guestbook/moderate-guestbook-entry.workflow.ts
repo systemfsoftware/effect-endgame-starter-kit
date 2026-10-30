@@ -6,7 +6,7 @@ import * as S from 'effect/Schema'
 
 import { EntryState, LifecycleEvent, StoredEntryState } from './guestbook.schema.ts'
 
-const ModerateGuestbookEntryTypeId: unique symbol = Symbol()
+const ModerateGuestbookEntryTypeId: unique symbol = Symbol.for('site/ModerateGuestbookEntry')
 
 export class ModerateGuestbookEntry
   extends S.Class<ModerateGuestbookEntry, { readonly brand: unique symbol }>('ModerateGuestbookEntry')({
