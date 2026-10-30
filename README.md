@@ -2,7 +2,7 @@
 
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Effect: 4.0](https://img.shields.io/badge/Effect-4.0-purple.svg)](https://effect.website)
-[![CI](https://github.com/systemfsoftware/starter/actions/workflows/ci.yml/badge.svg)](https://github.com/systemfsoftware/starter/actions/workflows/ci.yml)
+[![CI](https://github.com/systemfsoftware/starter/actions/workflows/check.yml/badge.svg)](https://github.com/systemfsoftware/starter/actions/workflows/check.yml)
 
 > 🏛️ **starter** is an opinionated monorepo template for serious TypeScript with Effect and AI coding agents.
 > 🔒 One architecture, zero knobs, and mechanical gates that reject the slop agents produce when left unconstrained.
@@ -57,7 +57,6 @@ read (impure) ──► decode (pure) ──► decide (pure) ──► shape (p
 | 🎨 **dprint**             | Fast, deterministic code and markdown formatting (`dprint.json`)                       |
 | 🧪 **Vitest**             | Fast unit and integration test runner with TypeScript support                          |
 | 🔬 **Stryker**            | Mutation testing ensuring tests fail when bugs are introduced                          |
-| 📝 **Changesets**         | Automated versioning and changelogs, released as git tags via shared tooling           |
 | 🪝 **Husky & Commitlint** | Git hooks enforcing conventional commit standards                                      |
 | 🌳 **Worktrunk Scripts**  | Deno-powered git worktree lifecycle hooks for isolated agent work                      |
 
@@ -139,7 +138,7 @@ A copy gets the template's files, not its repository settings, so nothing stops 
 gh api -X POST repos/{owner}/{repo}/rulesets --input .github/rulesets/gates.json
 ```
 
-Until it is installed, CI's `rules` check fails on every pull request and every push to `main`, and the production deploy waits on it.
+Until it is installed, nothing stops a pull request with failing checks from merging. The ruleset requires the single `check` job.
 
 ### 6. Deploy
 
@@ -153,7 +152,46 @@ ALCHEMY_STAGE=pr-12 pnpm run destroy
 
 `pnpm run deploy`, not `pnpm deploy`: the bare form is pnpm's own built-in command.
 
-In your copy, with the two secrets set as repository secrets (and `SITE_DOMAIN` as a repository variable), every same-repo pull request gets a preview with its URL in a comment, and `main` deploys production once the release gate passes. The template itself never deploys.
+In a copy that has run the [section 7](#7-credentials-for-ci) bootstrap and set the repository variable `ALCHEMY_DEPLOY` to `true` (plus `SITE_DOMAIN` as a repository variable to serve production on a domain), every same-repo pull request gets a preview deploy with its URL in a comment and its stage destroyed on close, and `main` deploys production in one job with no gate in front of it. The template itself never deploys.
+
+### 7. Credentials for CI
+
+The operator runs this once per repository that opts in to deploys. It runs on the host, outside every sandbox (not through `bin/cloud` or `sandbox --`), and never on the template. It mints a scoped Cloudflare token and writes it to the repository as secrets, so no one hand-copies a token into repository settings.
+
+The bootstrap requires `SITE_DOMAIN`: a hostname in a zone on the account, because the CI token's zone grants are scoped to that zone. A copy that serves only on `workers.dev` skips the bootstrap and creates the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` repository secrets by hand instead.
+
+From `apps/site` in the dev shell, with the operator's own secrets (supplied from Doppler, key named by the operator; never print them):
+
+```bash
+cd apps/site
+CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… GITHUB_ACCESS_TOKEN=… \
+  GITHUB_REPOSITORY=<owner>/<repo> SITE_DOMAIN=<hostname> \
+  pnpm exec alchemy deploy --config stacks/github.ts --stage ci-credentials
+```
+
+- `CLOUDFLARE_API_TOKEN`: an admin-scoped Cloudflare token that can create API tokens. A standard Edit Workers token is not enough; use an account API token with `Account > API Tokens > Write`, or the Global API Key.
+- `CLOUDFLARE_ACCOUNT_ID`: the target account.
+- `GITHUB_ACCESS_TOKEN`: a fine-grained personal access token on that one repository with only Secrets: write, and a short expiry.
+- `GITHUB_REPOSITORY`: `<owner>/<repo>` of the repository that receives the secrets.
+- `SITE_DOMAIN`: a hostname in a zone on the account. The CI token's zone grants are limited to that zone.
+
+These environment credentials win over any alchemy profile, so no `--profile` flag is needed. The fixed `ci-credentials` stage means a rerun updates the same token and secrets instead of minting new ones. A rerun changes the token's grants in place and keeps its value.
+
+The stack is named `github-<owner>-<repo>` from `GITHUB_REPOSITORY`, so every repository's bootstrap carries its own state: alchemy's state store keys each resource by stack, stage, and resource name (`@alchemy.run/cloudflare` `src/StateStore/Api.ts:75-79`, `:121-135`; the stack name flows from `Alchemy.Stack` into that key, `alchemy/src/Stack.ts:155-157`, `:216`). Two repositories therefore never share a state key, and one repository's `destroy` cannot delete another's token or secrets.
+
+The stack creates a Cloudflare account API token and two repository secrets, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. The token holds:
+
+- Account: Workers Scripts Write, D1 Write, Workers Tail Read, and Secrets Store Write. Secrets Store Write is needed because every cloud stage keeps its state in a worker that is bound to the account's Secrets Store.
+- The `SITE_DOMAIN` zone only: Workers Routes Write, DNS Write, and Zone Read. Zone Read is needed because the custom-domain path looks the zone up by name.
+
+After it runs:
+
+1. Confirm the secrets exist with `gh secret list` (names only).
+2. Revoke the previous hand-made Cloudflare token by name in the Cloudflare dashboard.
+3. Set the repository variable `ALCHEMY_DEPLOY` to `true`, and `SITE_DOMAIN` to the same hostname so production serves on it. Nothing deploys until `ALCHEMY_DEPLOY` is set.
+4. To rotate the token's value, at least every 90 days, run `pnpm exec alchemy destroy --config stacks/github.ts --stage ci-credentials` with the same environment, then run the deploy command again. The destroy deletes the token, the deploy mints a new one and rewrites both secrets, and deploys fail in between.
+
+A new resource type needs its permission group added to `apps/site/stacks/github.ts`.
 
 ---
 
@@ -173,7 +211,7 @@ pnpm lint
 
 # Run unit and integration tests
 pnpm test
-# Run full CI suite locally
+# Run every local gate (a superset of what CI runs)
 pnpm check:ci
 ```
 
@@ -198,7 +236,7 @@ Every configuration toggle provides a route for AI agents to downgrade verificat
 <details>
 <summary><strong>How does mutation testing work in this template?</strong></summary>
 
-Stryker introduces deliberate syntax and logic mutations into your code and runs your test suite against each mutant. If your tests still pass when code behavior changes, the mutant survives and the gate fails. The release gate mutates only `*.workflow.ts` decision files. Its planner (`scripts/mutation-shards.ts`) lists each package's workflow files and hands exactly that list to Stryker, and it refuses anything that would change that set before Stryker starts. Those files require a 100% kill score. Mutation runs only in the release gate on pushes to `main`, never locally or on pull requests.
+Stryker introduces deliberate syntax and logic mutations into your code and runs your test suite against each mutant. If your tests still pass when code behavior changes, the mutant survives. Mutation is an on-demand script, `pnpm --filter @endgame/site mutation` (`stryker run`), never a CI job and never a gate in front of a deploy. The shared config (`stryker.shared.ts`) mutates only `**/*.workflow.ts` files in the package, runs the Vitest tests related to each mutant, and breaks the run below a 100% kill score.
 
 </details>
 

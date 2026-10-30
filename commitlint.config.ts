@@ -4,8 +4,8 @@ import type { UserConfig } from '@commitlint/types'
  * systemfsoftware shared commitlint config.
  *
  * Design rule: a rule is `error` (2) ONLY if a wrong value has real downstream
- * impact in THIS org. Releases run on changesets (.changeset/*.md), NOT commit
- * messages, so scope / punctuation / type-vs-diff have ZERO release impact and
+ * impact in THIS org. Releases are plain `main` deploys, NOT commit messages,
+ * so scope / punctuation / type-vs-diff have ZERO release impact and
  * must never fail a commit. The one message policy that matters is the
  * AI-coauthor ban.
  */
@@ -59,7 +59,7 @@ const configuration: UserConfig = {
     // The one policy that matters.
     'no-ai-coauthors': [2, 'always'],
 
-    // Type: tidy log/PR grouping only (releases run on changesets).
+    // Type: tidy log/PR grouping only (releases are plain `main` deploys).
     'type-empty': [2, 'never'],
     'type-case': [2, 'always', 'lower-case'],
     'type-enum': [

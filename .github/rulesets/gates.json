@@ -25,16 +25,7 @@
       "parameters": {
         "strict_required_status_checks_policy": true,
         "required_status_checks": [
-          { "context": "check (format)" },
-          { "context": "check (lint)" },
-          { "context": "check (typecheck)" },
-          { "context": "check (test)" },
-          { "context": "check (dist)" },
-          { "context": "check (sfs-sources)" },
-          { "context": "journeys" },
-          { "context": "lint PR commits" },
-          { "context": "changeset · shared tooling / a publishable-package change needs an intent" },
-          { "context": "rules" }
+          { "context": "check" }
         ]
       }
     }
