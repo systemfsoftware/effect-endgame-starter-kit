@@ -31,6 +31,7 @@
     "check:branch-rules": "sandbox --allow-host api.github.com --allow-host jsr.io --pass-env GITHUB_TOKEN --pass-env GITHUB_REPOSITORY -- ./scripts/check-branch-rules.ts",
     "check:sfs-sources": "sandbox --allow-host jsr.io -- ./scripts/check-sfs-sources.ts",
     "clean": "sandbox -- turbo clean",
+    "check-env": "./bin/cloud pnpm --filter @endgame/site exec alchemy provider check-env --provider cloudflare",
     "deploy": "./bin/cloud pnpm --filter @endgame/site exec alchemy deploy --stage \"${ALCHEMY_STAGE:-prod}\" --no-input --yes",
     "destroy": "./bin/cloud pnpm --filter @endgame/site exec alchemy destroy --stage \"${ALCHEMY_STAGE:?set ALCHEMY_STAGE, e.g. pr-<N>}\" --no-input --yes",
     "format": "./bin/dprint fmt",
