@@ -9,16 +9,21 @@ import * as Config from 'effect/Config'
 import * as Effect from 'effect/Effect'
 import * as Layer from 'effect/Layer'
 import * as Redacted from 'effect/Redacted'
-import * as Schema from 'effect/Schema'
+
+const slug = process.env['GITHUB_REPOSITORY']
+if (slug === undefined || !/^[^/]+\/[^/]+$/.test(slug)) {
+  throw new Error(
+    'GITHUB_REPOSITORY must be set to <owner>/<repo>: the credentials stack is named after it, so each repository keys its own alchemy state, and its secrets are written to that repository.',
+  )
+}
+const owner = slug.slice(0, slug.indexOf('/'))
+const repository = slug.slice(slug.indexOf('/') + 1)
 
 export default Alchemy.Stack(
-  'github',
+  `github-${owner}-${repository}`,
   { providers: Layer.mergeAll(Cloudflare.providers(), GitHub.providers()), state: Cloudflare.state() },
   Effect.gen(function*() {
-    const slug = yield* Config.schema(Schema.String.check(Schema.isPattern(/^[^/]+\/[^/]+$/)), 'GITHUB_REPOSITORY')
     const hostname = yield* Config.NonEmptyString('SITE_DOMAIN')
-    const owner = slug.slice(0, slug.indexOf('/'))
-    const repository = slug.slice(slug.indexOf('/') + 1)
     const { accountId } = yield* yield* Cloudflare.CloudflareEnvironment
     const zoneId = yield* Cloudflare.Zone.resolveZoneId({ accountId, zone: undefined, hostname }).pipe(Effect.orDie)
     const accountKey = `com.cloudflare.api.account.${accountId}` as const

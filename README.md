@@ -177,6 +177,8 @@ CLOUDFLARE_API_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… GITHUB_ACCESS_TOKEN=… \
 
 These environment credentials win over any alchemy profile, so no `--profile` flag is needed. The fixed `ci-credentials` stage means a rerun updates the same token and secrets instead of minting new ones. A rerun changes the token's grants in place and keeps its value.
 
+The stack is named `github-<owner>-<repo>` from `GITHUB_REPOSITORY`, so every repository's bootstrap carries its own state: alchemy's state store keys each resource by stack, stage, and resource name (`@alchemy.run/cloudflare` `src/StateStore/Api.ts:75-79`, `:121-135`; the stack name flows from `Alchemy.Stack` into that key, `alchemy/src/Stack.ts:155-157`, `:216`). Two repositories therefore never share a state key, and one repository's `destroy` cannot delete another's token or secrets.
+
 The stack creates a Cloudflare account API token and two repository secrets, `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. The token holds:
 
 - Account: Workers Scripts Write, D1 Write, Workers Tail Read, and Secrets Store Write. Secrets Store Write is needed because every cloud stage keeps its state in a worker that is bound to the account's Secrets Store.
