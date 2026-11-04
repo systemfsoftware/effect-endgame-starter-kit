@@ -23,6 +23,7 @@ export const Site = Cloudflare.Website.Vite(
     return {
       main: siteWorker.main,
       compatibility: { date: siteWorker.compatibilityDate, flags: [...siteWorker.compatibilityFlags] },
+      assets: { runWorkerFirst: ['/app', '/app/*'] },
       dev: { port: 1337, strictPort: true },
       env: { DB: yield* Database },
       ...productionDomain(stage),
