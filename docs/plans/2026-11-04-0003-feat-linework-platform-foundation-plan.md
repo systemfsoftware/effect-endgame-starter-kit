@@ -133,7 +133,7 @@ Redemption must distinguish pending, consumed and expired links; the storage ope
 
 **Files:** Proposed `apps/site/src/features/account/`, its migrations and `apps/site/src/features/mail/`; existing API and Worker composition points under `apps/site/src/`; sign-in feature story in `apps/web/features/`.
 
-**Approach:** Integrate the chosen provider through typed domain boundaries and one session store. Sign-up creates the account only after confirmation. Existing-account lookup for sign-in must not leak through the response or an outbox message. Keep dev outbox records separate from real mail delivery. The working lifetime is R2's default, not an owner decision.
+**Approach:** Integrate the chosen provider through typed domain boundaries and one session store. Sign-up creates the account only after confirmation. Existing-account lookup for sign-in must not leak through the response or an outbox message. Keep dev outbox records separate from real mail delivery. The working lifetime is 15 minutes as a working default; the owner confirms it, and this slice doesn't treat it as settled.
 
 **Verification scenarios:** A new address receives a link and becomes confirmed on redemption; reuse and expiry each produce the specified distinct message. An unknown sign-in email receives the same screen and no message. Two redemptions of one link cannot both create sessions. Sign-out followed by Back and a protected request reveals no prior workspace data. The local outbox route is not exposed in deployed stages. Exercise the flow with `storybook-gherkin` as required by R9, not a mock that merely echoes the subject.
 
