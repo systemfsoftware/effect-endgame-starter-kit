@@ -41,8 +41,8 @@
   "name": "@endgame/site",
   "private": true,
   "scripts": {
-    "build": "tsr generate && vite build",
-    "dev": "alchemy dev",
+    "build": "pnpm --filter @endgame/web build && tsr generate && vite build",
+    "dev": "pnpm --filter @endgame/web build && alchemy dev",
     "generate": "tsr generate",
     "preview": "vite preview",
     "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
