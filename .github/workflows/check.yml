@@ -1,0 +1,52 @@
+name: Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: "true"
+      OXLINT_FORMAT: github
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: cachix/install-nix-action@v31
+      - name: Lift the ubuntu-24.04 AppArmor block on user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - name: Create the sandbox's output directory
+        run: mkdir -p .cache
+      - name: Install through the sandbox, offline from the Nix pnpm store
+        run: nix develop --command pnpm bootstrap
+      - name: Turbo cache
+        uses: actions/cache@v6
+        with:
+          path: .turbo/cache
+          key: turbo-${{ runner.os }}-check-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ runner.os }}-check-
+            turbo-${{ runner.os }}-
+      - name: Check
+        run: nix develop --command pnpm exec turbo run format:check lint typecheck test --affected
+      - name: Lint PR commits
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: nix develop --command sandbox -- pnpm exec commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose

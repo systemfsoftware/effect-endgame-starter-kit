@@ -11,7 +11,8 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@alchemy.run/frontend-frameworks": "catalog:",
+    "@alchemy.run/cloudflare": "catalog:",
+    "@alchemy.run/github": "catalog:",
     "@babel/core": "catalog:",
     "@cloudflare/vite-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",

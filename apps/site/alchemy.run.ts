@@ -1,5 +1,7 @@
+import * as Cloudflare from '@alchemy.run/cloudflare'
+import * as GitHub from '@alchemy.run/github'
 import * as Alchemy from 'alchemy'
-import * as Cloudflare from 'alchemy/Cloudflare'
+import * as Output from 'alchemy/Output'
 import * as Effect from 'effect/Effect'
 import * as Layer from 'effect/Layer'
 
@@ -34,9 +36,18 @@ const stateOfStage = Layer.unwrap(
 
 export default Alchemy.Stack(
   'Endgame',
-  { providers: Cloudflare.providers(), state: stateOfStage },
+  { providers: Layer.mergeAll(GitHub.providers(), Cloudflare.providers()), state: stateOfStage },
   Effect.gen(function*() {
     const site = yield* Site
+    const github = yield* GitHub.GitHubEnv
+    if (github?.pr !== undefined) {
+      yield* GitHub.Comment('preview-comment', {
+        owner: github.owner,
+        repository: github.repository,
+        issueNumber: github.pr,
+        body: Output.interpolate`### Preview\n\n${site.url}\n\nCommit \`${github.sha.slice(0, 7)}\``,
+      })
+    }
     return { url: site.url, workerName: site.workerName }
   }),
 )

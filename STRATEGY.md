@@ -39,7 +39,7 @@ their own review attention, and drift can't accumulate behind their back.
 - No light preset, no opt-out, no `warn` severity — ever.
 - No second exemplar: the starter is the exemplar, and a demo app would drift from doctrine; systemfsoftware's `examples/` is deleted in its favour.
 - Cloudflare is the one deploy target.
-- Mutation runs only on push to `main`.
+- Mutation runs on demand (`pnpm --filter @endgame/site mutation`), never as a CI or deploy gate.
 - No Effect 3 compatibility surface: Effect 4 is the price of entry.
 
 _Resist a change when:_ it buys adoption — or stars — by making the endgame shape optional.
