@@ -11,7 +11,8 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@alchemy.run/frontend-frameworks": "catalog:",
+    "@alchemy.run/cloudflare": "catalog:",
+    "@alchemy.run/github": "catalog:",
     "@babel/core": "catalog:",
     "@cloudflare/vite-plugin": "catalog:",
     "@cloudflare/workers-types": "catalog:",
@@ -40,8 +41,8 @@
   "name": "@endgame/site",
   "private": true,
   "scripts": {
-    "build": "tsr generate && vite build",
-    "dev": "alchemy dev",
+    "build": "pnpm --filter @endgame/web build && tsr generate && vite build",
+    "dev": "pnpm --filter @endgame/web build && alchemy dev",
     "generate": "tsr generate",
     "preview": "vite preview",
     "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",

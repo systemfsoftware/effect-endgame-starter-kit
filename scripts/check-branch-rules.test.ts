@@ -3,18 +3,7 @@ import { Result } from 'effect'
 
 import { branchRulesVerdict, decodeBranchRules, REQUIRED_CHECKS } from './check-branch-rules.ts'
 
-const R22_CHECKS = [
-  'check (format)',
-  'check (lint)',
-  'check (typecheck)',
-  'check (test)',
-  'check (dist)',
-  'check (sfs-sources)',
-  'journeys',
-  'lint PR commits',
-  'changeset · shared tooling / a publishable-package change needs an intent',
-  'rules',
-]
+const R22_CHECKS = ['check']
 
 const RULESET_SOURCE = {
   ruleset_source_type: 'Repository',

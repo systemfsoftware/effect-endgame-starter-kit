@@ -1,6 +1,17 @@
 {
   "$schema": "https://v2-11-7.turborepo.dev/schema.json",
   "agentGuidance": false,
+  "globalDependencies": [
+    "oxlint.shared.ts",
+    "stryker.shared.ts",
+    "tsconfig.base.json",
+    "tsconfig.node.json",
+    "commitlint.config.ts",
+    ".lintstagedrc.js",
+    "flake.nix",
+    "flake.lock",
+    "scripts/**"
+  ],
   "globalPassThroughEnv": [
     "XDG_CACHE_HOME",
     "SANDBOX",
@@ -51,7 +62,8 @@
       "outputs": [],
       "dependsOn": [
         "^build",
-        "generate"
+        "generate",
+        "//#typecheck:node"
       ],
       "cache": true
     },
@@ -78,6 +90,21 @@
       "outputs": [],
       "cache": true
     },
+    "//#format:check": {
+      "outputLogs": "errors-only",
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/dprint.json",
+        "$TURBO_ROOT$/**/*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc,md,toml,yaml,yml}",
+        "!$TURBO_ROOT$/**/node_modules/**",
+        "!$TURBO_ROOT$/**/dist/**",
+        "!$TURBO_ROOT$/coverage/**",
+        "!$TURBO_ROOT$/reports/**",
+        "!$TURBO_ROOT$/repos/**"
+      ],
+      "outputs": [],
+      "cache": true
+    },
     "//#lint:suppressions": {
       "outputLogs": "errors-only",
       "cache": false
@@ -96,7 +123,8 @@
       "outputLogs": "new-only",
       "dependsOn": [
         "^build",
-        "build"
+        "build",
+        "//#test:scripts"
       ],
       "outputs": [
         "coverage/**"
@@ -149,7 +177,9 @@
       "dependsOn": [
         "^build",
         "build",
-        "generate"
+        "generate",
+        "//#lint:suppressions",
+        "//#format:check"
       ],
       "env": [
         "NODE_ENV",

@@ -31,7 +31,7 @@ applications — both are workspace globs in `pnpm-workspace.yaml`. Turbo declar
 - This repo is a template and holds no credentials; CI proves everything locally. Gate: review of the workflow diff; a job that needs a secret carries `if: ${{ !github.event.repository.is_template }}`.
 - Every job runs on GitHub-hosted `ubuntu-latest` runners. This repository is public, and the org's self-hosted fleet runner group admits only private repositories (fork safety), so a `[self-hosted, systemfsoftware-runner, *]` job here queues forever. Gate: review of the workflow diff.
 - Cloudflare credentials enter a sandbox only through `bin/cloud` (deploy, destroy, state reads). Gate: review of the workflow diff — wrong: `sandbox --pass-env CLOUDFLARE_API_TOKEN -- pnpm --filter @endgame/site exec alchemy deploy`; right: `./bin/cloud pnpm --filter @endgame/site exec alchemy deploy`.
-- Heavy suites split across parallel hosted jobs instead of a larger runner: Linux `check:ci` runs as one job per part (format, lint, typecheck, test, dist), and mutation on `main` runs one job per package. Gate: review of the workflow diff.
+- CI is two workflows: `check.yml` (one `check` job: `turbo run format:check lint typecheck test --affected` plus commitlint over the PR range) and `deploy.yml` (a `deploy` and a `cleanup` job, dormant until the repository variable `ALCHEMY_DEPLOY` is `true`); mutation is an on-demand package script and never gates a deploy. Gate: review of the workflow diff.
 
 ## End of Session
 

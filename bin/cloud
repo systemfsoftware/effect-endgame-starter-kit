@@ -2,17 +2,28 @@
 # Run a Cloudflare-facing command (an alchemy deploy, destroy or state read)
 # inside the sandbox. This is the one place the Cloudflare credentials enter a
 # sandbox, and the one list of hosts such a command may reach: Cloudflare's
-# API, and the account's workers.dev hosts, where alchemy's state store
-# answers. Telemetry stays off, so nothing else needs to be reachable.
+# API, the account's workers.dev hosts, where alchemy's state store answers,
+# and api.github.com, where the app stack's GitHub.Comment posts the preview
+# URL. The Actions token enters only under the CI-only name
+# ALCHEMY_GITHUB_TOKEN, mapped here to the provider's GITHUB_ACCESS_TOKEN, so an
+# ambient GITHUB_TOKEN or PAT never crosses. Telemetry stays off.
 set -euo pipefail
 
 export DO_NOT_TRACK=1
+export GITHUB_ACCESS_TOKEN="${ALCHEMY_GITHUB_TOKEN-}"
 exec sandbox \
   --allow-host api.cloudflare.com \
   --allow-host '*.workers.dev' \
+  --allow-host api.github.com \
   --pass-env CLOUDFLARE_API_TOKEN \
   --pass-env CLOUDFLARE_ACCOUNT_ID \
   --pass-env SITE_DOMAIN \
+  --pass-env GITHUB_ACCESS_TOKEN \
+  --pass-env GITHUB_ACTIONS \
+  --pass-env GITHUB_SHA \
+  --pass-env GITHUB_REPOSITORY \
+  --pass-env GITHUB_REPOSITORY_OWNER \
+  --pass-env PULL_REQUEST \
   --pass-env DO_NOT_TRACK \
   --pass-env CI \
   -- "$@"

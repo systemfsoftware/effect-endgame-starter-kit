@@ -1,18 +1,7 @@
 #!/usr/bin/env -S deno run --config=scripts/deno.json --allow-net=api.github.com --allow-env=GITHUB_TOKEN,GITHUB_REPOSITORY
 import { Result, Schema as S } from 'effect'
 
-export const REQUIRED_CHECKS = [
-  'check (format)',
-  'check (lint)',
-  'check (typecheck)',
-  'check (test)',
-  'check (dist)',
-  'check (sfs-sources)',
-  'journeys',
-  'lint PR commits',
-  'changeset · shared tooling / a publishable-package change needs an intent',
-  'rules',
-] as const
+export const REQUIRED_CHECKS = ['check'] as const
 
 const StatusChecksRule = S.Struct({
   type: S.Literal('required_status_checks'),

@@ -19,7 +19,7 @@ const signed = (name: string, suffix: string) =>
   })
 
 const flagged = (suffix: string) =>
-  Effect.flatMap(signed('Ray', suffix), (message) => Effect.as(moderateOnPage({ message, event: 'Flag' }), message))
+  Effect.tap(signed('Ray', suffix), (message) => moderateOnPage({ message, event: 'Flag' }))
 
 Feature('Flagging and vouching for guestbook entries from the page', { timeout: CHROMIUM_TIMEOUT_MS })
   .withLayer(ChromiumLive)

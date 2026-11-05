@@ -5,21 +5,27 @@ import * as S from 'effect/Schema'
 
 const CheckHealthTypeId: unique symbol = Symbol()
 
-export class ProbeAnswered extends S.TaggedClass<ProbeAnswered>()('ProbeAnswered', {}) {}
+export class ProbeAnswered
+  extends S.TaggedClass<ProbeAnswered, { readonly brand: unique symbol }>()('ProbeAnswered', {})
+{}
 
-export class ProbeUnanswered extends S.TaggedClass<ProbeUnanswered>()('ProbeUnanswered', {}) {}
+export class ProbeUnanswered
+  extends S.TaggedClass<ProbeUnanswered, { readonly brand: unique symbol }>()('ProbeUnanswered', {})
+{}
 
-export class CheckHealth extends S.Class<CheckHealth>('CheckHealth')({
+export class CheckHealth extends S.Class<CheckHealth, { readonly brand: unique symbol }>('CheckHealth')({
   probe: S.Union([ProbeAnswered, ProbeUnanswered]),
 }) {
   static readonly [Workflow.InstrumentationBrand]: Record<never, never> = {}
 }
 
-class Healthy extends S.TaggedClass<Healthy>()('Healthy', {}) {
+class Healthy extends S.TaggedClass<Healthy, { readonly brand: unique symbol }>()('Healthy', {}) {
   readonly [CheckHealthTypeId] = CheckHealthTypeId
 }
 
-export class DatabaseUnreachable extends S.TaggedError<DatabaseUnreachable>()('DatabaseUnreachable', {}) {
+export class DatabaseUnreachable
+  extends S.TaggedError<DatabaseUnreachable, { readonly brand: unique symbol }>()('DatabaseUnreachable', {})
+{
   override get message(): string {
     return 'The database did not answer the health probe.'
   }

@@ -32,40 +32,50 @@ export type GuestbookEntry = S.Schema.Type<typeof GuestbookEntry>
 export const GuestbookEntries = S.Array(GuestbookEntry)
 export type GuestbookEntries = S.Schema.Type<typeof GuestbookEntries>
 
-export class EntryNotFound extends S.TaggedError<EntryNotFound>()('EntryNotFound', { id: EntryId }) {
+export class EntryNotFound
+  extends S.TaggedError<EntryNotFound, { readonly brand: unique symbol }>()('EntryNotFound', { id: EntryId })
+{
   override get message(): string {
     return `There is no entry ${this.id}.`
   }
 }
 
-export class StoredStateInvalid extends S.TaggedError<StoredStateInvalid>()('StoredStateInvalid', {
-  detail: S.String,
-}) {
+export class StoredStateInvalid
+  extends S.TaggedError<StoredStateInvalid, { readonly brand: unique symbol }>()('StoredStateInvalid', {
+    detail: S.String,
+  })
+{
   override get message(): string {
     return `This entry's stored state is not one the lifecycle knows: ${this.detail}`
   }
 }
 
-export class TransitionConflict extends S.TaggedError<TransitionConflict>()('TransitionConflict', {
-  id: EntryId,
-  from: EntryState,
-}) {
+export class TransitionConflict
+  extends S.TaggedError<TransitionConflict, { readonly brand: unique symbol }>()('TransitionConflict', {
+    id: EntryId,
+    from: EntryState,
+  })
+{
   override get message(): string {
     return `Entry ${this.id} changed after it was read as ${this.from}; reload and try again.`
   }
 }
 
-export class GuestbookUnavailable extends S.TaggedError<GuestbookUnavailable>()('GuestbookUnavailable', {
-  detail: S.String,
-}) {
+export class GuestbookUnavailable
+  extends S.TaggedError<GuestbookUnavailable, { readonly brand: unique symbol }>()('GuestbookUnavailable', {
+    detail: S.String,
+  })
+{
   override get message(): string {
     return `The guestbook's database failed: ${this.detail}`
   }
 }
 
-export class GuestbookRowInvalid extends S.TaggedError<GuestbookRowInvalid>()('GuestbookRowInvalid', {
-  detail: S.String,
-}) {
+export class GuestbookRowInvalid
+  extends S.TaggedError<GuestbookRowInvalid, { readonly brand: unique symbol }>()('GuestbookRowInvalid', {
+    detail: S.String,
+  })
+{
   override get message(): string {
     return `A guestbook row did not decode: ${this.detail}`
   }

@@ -8,39 +8,43 @@ import { GuestMessage, GuestName } from './guestbook.schema.ts'
 
 const SignGuestbookTypeId: unique symbol = Symbol()
 
-export class SignGuestbook extends S.Class<SignGuestbook>('SignGuestbook')({
+export class SignGuestbook extends S.Class<SignGuestbook, { readonly brand: unique symbol }>('SignGuestbook')({
   name: S.String,
   message: S.String,
 }) {
   static readonly [Workflow.InstrumentationBrand]: Record<never, never> = {}
 }
 
-export class EntryAccepted extends S.TaggedClass<EntryAccepted>()('EntryAccepted', {
+export class EntryAccepted extends S.TaggedClass<EntryAccepted, { readonly brand: unique symbol }>()('EntryAccepted', {
   guest: GuestName,
   message: GuestMessage,
 }) {
   readonly [SignGuestbookTypeId] = SignGuestbookTypeId
 }
 
-export class NameMissing extends S.TaggedError<NameMissing>()('NameMissing', {}) {
+export class NameMissing extends S.TaggedError<NameMissing, { readonly brand: unique symbol }>()('NameMissing', {}) {
   override get message(): string {
     return 'Write your name.'
   }
 }
 
-export class NameTooLong extends S.TaggedError<NameTooLong>()('NameTooLong', {}) {
+export class NameTooLong extends S.TaggedError<NameTooLong, { readonly brand: unique symbol }>()('NameTooLong', {}) {
   override get message(): string {
     return 'Your name is too long for the guestbook.'
   }
 }
 
-export class MessageMissing extends S.TaggedError<MessageMissing>()('MessageMissing', {}) {
+export class MessageMissing
+  extends S.TaggedError<MessageMissing, { readonly brand: unique symbol }>()('MessageMissing', {})
+{
   override get message(): string {
     return 'Write a message.'
   }
 }
 
-export class MessageTooLong extends S.TaggedError<MessageTooLong>()('MessageTooLong', {}) {
+export class MessageTooLong
+  extends S.TaggedError<MessageTooLong, { readonly brand: unique symbol }>()('MessageTooLong', {})
+{
   override get message(): string {
     return 'Your message is too long for the guestbook.'
   }
