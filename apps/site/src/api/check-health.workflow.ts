@@ -3,7 +3,7 @@ import * as Match from 'effect/Match'
 import * as Result from 'effect/Result'
 import * as S from 'effect/Schema'
 
-const CheckHealthTypeId: unique symbol = Symbol()
+const CheckHealthTypeId: unique symbol = Symbol.for('site/CheckHealth')
 
 export class ProbeAnswered
   extends S.TaggedClass<ProbeAnswered, { readonly brand: unique symbol }>()('ProbeAnswered', {})
