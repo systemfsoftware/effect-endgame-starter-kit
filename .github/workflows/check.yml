@@ -45,7 +45,7 @@ jobs:
       - name: Check
         run: nix develop --command pnpm exec turbo run format:check lint typecheck test --affected
       - name: Lint PR commits
-        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+        if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' && !startsWith(github.head_ref, 'mergify/merge-queue/')
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
