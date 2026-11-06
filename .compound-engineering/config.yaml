@@ -1,0 +1,4 @@
+packs:
+  - source: https://github.com/systemfsoftware/systemfsoftware
+    ref: f36e00fba3bb3bf87d3e06601c92419b61cba8a9
+    path: compound-packs
