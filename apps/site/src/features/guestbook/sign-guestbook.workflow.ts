@@ -6,7 +6,7 @@ import * as Str from 'effect/String'
 
 import { GuestMessage, GuestName } from './guestbook.schema.ts'
 
-const SignGuestbookTypeId: unique symbol = Symbol()
+const SignGuestbookTypeId: unique symbol = Symbol.for('site/SignGuestbook')
 
 export class SignGuestbook extends S.Class<SignGuestbook, { readonly brand: unique symbol }>('SignGuestbook')({
   name: S.String,

@@ -121,7 +121,7 @@ To remove it:
 2. Delete `apps/site-e2e/tests/features/guestbook`.
 3. Delete the route file `apps/site/src/routes/guestbook.tsx`.
 4. `apps/site/src/api/site-rpcs.ts`: drop the `GuestbookRpcs` import and make `SiteRpcs` just `HealthRpcs`.
-5. `apps/site/src/api/site-rpc-server.ts`: drop the `GuestbookHandlers` import and its `Layer.provide(GuestbookHandlers)` line.
+5. `apps/site/src/api/site-rpc-server.ts`: drop the five `../features/guestbook/…` imports and the `GuestbookStoreLive` line; build the context from `SiteDatabaseLive` alone (the health check still probes D1); and delete the `guestbook` record, so the `toLayer` effect returns only `health`.
 6. `apps/site/alchemy.run.ts`: drop the `migrations` option from `Cloudflare.D1.Database('Database', …)`.
 7. `pnpm-workspace.yaml`: drop the `@systemfsoftware/xstate` line under `catalog:` and its mirror under `overrides:`; `apps/site/package.json`: drop the `@systemfsoftware/xstate` dependency.
 8. Run `pnpm install --no-frozen-lockfile` from the shell you already have open. It rewrites `pnpm-lock.yaml` without its xstate entries; `--frozen-lockfile` (pnpm's default when `CI` is set) refuses that rewrite. The devshell builds its pnpm store from `pnpm-lock.yaml`, so it can't start again until the lockfile drops xstate.
