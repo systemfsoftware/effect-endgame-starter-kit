@@ -1,7 +1,27 @@
 extends: .github
 queue_rules:
+  - name: subtree
+    merge_method: merge
+    queue_conditions:
+      # Recognised from the commits themselves: both anchored git-subtree trailer
+      # lines must be present (ruling 9, SYS-1246). Same checks as default.
+      - "commits[*].commit_message ~= (?m)^git-subtree-dir: \\S+$"
+      - "commits[*].commit_message ~= (?m)^git-subtree-split: [0-9a-f]{40}$"
+      - check-success = check
+    merge_conditions:
+      - check-success = check
+
   - name: default
     queue_conditions:
+      # Ruling 9 (SYS-1246): subtree PRs merge via the subtree queue above; a subtree
+      # claim without trailers matches no queue and cannot merge at all.
+      - "-commits[*].commit_message ~= (?m)^git-subtree-dir: \\S+$"
+      - "-title ~= (?i)\\b(add|pull|update|sync|vendor|refresh|import)\\b[^.]*\\bsubtrees?\\b|\\bsubtrees?\\b[^.]*(\\badd\\b|\\bpull\\b|\\bupdate\\b|\\bsync\\b|\\bvendor\\b|\\brefresh\\b|\\bimport\\b)"
+      # Vendored subtree prefixes in this repo: hand edits without trailers cannot merge.
+      - not:
+          or:
+            - "added-files ~= ^(repos/alchemy|repos/constitution|repos/effect|repos/worktrunk-scripts)/"
+            - "modified-files ~= ^(repos/alchemy|repos/constitution|repos/effect|repos/worktrunk-scripts)/"
       - check-success = check
     merge_conditions:
       - check-success = check
