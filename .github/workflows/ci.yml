@@ -58,6 +58,20 @@ jobs:
       - name: Gate
         run: nix develop --command ${{ matrix.gate }}
 
+  check-aggregate:
+    name: check
+    needs: [check]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every check leg to pass
+        run: |
+          [ "${{ needs.check.result }}" = "success" ] || {
+            echo "::error::check matrix concluded: ${{ needs.check.result }}"
+            exit 1
+          }
+
   journeys:
     name: journeys
     runs-on: ubuntu-latest
