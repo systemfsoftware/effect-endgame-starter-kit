@@ -41,10 +41,12 @@
     "comment-checker_2": {
       "inputs": {
         "nixpkgs": [
-          "systemfsoftware-xstate",
+          "systemfsoftware",
+          "gritlint",
+          "pnpm-release-management",
           "nixpkgs"
         ],
-        "rust-overlay": "rust-overlay_3"
+        "rust-overlay": "rust-overlay_2"
       },
       "locked": {
         "lastModified": 1790884787,
@@ -64,7 +66,6 @@
       "inputs": {
         "nixpkgs": [
           "systemfsoftware-xstate",
-          "release-tools",
           "nixpkgs"
         ],
         "rust-overlay": "rust-overlay_4"
@@ -87,8 +88,7 @@
       "inputs": {
         "nixpkgs": [
           "systemfsoftware-xstate",
-          "systemfsoftware",
-          "pnpm-release-management",
+          "release-tools",
           "nixpkgs"
         ],
         "rust-overlay": "rust-overlay_5"
@@ -104,6 +104,67 @@
       "original": {
         "owner": "systemfsoftware",
         "repo": "comment-checker",
+        "type": "github"
+      }
+    },
+    "comment-checker_5": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
+          "systemfsoftware",
+          "pnpm-release-management",
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay_6"
+      },
+      "locked": {
+        "lastModified": 1790884787,
+        "narHash": "sha256-XZz0bdSY5zjlRDme0dfC98oYcAf3WOpMCueoU39iXjY=",
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "rev": "3bfedd853c1d6dca666e65e71e9f8a31d47db336",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "comment-checker",
+        "type": "github"
+      }
+    },
+    "crane": {
+      "locked": {
+        "lastModified": 1787326676,
+        "narHash": "sha256-lWhBbBvC05/xwivKBBiM2YNizpmgqCgyOIzomvRuwxs=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "692f7e9ef2ece8125b466f66f2af532b3edaed0d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "ref": "v0.24.0",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
+    "gritlint": {
+      "inputs": {
+        "crane": "crane",
+        "nixpkgs": "nixpkgs_2",
+        "pnpm-release-management": "pnpm-release-management_2",
+        "rust-overlay": "rust-overlay_3"
+      },
+      "locked": {
+        "lastModified": 1791922588,
+        "narHash": "sha256-8E3USqttJ1qL5xJazv54f2rNB+SujEJFLQIGo6FtU3k=",
+        "owner": "systemfsoftware",
+        "repo": "gritlint",
+        "rev": "3919672c8de07c172c149031325bdba05b13b80e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "gritlint",
         "type": "github"
       }
     },
@@ -131,7 +192,9 @@
     "importPnpmLock_2": {
       "inputs": {
         "nixpkgs": [
-          "systemfsoftware-xstate",
+          "systemfsoftware",
+          "gritlint",
+          "pnpm-release-management",
           "nixpkgs"
         ],
         "systems": "systems_2"
@@ -147,6 +210,7 @@
       "original": {
         "owner": "Scrumplex",
         "repo": "importPnpmLock.nix",
+        "rev": "ca18d47b0e98a4b51404f69ce5ab51efb6ebc151",
         "type": "github"
       }
     },
@@ -154,11 +218,33 @@
       "inputs": {
         "nixpkgs": [
           "systemfsoftware-xstate",
+          "nixpkgs"
+        ],
+        "systems": "systems_3"
+      },
+      "locked": {
+        "lastModified": 1790096829,
+        "narHash": "sha256-mnjMXjY/fo5OQH/iYNPijIqo0jAb/z7EhHtfXLlzOrs=",
+        "owner": "Scrumplex",
+        "repo": "importPnpmLock.nix",
+        "rev": "ca18d47b0e98a4b51404f69ce5ab51efb6ebc151",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Scrumplex",
+        "repo": "importPnpmLock.nix",
+        "type": "github"
+      }
+    },
+    "importPnpmLock_4": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware-xstate",
           "systemfsoftware",
           "pnpm-release-management",
           "nixpkgs"
         ],
-        "systems": "systems_3"
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1790096829,
@@ -207,6 +293,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1791191277,
+        "narHash": "sha256-i8KuaINOYLvB2oQikGvtRmdZRxATRxsI9Yad2pp7dEA=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "aa48d347080940b8a2b8d2f48228674e280a3514",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "pnpm-release-management": {
       "inputs": {
         "comment-checker": [
@@ -236,6 +338,31 @@
     },
     "pnpm-release-management_2": {
       "inputs": {
+        "comment-checker": "comment-checker_2",
+        "importPnpmLock": "importPnpmLock_2",
+        "nixpkgs": [
+          "systemfsoftware",
+          "gritlint",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791596974,
+        "narHash": "sha256-fE5LJdLoFR/aTaKhWCf3Xzgn0fx19AYQB2uEVVr25wM=",
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "b9b4a1d48cc16241b33f9afd8ab99b82b05ce04f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "systemfsoftware",
+        "repo": "pnpm-release-management",
+        "rev": "b9b4a1d48cc16241b33f9afd8ab99b82b05ce04f",
+        "type": "github"
+      }
+    },
+    "pnpm-release-management_3": {
+      "inputs": {
         "comment-checker": [
           "systemfsoftware-xstate",
           "comment-checker"
@@ -260,10 +387,10 @@
         "type": "github"
       }
     },
-    "pnpm-release-management_3": {
+    "pnpm-release-management_4": {
       "inputs": {
-        "comment-checker": "comment-checker_4",
-        "importPnpmLock": "importPnpmLock_3",
+        "comment-checker": "comment-checker_5",
+        "importPnpmLock": "importPnpmLock_4",
         "nixpkgs": [
           "systemfsoftware-xstate",
           "systemfsoftware",
@@ -287,8 +414,8 @@
     },
     "release-tools": {
       "inputs": {
-        "comment-checker": "comment-checker_3",
-        "nixpkgs": "nixpkgs_2"
+        "comment-checker": "comment-checker_4",
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1791338691,
@@ -341,6 +468,31 @@
       "inputs": {
         "nixpkgs": [
           "systemfsoftware",
+          "gritlint",
+          "pnpm-release-management",
+          "comment-checker",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790756160,
+        "narHash": "sha256-NPs4nNLxCpho3Ctj8O7t/bzmX0zR8r0zndKghAFEz5U=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "ed3a19fd0439ed618ec5fe1e12f0ba69a8be38b5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "rust-overlay_3": {
+      "inputs": {
+        "nixpkgs": [
+          "systemfsoftware",
+          "gritlint",
           "nixpkgs"
         ]
       },
@@ -358,7 +510,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_3": {
+    "rust-overlay_4": {
       "inputs": {
         "nixpkgs": [
           "systemfsoftware-xstate",
@@ -380,7 +532,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_4": {
+    "rust-overlay_5": {
       "inputs": {
         "nixpkgs": [
           "systemfsoftware-xstate",
@@ -403,7 +555,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_5": {
+    "rust-overlay_6": {
       "inputs": {
         "nixpkgs": [
           "systemfsoftware-xstate",
@@ -427,7 +579,7 @@
         "type": "github"
       }
     },
-    "rust-overlay_6": {
+    "rust-overlay_7": {
       "inputs": {
         "nixpkgs": [
           "systemfsoftware-xstate",
@@ -504,20 +656,20 @@
         "comment-checker": [
           "comment-checker"
         ],
+        "gritlint": "gritlint",
         "nixpkgs": [
           "nixpkgs"
         ],
         "pnpm-release-management": [
           "pnpm-release-management"
-        ],
-        "rust-overlay": "rust-overlay_2"
+        ]
       },
       "locked": {
-        "lastModified": 1791507027,
-        "narHash": "sha256-sbVsKZqhLd9/Vp9Nck3Q3OxSH0YQKhQdpkG/mFW/CmM=",
+        "lastModified": 1793801524,
+        "narHash": "sha256-m+/rcMRA00FYEaBmRwhYH7hGOAZVDWUSy895JRE6cNk=",
         "owner": "systemfsoftware",
         "repo": "systemfsoftware",
-        "rev": "c6eafec3a21048b6ef05e8a5218179bc6b091ed3",
+        "rev": "c4d8e0eecdc1585a995933df02e8f5202c9f7c4f",
         "type": "github"
       },
       "original": {
@@ -547,12 +699,12 @@
     "systemfsoftware-xstate": {
       "inputs": {
         "are-the-types-wrong-effect": "are-the-types-wrong-effect",
-        "comment-checker": "comment-checker_2",
-        "importPnpmLock": "importPnpmLock_2",
+        "comment-checker": "comment-checker_3",
+        "importPnpmLock": "importPnpmLock_3",
         "nixpkgs": [
           "nixpkgs"
         ],
-        "pnpm-release-management": "pnpm-release-management_2",
+        "pnpm-release-management": "pnpm-release-management_3",
         "release-tools": "release-tools",
         "stryker-js-effect": "stryker-js-effect_2",
         "systemfsoftware": "systemfsoftware_2",
@@ -583,8 +735,8 @@
           "systemfsoftware-xstate",
           "nixpkgs"
         ],
-        "pnpm-release-management": "pnpm-release-management_3",
-        "rust-overlay": "rust-overlay_6"
+        "pnpm-release-management": "pnpm-release-management_4",
+        "rust-overlay": "rust-overlay_7"
       },
       "locked": {
         "lastModified": 1791330870,
@@ -632,6 +784,21 @@
       }
     },
     "systems_3": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_4": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
