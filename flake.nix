@@ -22,7 +22,7 @@
       inputs.comment-checker.follows = "comment-checker";
       inputs.importPnpmLock.follows = "importPnpmLock";
     };
-    systemfsoftware.url = "github:systemfsoftware/systemfsoftware/main";
+    systemfsoftware.url = "github:systemfsoftware/systemfsoftware/3ef6c21c36f19a539078b6817b495df3039cc163";
     stryker-js-effect.url = "github:systemfsoftware/stryker-js-effect/main";
     systemfsoftware-xstate.url = "github:systemfsoftware/xstate/main";
     # The pnpm store is hashless: each tarball's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
