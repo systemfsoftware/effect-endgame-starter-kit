@@ -48,7 +48,7 @@ catalog:
   wrangler: 4.147.0
 catalogMode: prefer
 ignoreScripts: true
-minimumReleaseAge: 1440
+minimumReleaseAge: 4320
 blockExoticSubdeps: false
 minimumReleaseAgeExclude:
   - alchemy
