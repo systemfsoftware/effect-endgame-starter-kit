@@ -1,17 +1,9 @@
 {
   "$schema": "https://v2-11-7.turborepo.dev/schema.json",
+  "futureFlags": {
+    "affectedUsingTaskInputs": true
+  },
   "agentGuidance": false,
-  "globalDependencies": [
-    "oxlint.shared.ts",
-    "stryker.shared.ts",
-    "tsconfig.base.json",
-    "tsconfig.node.json",
-    "commitlint.config.ts",
-    ".lintstagedrc.js",
-    "flake.nix",
-    "flake.lock",
-    "scripts/**"
-  ],
   "globalPassThroughEnv": [
     "XDG_CACHE_HOME",
     "SANDBOX",
@@ -62,8 +54,7 @@
       "outputs": [],
       "dependsOn": [
         "^build",
-        "generate",
-        "//#typecheck:node"
+        "generate"
       ],
       "cache": true
     },
@@ -123,8 +114,7 @@
       "outputLogs": "new-only",
       "dependsOn": [
         "^build",
-        "build",
-        "//#test:scripts"
+        "build"
       ],
       "outputs": [
         "coverage/**"
@@ -168,7 +158,6 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "oxlint.config.ts",
-        "$TURBO_ROOT$/oxlint.shared.ts",
         "tsconfig.json",
         "tsconfig.*.json",
         "!**/*.md"
@@ -177,9 +166,7 @@
       "dependsOn": [
         "^build",
         "build",
-        "generate",
-        "//#lint:suppressions",
-        "//#format:check"
+        "generate"
       ],
       "env": [
         "NODE_ENV",
