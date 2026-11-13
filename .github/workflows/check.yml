@@ -47,7 +47,11 @@ jobs:
           restore-keys: |
             turbo-${{ runner.os }}-check-
             turbo-${{ runner.os }}-
+      - name: Check (merge-queue draft, full suite)
+        if: startsWith(github.head_ref, 'mergify/merge-queue/')
+        run: nix develop --command pnpm exec turbo run format:check lint typecheck test
       - name: Check
+        if: ${{ !startsWith(github.head_ref, 'mergify/merge-queue/') }}
         run: nix develop --command pnpm exec turbo run format:check lint typecheck test --affected
       - name: Lint PR commits
         if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]' && !startsWith(github.head_ref, 'mergify/merge-queue/')
