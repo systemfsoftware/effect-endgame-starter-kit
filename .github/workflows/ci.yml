@@ -1,0 +1,27 @@
+name: CI
+
+# One job per pull request. A pull request runs format, lint and typecheck on the affected packages. A Mergify queue draft (head ref
+# `mergify/merge-queue/*`) and a push to main run the full command. Mergify builds its drafts as pull requests, so
+# there is no merge_group trigger. The squash-message lint and the change-intent check are steps of the same job.
+# A newer push to a pull request cancels its older run.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    uses: systemfsoftware/systemfsoftware/.github/workflows/reusable-ci.yml@f271b208fd10c56d27380de6bc43f54b9c7ee2a5
+    with:
+      commitlint: true
+      changeset: false
+      install: |
+        sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+        mkdir -p .cache
+        pnpm bootstrap
+      fast: export TURBO_SCM_BASE="$BASE" TURBO_SCM_HEAD="$HEAD" && pnpm exec turbo run format:check lint typecheck --affected
+      full: pnpm exec turbo run format:check lint typecheck test
