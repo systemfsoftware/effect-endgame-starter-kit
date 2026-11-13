@@ -7,9 +7,9 @@ queue_rules:
       # lines must be present. Same checks as default.
       - "commits[*].commit_message ~= (?m)^git-subtree-dir: \\S+$"
       - "commits[*].commit_message ~= (?m)^git-subtree-split: [0-9a-f]{40}$"
-      - check-success = check
+      - check-success = checks / check
     merge_conditions:
-      - check-success = check
+      - check-success = checks / check
 
   - name: default
     queue_conditions:
@@ -22,6 +22,6 @@ queue_rules:
           or:
             - "added-files ~= ^(repos/alchemy|repos/constitution|repos/effect|repos/worktrunk-scripts)/"
             - "modified-files ~= ^(repos/alchemy|repos/constitution|repos/effect|repos/worktrunk-scripts)/"
-      - check-success = check
+      - check-success = checks / check
     merge_conditions:
-      - check-success = check
+      - check-success = checks / check
