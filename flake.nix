@@ -8,7 +8,7 @@
   };
 
   inputs = {
-    # Follows one producer's nixpkgs (KTD7 in the SYS-1296 plan); the producer inputs below carry no `follows`.
+    # Follows one producer's nixpkgs; the producer inputs below carry no `follows`.
     nixpkgs.follows = "systemfsoftware/nixpkgs";
     comment-checker = {
       url = "github:systemfsoftware/comment-checker";
