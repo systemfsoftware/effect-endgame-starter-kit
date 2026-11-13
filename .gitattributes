@@ -13,3 +13,8 @@
 *.dll binary
 *.so binary
 *.dylib binary
+# The vendored upstream subtrees under repos/ are 183 MB of 26815 files that no flake, workflow or action reads. Every
+# `github:systemfsoftware/effect-endgame-starter-kit` flake input downloads and unpacks this archive on a cold runner (SYS-1411).
+/repos/ export-ignore
+# CONSTITUTION.md is a symlink into repos/; the Actions runner fails on a symlink whose target the archive lacks.
+/CONSTITUTION.md export-ignore
