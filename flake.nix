@@ -1,8 +1,15 @@
 {
   description = "starter toolchain — the formatter, runtimes, systemfsoftware packages and dependency sandbox the check chain shells out to";
 
+  nixConfig = {
+    extra-substituters = "https://nix.systemfsoftware.com";
+    extra-trusted-public-keys = "nix-cache-1:wXA8I4DayNW9q6enUyQA/P/nT38pGSTLt374t3gsn7M=";
+    fallback = true;
+  };
+
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Follows one producer's nixpkgs (KTD7 in the SYS-1296 plan); the producer inputs below carry no `follows`.
+    nixpkgs.follows = "systemfsoftware/nixpkgs";
     # The release manifest (`nix/release-hashes.json`) rides in this input, so
     # Dependabot's bump of it is also the version and digest bump.
     comment-checker = {
@@ -15,24 +22,9 @@
       inputs.comment-checker.follows = "comment-checker";
       inputs.importPnpmLock.follows = "importPnpmLock";
     };
-    systemfsoftware = {
-      url = "github:systemfsoftware/systemfsoftware/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.comment-checker.follows = "comment-checker";
-      inputs.pnpm-release-management.follows = "pnpm-release-management";
-    };
-    stryker-js-effect = {
-      url = "github:systemfsoftware/stryker-js-effect/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.comment-checker.follows = "comment-checker";
-      inputs.importPnpmLock.follows = "importPnpmLock";
-      inputs.pnpm-release-management.follows = "pnpm-release-management";
-      inputs.systemfsoftware.follows = "systemfsoftware";
-    };
-    systemfsoftware-xstate = {
-      url = "github:systemfsoftware/xstate/main";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    systemfsoftware.url = "github:systemfsoftware/systemfsoftware/3ef6c21c36f19a539078b6817b495df3039cc163";
+    stryker-js-effect.url = "github:systemfsoftware/stryker-js-effect/main";
+    systemfsoftware-xstate.url = "github:systemfsoftware/xstate/main";
     # The pnpm store is hashless: each tarball's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
     importPnpmLock = {
       url = "github:Scrumplex/importPnpmLock.nix";
@@ -56,13 +48,10 @@
           sandboxed = pkgs.callPackage ./nix/comment-checker-sandbox.nix {
             comment-checker = unwrapped;
           };
-          sfs-deps = pkgs.runCommand "sfs-deps" { nativeBuildInputs = [ pkgs.jq ]; } ''
-            mkdir $out
-            for dir in ${systemfsoftware.packages.${system}.workspace-tarballs} ${stryker-js-effect.packages.${system}.workspace-tarballs} ${systemfsoftware-xstate.packages.${system}.workspace-tarballs}; do
-              cp "$dir"/*.tgz $out/
-            done
-            jq -s add ${systemfsoftware.packages.${system}.workspace-tarballs}/index.json ${stryker-js-effect.packages.${system}.workspace-tarballs}/index.json ${systemfsoftware-xstate.packages.${system}.workspace-tarballs}/index.json > $out/index.json
-          '';
+          producer-tarballs = pnpm-release-management.lib.mkProducerTarballs {
+            inherit pkgs;
+            producers = { inherit systemfsoftware stryker-js-effect systemfsoftware-xstate; };
+          };
           pnpm-store = pnpm-release-management.lib.mkPnpmConsumerStore {
             inherit pkgs;
             pname = "starter";
@@ -74,7 +63,7 @@
                 (pkgs.lib.fileset.fileFilter (file: file.name == "package.json") ./.)
               ];
             };
-            files.".sfs-deps" = sfs-deps;
+            files.".deps" = producer-tarballs;
           };
           sandbox = pkgs.callPackage "${pnpm-release-management}/nix/sandbox/default.nix" { };
           workspace = pnpm-release-management.lib.mkPnpmWorkspacePackages {
@@ -84,7 +73,7 @@
             pnpm = pkgs.pnpm_12;
           };
         in {
-          inherit dprint sfs-deps sandbox pnpm-store;
+          inherit dprint sandbox pnpm-store producer-tarballs;
           inherit (workspace) workspace-tarballs;
           sandbox-proofs = (pkgs.callPackage "${pnpm-release-management}/nix/sandbox/proofs.nix" {
             inherit pkgs sandbox;
@@ -126,10 +115,8 @@
           ] ++ pkgs.lib.optionals pkgs.stdenv.hostPlatform.isLinux [ playwrightBrowsersAnchor ];
           SANDBOX_PNPM_STORE = own.pnpm-store;
           shellHook = ''
-            root="$(git rev-parse --show-toplevel)"
             git config core.hooksPath .husky
-            rm -rf "$root/.sfs-deps"
-            cp -r --no-preserve=mode ${own.sfs-deps} "$root/.sfs-deps"
+            ${own.producer-tarballs.shellHook}
           '';
           env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             PLAYWRIGHT_BROWSERS_PATH = "${playwrightBrowsers}";
