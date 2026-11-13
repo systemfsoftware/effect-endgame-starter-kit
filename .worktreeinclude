@@ -1,3 +1,4 @@
-# Worktree include whitelist — gitignored patterns copied by `wt step copy-ignored`
 dist
 dist/**
+.deps
+**/*.tsbuildinfo
