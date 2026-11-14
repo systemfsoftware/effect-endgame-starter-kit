@@ -18,3 +18,4 @@ apps/site-e2e/artifacts/
 .journeys/
 .deps
 .cache/
+.scratch/
