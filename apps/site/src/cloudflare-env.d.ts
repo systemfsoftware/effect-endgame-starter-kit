@@ -4,6 +4,8 @@ import type { Site } from '../alchemy.run'
 
 declare global {
   namespace Cloudflare {
-    interface Env extends Alchemy.InferEnv<typeof Site> {}
+    interface Env extends Alchemy.InferEnv<typeof Site> {
+      readonly OTEL_EXPORTER_OTLP_ENDPOINT: string
+    }
   }
 }

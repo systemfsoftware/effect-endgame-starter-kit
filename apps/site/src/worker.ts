@@ -2,15 +2,21 @@ import startHandler from '@tanstack/react-start/server-entry'
 import { env } from 'cloudflare:workers'
 import * as Effect from 'effect/Effect'
 import { HttpRouter } from 'effect/http'
+import * as Match from 'effect/Match'
 import * as S from 'effect/Schema'
 
+import { SITE_MCP_PATH, SiteMcpLive } from './api/site-mcp-server'
 import { SiteRpcLive } from './api/site-rpc-server'
 import { SITE_RPC_PATH } from './api/site-rpcs'
 import { contentSecurityPolicyOf, CspNonce } from './csp/content-security-policy.schema'
+import todoCss from './features/todo/todo.css?raw'
 
 const siteRpc = HttpRouter.toWebHandler(SiteRpcLive)
+const siteMcp = HttpRouter.toWebHandler(SiteMcpLive)
 
 const isRpcRequest = (pathname: string): boolean => pathname === SITE_RPC_PATH
+const isMcpRequest = (pathname: string): boolean => pathname === SITE_MCP_PATH
+const isStyleRequest = (pathname: string): boolean => pathname === '/todo.css'
 const isAppRequest = (pathname: string): boolean => pathname === '/app' || pathname.startsWith('/app/')
 
 const drawNonce = (random: Crypto) =>
@@ -36,8 +42,16 @@ const appResponse = (request: Request): Promise<Response> => {
   return env.ASSETS.fetch(new Request(url, request))
 }
 
+const styleResponse = (): Promise<Response> =>
+  Promise.resolve(new Response(todoCss, { headers: { 'content-type': 'text/css; charset=utf-8' } }))
+
 const siteResponse = (request: Request, pathname: string): Promise<Response> =>
-  isRpcRequest(pathname) ? siteRpc.handler(request) : Effect.runPromise(serve(request, globalThis.crypto))
+  Match.value(pathname).pipe(
+    Match.when(isRpcRequest, () => siteRpc.handler(request)),
+    Match.when(isMcpRequest, () => siteMcp.handler(request)),
+    Match.when(isStyleRequest, () => styleResponse()),
+    Match.orElse(() => Effect.runPromise(serve(request, globalThis.crypto))),
+  )
 
 export default {
   fetch: (request: Request): Promise<Response> => {

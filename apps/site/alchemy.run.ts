@@ -16,6 +16,8 @@ const productionDomain = (stage: string): { readonly domain?: string } => {
 
 export const Database = Cloudflare.D1.Database('Database', { migrations: 'src/features/guestbook/migrations' })
 
+export const TodoDatabase = Cloudflare.D1.Database('TodoDatabase', { migrations: 'src/features/todo/migrations' })
+
 export const Site = Cloudflare.Website.Vite(
   'Site',
   Effect.gen(function*() {
@@ -25,7 +27,11 @@ export const Site = Cloudflare.Website.Vite(
       compatibility: { date: siteWorker.compatibilityDate, flags: [...siteWorker.compatibilityFlags] },
       assets: { runWorkerFirst: ['/app', '/app/*'] },
       dev: { port: 1337, strictPort: true },
-      env: { DB: yield* Database },
+      env: {
+        DB: yield* Database,
+        TODO_DB: yield* TodoDatabase,
+        OTEL_EXPORTER_OTLP_ENDPOINT: process.env['OTEL_EXPORTER_OTLP_ENDPOINT'] ?? '',
+      },
       ...productionDomain(stage),
     }
   }),

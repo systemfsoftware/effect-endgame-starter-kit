@@ -10,9 +10,12 @@ import { GuestbookHandlers } from '../features/guestbook/guestbook-handlers'
 import { listGuestbookEntriesCell } from '../features/guestbook/list-guestbook-entries.cell'
 import { moderateGuestbookEntryCell } from '../features/guestbook/moderate-guestbook-entry.cell'
 import { signGuestbookCell } from '../features/guestbook/sign-guestbook.cell'
+import { TodoHandlers } from '../features/todo/todo-handlers'
 import { SiteDatabase } from '../site-database.service'
 import { checkHealthCell } from './check-health.cell'
 import { SITE_RPC_PATH, SiteRpcs } from './site-rpcs'
+import { telemetryLayer } from './site-telemetry'
+import { todoCells } from './site-todo-cells'
 
 const SiteDatabaseLive = Layer.succeed(SiteDatabase, env.DB)
 
@@ -27,7 +30,8 @@ const SiteHandlers = SiteRpcs.toLayer(
       list: Cell.provideContext(listGuestbookEntriesCell, context),
       moderate: Cell.provideContext(moderateGuestbookEntryCell, context),
     })
-    return { health: () => health.run(undefined), ...guestbook }
+    const todo = TodoHandlers(yield* todoCells)
+    return { health: () => health.run(undefined), ...guestbook, ...todo }
   }),
 )
 
@@ -35,4 +39,5 @@ export const SiteRpcLive = RpcServer.layerHttp({ group: SiteRpcs, path: SITE_RPC
   Layer.provide(SiteHandlers),
   Layer.provide(RpcSerialization.layerJson),
   Layer.provide(HttpServer.layerServices),
+  Layer.provideMerge(telemetryLayer(env.OTEL_EXPORTER_OTLP_ENDPOINT)),
 )
