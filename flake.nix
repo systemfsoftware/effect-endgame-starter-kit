@@ -7,7 +7,7 @@
   };
 
   inputs = {
-    # Follows one producer's nixpkgs; the producer inputs below carry no `follows`.
+    # Follows the core input's nixpkgs.
     nixpkgs.follows = "systemfsoftware/nixpkgs";
     comment-checker = {
       url = "github:systemfsoftware/comment-checker";
@@ -20,16 +20,14 @@
       inputs.importPnpmLock.follows = "importPnpmLock";
     };
     systemfsoftware.url = "github:systemfsoftware/systemfsoftware/3ef6c21c36f19a539078b6817b495df3039cc163";
-    stryker-js-effect.url = "github:systemfsoftware/stryker-js-effect/main";
-    systemfsoftware-xstate.url = "github:systemfsoftware/xstate/main";
-    # The pnpm store is hashless: each tarball's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
+    # The pnpm store is hashless: each package's lockfile integrity is its fetch hash, so a lockfile change needs no hash edit.
     importPnpmLock = {
       url = "github:Scrumplex/importPnpmLock.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware, stryker-js-effect, systemfsoftware-xstate, importPnpmLock }:
+  outputs = { self, nixpkgs, comment-checker, pnpm-release-management, systemfsoftware, importPnpmLock }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" ];
       forEachSystem = fn: nixpkgs.lib.genAttrs systems (system: fn nixpkgs.legacyPackages.${system});
@@ -43,10 +41,6 @@
           sandboxed = pkgs.callPackage ./nix/comment-checker-sandbox.nix {
             comment-checker = unwrapped;
           };
-          producer-tarballs = pnpm-release-management.lib.mkProducerTarballs {
-            inherit pkgs;
-            producers = { inherit systemfsoftware stryker-js-effect systemfsoftware-xstate; };
-          };
           pnpm-store = pnpm-release-management.lib.mkPnpmConsumerStore {
             inherit pkgs;
             pname = "starter";
@@ -58,7 +52,6 @@
                 (pkgs.lib.fileset.fileFilter (file: file.name == "package.json") ./.)
               ];
             };
-            files.".deps" = producer-tarballs;
           };
           sandbox = pkgs.callPackage "${pnpm-release-management}/nix/sandbox/default.nix" { };
           workspace = pnpm-release-management.lib.mkPnpmWorkspacePackages {
@@ -68,7 +61,7 @@
             pnpm = pkgs.pnpm_12;
           };
         in {
-          inherit dprint sandbox pnpm-store producer-tarballs;
+          inherit dprint sandbox pnpm-store;
           inherit (workspace) workspace-tarballs;
           sandbox-proofs = (pkgs.callPackage "${pnpm-release-management}/nix/sandbox/proofs.nix" {
             inherit pkgs sandbox;
@@ -111,7 +104,6 @@
           SANDBOX_PNPM_STORE = own.pnpm-store;
           shellHook = ''
             git config core.hooksPath .husky
-            ${own.producer-tarballs.shellHook}
           '';
           env = pkgs.lib.optionalAttrs pkgs.stdenv.hostPlatform.isLinux {
             PLAYWRIGHT_BROWSERS_PATH = "${playwrightBrowsers}";

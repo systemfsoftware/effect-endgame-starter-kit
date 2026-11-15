@@ -55,6 +55,7 @@ minimumReleaseAgeExclude:
   - "@alchemy.run/*"
   - effect
   - "@effect/*"
+  - "@systemfsoftware/*"
 verifyDepsBeforeRun: warn
 overrides:
   effect: "catalog:"
@@ -63,60 +64,6 @@ overrides:
   "@effect/platform-node-shared": "catalog:"
   "@effect/sql-sqlite-do": "catalog:"
   "@effect/tsgo": "catalog:"
-  "@systemfsoftware/conformance-spec@*": file:.deps/conformance-spec.tgz
-  "@systemfsoftware/differential-spec@*": file:.deps/differential-spec.tgz
-  "@systemfsoftware/effect-atom@*": file:.deps/effect-atom.tgz
-  "@systemfsoftware/effect-atom-react@*": file:.deps/effect-atom-react.tgz
-  "@systemfsoftware/effect-cell-types@*": file:.deps/effect-cell-types.tgz
-  "@systemfsoftware/effect-gherkin-spec@*": file:.deps/effect-gherkin-spec.tgz
-  "@systemfsoftware/effect-schema-discovery@*": file:.deps/effect-schema-discovery.tgz
-  "@systemfsoftware/effect-schema-law@*": file:.deps/effect-schema-law.tgz
-  "@systemfsoftware/effect-schema-recursion-budget@*": file:.deps/effect-schema-recursion-budget.tgz
-  "@systemfsoftware/effect-schema-vite@*": file:.deps/effect-schema-vite.tgz
-  "@systemfsoftware/effect-sim-kernel@*": file:.deps/effect-sim-kernel.tgz
-  "@systemfsoftware/effect-spec-runtime@*": file:.deps/effect-spec-runtime.tgz
-  "@systemfsoftware/omp-typescript-discipline@*": file:.deps/omp-typescript-discipline.tgz
-  "@systemfsoftware/oxlint-config-cell-architecture@*": file:.deps/oxlint-config-cell-architecture.tgz
-  "@systemfsoftware/oxlint-config-dmmf@*": file:.deps/oxlint-config-dmmf.tgz
-  "@systemfsoftware/oxlint-config-recommended@*": file:.deps/oxlint-config-recommended.tgz
-  "@systemfsoftware/oxlint-config-rule-authoring@*": file:.deps/oxlint-config-rule-authoring.tgz
-  "@systemfsoftware/oxlint-ignorer-config@*": file:.deps/oxlint-ignorer-config.tgz
-  "@systemfsoftware/oxlint-plugin-cell-architecture@*": file:.deps/oxlint-plugin-cell-architecture.tgz
-  "@systemfsoftware/oxlint-plugin-dmmf-workflow@*": file:.deps/oxlint-plugin-dmmf-workflow.tgz
-  "@systemfsoftware/oxlint-plugin-effect-platform@*": file:.deps/oxlint-plugin-effect-platform.tgz
-  "@systemfsoftware/oxlint-plugin-effect-schema@*": file:.deps/oxlint-plugin-effect-schema.tgz
-  "@systemfsoftware/oxlint-plugin-test-discipline@*": file:.deps/oxlint-plugin-test-discipline.tgz
-  "@systemfsoftware/storybook-gherkin@*": file:.deps/storybook-gherkin.tgz
-  "@systemfsoftware/stryker-config@*": file:.deps/stryker-config.tgz
-  "@systemfsoftware/stryker-framework-interface@*": file:.deps/stryker-framework-interface.tgz
-  "@systemfsoftware/stryker-ignorer-angular@*": file:.deps/stryker-ignorer-angular.tgz
-  "@systemfsoftware/stryker-ignorer-effect-schema-declarations@*": file:.deps/stryker-ignorer-effect-schema-declarations.tgz
-  "@systemfsoftware/stryker-ignorer-in-source-vitest-block@*": file:.deps/stryker-ignorer-in-source-vitest-block.tgz
-  "@systemfsoftware/stryker-ignorer-interface@*": file:.deps/stryker-ignorer-interface.tgz
-  "@systemfsoftware/stryker-ignorer-kit@*": file:.deps/stryker-ignorer-kit.tgz
-  "@systemfsoftware/stryker-js@*": file:.deps/stryker-js.tgz
-  "@systemfsoftware/stryker-js-angular@*": file:.deps/stryker-js-angular.tgz
-  "@systemfsoftware/stryker-js-cli-contract@*": file:.deps/stryker-js-cli-contract.tgz
-  "@systemfsoftware/stryker-js-html-reporter@*": file:.deps/stryker-js-html-reporter.tgz
-  "@systemfsoftware/stryker-js-instrumenter@*": file:.deps/stryker-js-instrumenter.tgz
-  "@systemfsoftware/stryker-js-plugin-interface@*": file:.deps/stryker-js-plugin-interface.tgz
-  "@systemfsoftware/stryker-js-plugin-runtime@*": file:.deps/stryker-js-plugin-runtime.tgz
-  "@systemfsoftware/stryker-js-svelte@*": file:.deps/stryker-js-svelte.tgz
-  "@systemfsoftware/stryker-js-typescript-checker@*": file:.deps/stryker-js-typescript-checker.tgz
-  "@systemfsoftware/stryker-js-vitest-runner@*": file:.deps/stryker-js-vitest-runner.tgz
-  "@systemfsoftware/trace-spec@*": file:.deps/trace-spec.tgz
-  "@systemfsoftware/trace-taxonomy@*": file:.deps/trace-taxonomy.tgz
-  "@systemfsoftware/tsconfig@*": file:.deps/tsconfig.tgz
-  "@systemfsoftware/tsdown-config@*": file:.deps/tsdown-config.tgz
-  "@systemfsoftware/vitest@*": file:.deps/vitest.tgz
-  "@systemfsoftware/vitest-config@*": file:.deps/vitest-config.tgz
-  "@systemfsoftware/xstate@*": file:.deps/xstate.tgz
-  "@systemfsoftware/xstate-effect@*": file:.deps/xstate-effect.tgz
-  "@systemfsoftware/xstate-react@*": file:.deps/xstate-react.tgz
-  "@systemfsoftware/xstate-store@*": file:.deps/xstate-store.tgz
-  "@systemfsoftware/xstate-store-react@*": file:.deps/xstate-store-react.tgz
-  "@systemfsoftware/xstate-test@*": file:.deps/xstate-test.tgz
-  "@systemfsoftware/stryker-js-vm-runner@npm:@systemfsoftware/stryker-js-vitest-runner@^10.0.0": file:.deps/stryker-js-vitest-runner.tgz
   rolldown: 1.2.13
   workerd: 1.20261005.1
 packages:
