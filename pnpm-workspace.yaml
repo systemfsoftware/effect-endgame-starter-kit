@@ -35,7 +35,7 @@ catalog:
   babel-plugin-react-compiler: 1.0.0
   effect: 4.1.2
   lint-staged: 17.6.0
-  oxlint: 1.90.0
+  oxlint: 1.93.0
   oxlint-tsgolint: 7.0.2005
   playwright: 1.63.0
   react: 19.3.0
