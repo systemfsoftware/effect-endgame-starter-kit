@@ -253,12 +253,12 @@ catalogs:
       version: 4.147.0
 
 overrides:
-  effect: 4.1.2
-  '@effect/opentelemetry': 4.1.2
-  '@effect/platform-node': 4.1.2
-  '@effect/platform-node-shared': 4.1.2
-  '@effect/sql-sqlite-do': 4.1.2
-  '@effect/tsgo': 0.64.1
+  effect: 4.1.5
+  '@effect/opentelemetry': 4.1.5
+  '@effect/platform-node': 4.1.5
+  '@effect/platform-node-shared': 4.1.5
+  '@effect/sql-sqlite-do': 4.1.5
+  '@effect/tsgo': 0.73.2
   rolldown: 1.2.13
   workerd: 1.20261005.1
 
@@ -276,17 +276,17 @@ importers:
         specifier: 'catalog:'
         version: 21.2.3
       '@effect/tsgo':
-        specifier: 0.64.1
-        version: 0.64.1
+        specifier: 0.73.2
+        version: 0.73.2
       '@systemfsoftware/oxlint-config-recommended':
         specifier: ^6.0.1
-        version: 6.0.1(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
+        version: 6.0.1(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
       '@systemfsoftware/oxlint-plugin-test-discipline':
         specifier: ^6.1.3
-        version: 6.1.3(effect@4.1.2)(typescript@7.0.2)
+        version: 6.1.3(effect@4.1.5)(typescript@7.0.2)
       '@systemfsoftware/stryker-js':
         specifier: ^22.0.0
-        version: 22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+        version: 22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
       '@systemfsoftware/tsconfig':
         specifier: ^2.1.0
         version: 2.1.0
@@ -294,8 +294,8 @@ importers:
         specifier: 'catalog:'
         version: 24.19.1
       effect:
-        specifier: 4.1.2
-        version: 4.1.2
+        specifier: 4.1.5
+        version: 4.1.5
       lint-staged:
         specifier: 'catalog:'
         version: 17.6.0
@@ -319,7 +319,7 @@ importers:
     dependencies:
       '@systemfsoftware/effect-cell-types':
         specifier: ^12.1.4
-        version: 12.1.4(effect@4.1.2)
+        version: 12.1.4(effect@4.1.5)
       '@systemfsoftware/xstate':
         specifier: ^6.0.0-beta.65
         version: 6.0.0-beta.65
@@ -330,8 +330,8 @@ importers:
         specifier: 'catalog:'
         version: 1.168.60(esbuild@0.28.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.2.13)(supports-color@10.2.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
       effect:
-        specifier: 4.1.2
-        version: 4.1.2
+        specifier: 4.1.5
+        version: 4.1.5
       react:
         specifier: 'catalog:'
         version: 19.3.0
@@ -341,10 +341,10 @@ importers:
     devDependencies:
       '@alchemy.run/cloudflare':
         specifier: 'catalog:'
-        version: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
+        version: 2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
       '@alchemy.run/github':
         specifier: 'catalog:'
-        version: 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)
+        version: 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)
       '@babel/core':
         specifier: 'catalog:'
         version: 8.0.6
@@ -359,25 +359,25 @@ importers:
         version: 0.2.4(@babel/core@8.0.6)(rolldown@1.2.13)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
       '@systemfsoftware/oxlint-config-recommended':
         specifier: ^6.0.1
-        version: 6.0.1(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
+        version: 6.0.1(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
       '@systemfsoftware/stryker-ignorer-effect-schema-declarations':
         specifier: ^0.3.1
         version: 0.3.1(rolldown@1.2.13)
       '@systemfsoftware/stryker-js':
         specifier: ^22.0.0
-        version: 22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+        version: 22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
       '@systemfsoftware/stryker-js-typescript-checker':
         specifier: ^9.0.1
         version: 9.0.1(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(rolldown@1.2.13)(supports-color@10.2.2)
       '@systemfsoftware/stryker-js-vitest-runner':
         specifier: ^10.1.0
-        version: 10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+        version: 10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
       '@systemfsoftware/tsconfig':
         specifier: ^2.1.0
         version: 2.1.0
       '@systemfsoftware/vitest':
         specifier: ^4.1.1
-        version: 4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+        version: 4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
       '@tanstack/router-cli':
         specifier: 'catalog:'
         version: 1.167.40(supports-color@10.2.2)
@@ -395,7 +395,7 @@ importers:
         version: 6.1.2(@rolldown/plugin-babel@0.2.4(@babel/core@8.0.6)(rolldown@1.2.13)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))(babel-plugin-react-compiler@1.0.0)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
       alchemy:
         specifier: 'catalog:'
-        version: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2)
+        version: 2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0)
       babel-plugin-react-compiler:
         specifier: 'catalog:'
         version: 1.0.0
@@ -419,22 +419,22 @@ importers:
     devDependencies:
       '@systemfsoftware/effect-gherkin-spec':
         specifier: ^8.1.4
-        version: 8.1.4(@systemfsoftware/vitest@4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+        version: 8.1.4(@systemfsoftware/vitest@4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.5)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
       '@systemfsoftware/oxlint-config-recommended':
         specifier: ^6.0.1
-        version: 6.0.1(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
+        version: 6.0.1(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
       '@systemfsoftware/tsconfig':
         specifier: ^2.1.0
         version: 2.1.0
       '@systemfsoftware/vitest':
         specifier: ^4.1.1
-        version: 4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+        version: 4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
       '@types/node':
         specifier: 'catalog:'
         version: 24.19.1
       effect:
-        specifier: 4.1.2
-        version: 4.1.2
+        specifier: 4.1.5
+        version: 4.1.5
       oxlint:
         specifier: 'catalog:'
         version: 1.90.0(oxlint-tsgolint@7.0.2005)
@@ -470,15 +470,15 @@ packages:
     resolution: {integrity: sha512-hOV18VHG6ivrbPnk35hoqlCQPc6bR8b9soGmHlSkbnPIgVZUg7jpliF9AztSSJbJK4GHcBFc9hWetwCRHzGYAg==}
     peerDependencies:
       alchemy: 2.0.0-beta.85
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@alchemy.run/cloudflare-runtime@2.0.0-beta.85':
     resolution: {integrity: sha512-OyGH/j5R9QaUdMjvm3y6pIUpMa7T9SvVYvlVd+fWo/eltOf+k/KQxC12QHC2fe22GVs3apL28l9f4VUH8N9aEA==}
     peerDependencies:
       '@distilled.cloud/cloudflare': 1.0.0-rc.18
       '@effect/platform-bun': ^4.1.0
-      '@effect/platform-node': 4.1.2
-      effect: 4.1.2
+      '@effect/platform-node': 4.1.5
+      effect: 4.1.5
       rolldown: 1.2.13
       vite: ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
@@ -497,9 +497,9 @@ packages:
       '@alchemy.run/domain': 2.0.0-beta.85
       '@alchemy.run/frontend-frameworks': 2.0.0-beta.85
       '@effect/platform-bun': ^4.1.0
-      '@effect/platform-node': 4.1.2
+      '@effect/platform-node': 4.1.5
       alchemy: 2.0.0-beta.85
-      effect: 4.1.2
+      effect: 4.1.5
       vite: ^7.0.0 || ^8.0.0
     peerDependenciesMeta:
       '@alchemy.run/domain':
@@ -518,7 +518,7 @@ packages:
     peerDependencies:
       '@effect/platform-bun': ^4.1.0
       alchemy: 2.0.0-beta.85
-      effect: 4.1.2
+      effect: 4.1.5
     peerDependenciesMeta:
       '@effect/platform-bun':
         optional: true
@@ -527,7 +527,7 @@ packages:
     resolution: {integrity: sha512-lKQZTlqYo/iOK4Zbskd7riff9nqkMNgtStdlmgAUD/IvR+FweXftfcjZD9u9k/Z3h4RguJi4IduwFudSpLl6QQ==}
     peerDependencies:
       alchemy: 2.0.0-beta.85
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@alchemy.run/node-utils@2.0.0-beta.85':
     resolution: {integrity: sha512-2gxqMNMoJdx13w7wlDJw+gaXQ8e1VxQFsKldOvweqpd7JEgB5TGn3oO8r1sb/GB9+UzqXdh8tKp2MOVgFOrmbg==}
@@ -551,7 +551,7 @@ packages:
       '@effect/sql-mysql2': ^4.1.0
       '@effect/sql-pg': ^4.1.0
       alchemy: 2.0.0-beta.85
-      effect: 4.1.2
+      effect: 4.1.5
       mysql2: ^3.24.2
       pg: ^8.22.0
     peerDependenciesMeta:
@@ -838,40 +838,40 @@ packages:
   '@distilled.cloud/acme@1.0.0-rc.18':
     resolution: {integrity: sha512-OWO6NG9IcpDqZCzlrN5T4MIQqSbpZ5cw61Ru/dYn1vr3AIyx3Vlg+Ew8NhlunpURr4wqDUW2/7QW3fKbrmfwLg==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@distilled.cloud/aws4signer@1.0.0-rc.18':
     resolution: {integrity: sha512-eYJi2rsblwjxpa0kj2qUQYqY9cEwD6ow0njiFL6I5ZnlOqrE8I3aLiWvScoc3s9bQUQD5nFdmSnORoPJ5GsHKg==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@distilled.cloud/aws@1.0.0-rc.18':
     resolution: {integrity: sha512-VZDlOGEXvXvTdY/0sTEoTWnPCGde+fjvq1ZIW3wgiZK/X8ChbbonGArg+Sc9OO4E9tr1WBymASrZ906uLnLWFw==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@distilled.cloud/cloudflare@1.0.0-rc.18':
     resolution: {integrity: sha512-UJB7pitkg7msm7BGTuAE8yYx4GzKdPLRtiOm3G3XHw07xLUlqEiEr4xpSf0CeziWzDygjI53FSkpC2qyVZr49g==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@distilled.cloud/core@1.0.0-rc.18':
     resolution: {integrity: sha512-Iui60+sNl1CwUu7NKGLuFf3VC4H9xYzfm0Fc8ZQvd87qwf1sDMB3EAWZrq/QFgrwzSY16z2mJ0PNHaBUnGet8A==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@distilled.cloud/github@1.0.0-rc.18':
     resolution: {integrity: sha512-SX5EofqqjaHRnTw0RC83qvEQZr11/RcNxqjdsn7kteHvni+1DIgnlRfeHoUD2rVyQEyEPWCYnIOFWysgXUOvSg==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@distilled.cloud/iceberg@1.0.0-rc.18':
     resolution: {integrity: sha512-XjUJ/vEOylhIZbAm85O9H6YqXKWGfVROT5BE9BGA/RXvo0bLK2+sUcjC6BoN77a99lImJkrXJuvbHBhNebObEA==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
-  '@effect/opentelemetry@4.1.2':
-    resolution: {integrity: sha512-FhxQy4I0nKLX0Dh9l6rZ5S/fRAMt7dKdekHtoxgx7N/XBtPP/IFhcJnGPenceuuSeVbcLp1vpZa43wC05qdxng==}
+  '@effect/opentelemetry@4.1.5':
+    resolution: {integrity: sha512-npD5KIkqIh754Rofno3qdKvbAyaNVfl777fTZkdgtUlZE6VycwCng+49aWK+sGpo4B4wKDSQLsbjAoDf/13Wew==}
     engines: {node: '>=22.19.0'}
     peerDependencies:
       '@opentelemetry/api': '>=1.9.0 <2.0.0'
@@ -883,7 +883,7 @@ packages:
       '@opentelemetry/sdk-trace-node': '>=2.0.0 <3.0.0'
       '@opentelemetry/sdk-trace-web': '>=2.0.0 <3.0.0'
       '@opentelemetry/semantic-conventions': '>=1.33.0 <2.0.0'
-      effect: 4.1.2
+      effect: 4.1.5
     peerDependenciesMeta:
       '@opentelemetry/api':
         optional: true
@@ -902,61 +902,61 @@ packages:
       '@opentelemetry/sdk-trace-web':
         optional: true
 
-  '@effect/platform-node-shared@4.1.2':
-    resolution: {integrity: sha512-wSwl9A/G1hcVvF8nLI+YfB3EyOIDvWS6+lsTZBkmgDnPBL7m8YWZF+1HD+mdEsb52SUGfukip46Q3gRwSdk3QA==}
+  '@effect/platform-node-shared@4.1.5':
+    resolution: {integrity: sha512-JzlrYe4uKaBFTWihBRXo2pDjkUVB39kQpKdGfXdbp7Co5sKT8hbcjOmdB5pg/WOYESdGTddd3fxD4lwlZELbZQ==}
     engines: {node: '>=22.19.0'}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
-  '@effect/platform-node@4.1.2':
-    resolution: {integrity: sha512-ye0UjxORdd5Qu3paZ1LljgGOALWHt7muP9VTpjUSCNfcesiB/Hm7wPJIvZeu4gnwpTe5BtEnO1VHngWqjJp8mA==}
+  '@effect/platform-node@4.1.5':
+    resolution: {integrity: sha512-tFnRvxF9EKc3oU17sDHj1JeLP+TL/IkaOEl3IUk2EjgMS0x7AWs0ioUXjdNKLb3Z1LdjVfMf/DxsNh9PW5FFAg==}
     engines: {node: '>=22.19.0'}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       redis: '>=5.1.0 <7.0.0'
 
   '@effect/sql-d1@4.1.4':
     resolution: {integrity: sha512-x7UtDPNCgcAz6lvGbrf0INHxztV0qV8i4qleqPb31ADeilz7MnGYJ5Qhprqod+ySBUNPdsvXNRE9vm36TznIdg==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
-  '@effect/tsgo-darwin-arm64@0.64.1':
-    resolution: {integrity: sha512-/T4E1JzKiCaXL1dNyNDB2K+7Wot35Pt+FttrrQ5XV5W2p6A62FhCzpZvPaNZ/NQvT/Ldw6wNMtprivpE0mKTdQ==}
+  '@effect/tsgo-darwin-arm64@0.73.2':
+    resolution: {integrity: sha512-+6xuv33cSp44tNWc9erzLKmS7qRB/QdPJYUCJrEY+4lfRhFdAsCvRDw6uw2aqzePuZDHfM3gDqfYEl5g/mWBfQ==}
     cpu: [arm64]
     os: [darwin]
 
-  '@effect/tsgo-darwin-x64@0.64.1':
-    resolution: {integrity: sha512-K6GwVVbudxEG3vuf3x4ooAsL667T/uf5XQXNkKzlxNDqHv6i/h8eRIArRk0flV1Z1H97YQmHTryoeffjKAgbAQ==}
+  '@effect/tsgo-darwin-x64@0.73.2':
+    resolution: {integrity: sha512-Oqwft3rP05CWImD1GGPuWB3esJrxz7iSOXGpfku1KIK1eElW0aE9E1vdpgiFJ3lykJruyOOZ4UB+E4US5K/alA==}
     cpu: [x64]
     os: [darwin]
 
-  '@effect/tsgo-linux-arm64@0.64.1':
-    resolution: {integrity: sha512-sVmjJzl1aqliVkHkBhgZgQMrxI2eaD2IFYXaz4FWVgOOENqE92xBEJrpnwhsKVEwxMZCDoEG6yEHZQJ2m4vGmw==}
+  '@effect/tsgo-linux-arm64@0.73.2':
+    resolution: {integrity: sha512-/EuCPqoqZb+kkcdCnypwd/stmSvAO5k/NKS+sQJSv6F2wXQAIgWB4VSNmftt1b/s7dBB0QysLFohscV8OxzCgA==}
     cpu: [arm64]
     os: [linux]
 
-  '@effect/tsgo-linux-arm@0.64.1':
-    resolution: {integrity: sha512-DKpAPkIEm1avo0II4wdpkzQXyHYRDYoVbTBs/2KROnKtT20ZVJHLJUAlfEbHZjFi5nhg1s8UgeUNPsR1kamNJA==}
+  '@effect/tsgo-linux-arm@0.73.2':
+    resolution: {integrity: sha512-JdAFBCv0Q0UyMe4Et7xTjqLoM6jDvci6qsaqWwGCRR8ZZhvc+j9kLw7dN3GJnYlHMr0HUGWnSCxUBISODpX/kA==}
     cpu: [arm]
     os: [linux]
 
-  '@effect/tsgo-linux-x64@0.64.1':
-    resolution: {integrity: sha512-mHSsYFFgEsOiGo2E/G0T0kKmphb88oJZnJMx8IaO0/wVIdEAUKIMN30o13cC9gXJpeCrNox6ZilrzFOA+VllFg==}
+  '@effect/tsgo-linux-x64@0.73.2':
+    resolution: {integrity: sha512-1g5UQ8nwpqJVwrXvHLstEc7N7jRuqZm2axukryerGV6/e6hD2vc70tHdb1ZVg8zIUR40TWem1MCoFNNIXKOlZg==}
     cpu: [x64]
     os: [linux]
 
-  '@effect/tsgo-win32-arm64@0.64.1':
-    resolution: {integrity: sha512-Av6WBMiQIu1jyKgU8Cy8fLOnKBvJAk94Hb2vpFzgwRNItFgC9cFUhvUGa+QVZRx60xwx0cWBs4HpEDXpFuqNyA==}
+  '@effect/tsgo-win32-arm64@0.73.2':
+    resolution: {integrity: sha512-J4kyLNk0Fi6WwIWQV6omCu1OkHcNNY6KMcs5K2AqUV8l+QUMEetko5NkcmEi1Keedh6bNRqOGwvB9dg+Duvypw==}
     cpu: [arm64]
     os: [win32]
 
-  '@effect/tsgo-win32-x64@0.64.1':
-    resolution: {integrity: sha512-fDozqyqyT15T/RcGswIqr8yVOMDhAAnsDZ8o0UP2OAaXzIf5lO6SvUbS+A5A0KE0ddCCBYWPF/8Rw1N9y7sVNQ==}
+  '@effect/tsgo-win32-x64@0.73.2':
+    resolution: {integrity: sha512-N5V9GaTZseqGN38+XhGypLpweX2XiM2DO1V9DUppp26deZIJe0j3QRiRCSUAQoJrR0Lji/k5wo3jki6P38sCPA==}
     cpu: [x64]
     os: [win32]
 
-  '@effect/tsgo@0.64.1':
-    resolution: {integrity: sha512-MtBw+qO1IJdZklc80rBXIMgAZBmNTH1NeEHgJu5LiCFocDR0X56cFYUyKItYY7+D9ROzNIS3bD/sL1Tku6mMpQ==}
+  '@effect/tsgo@0.73.2':
+    resolution: {integrity: sha512-eM5ayjlp0fD2l+aL+4O/y9d1LwF1m5in5EdNkOYwLFcXI3kcee8CWP4wr2xTc4L/+KJmS/uaYUGWdOj4G46BDA==}
     hasBin: true
 
   '@emnapi/runtime@1.11.3':
@@ -2561,38 +2561,38 @@ packages:
   '@systemfsoftware/effect-cell-types@12.1.4':
     resolution: {integrity: sha512-/wV3smgMgEfrxsbCJhBWVKtmQJk3U2eQYcaSXGI5LcTmpVuf0Foi2GKMI+8tmevbLTTB9/xJWrT0mFXmekHYtQ==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@systemfsoftware/effect-gherkin-spec@8.1.4':
     resolution: {integrity: sha512-AH+JJSu05V98tmWjitF6I71MyuoqGxmxWWvlU72JALhecGOgE7MtegsBanVJtVZ+nNSRsurAwm4lfA2FlC/org==}
     peerDependencies:
       '@systemfsoftware/vitest': ^4.1.1
-      effect: 4.1.2
+      effect: 4.1.5
       vitest: ^5.1.0
 
   '@systemfsoftware/effect-sim-kernel@2.0.5':
     resolution: {integrity: sha512-D1b8rfLlypbd5lSRe7JwXgRoOSzq0Rlgb9nWwMDKZCbcAApfBSlKMLQ8RT1ZPDvC7FKVDNn6Pp10xQAGY11qiw==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@systemfsoftware/effect-spec-runtime@1.1.5':
     resolution: {integrity: sha512-02VZuOj9PiLwPdgL5vpVKDCq9+FLqAK6y8/NvngOvS4zC1II9HVc0axxFIO4ytwmlqMYLktophLXU+FpYqfmAw==}
     peerDependencies:
       '@systemfsoftware/vitest': ^4.1.1
-      effect: 4.1.2
+      effect: 4.1.5
       vitest: ^5.1.0
 
   '@systemfsoftware/oxlint-config-cell-architecture@6.0.1':
     resolution: {integrity: sha512-/rT3RexJw+lClqqUKyaUEmvF1FIRtQ9xSCyYAnTm2MQr9AFiV9fduivqvMKiuAxnvEE+H/Z5rDUb30FIcl1HfQ==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       oxlint: ~1.89.0
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-config-dmmf@4.0.1':
     resolution: {integrity: sha512-s8goETaOMBLIha9VFeu3sdjrm+6Jx0wKimyO9ORQBJXPgovvOhP7ydM6mTYBsWBsOVxNicMz7AXVL1YFtukShg==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       oxlint: ~1.89.0
       oxlint-tsgolint: 7.0.2005
       typescript: '>=5.0.0'
@@ -2600,7 +2600,7 @@ packages:
   '@systemfsoftware/oxlint-config-recommended@6.0.1':
     resolution: {integrity: sha512-Lms3KF+jO0BjFbry9QRxVcoMmBT/1AJrzDg5Rid15RFuP/3P8Kc+WSAWTp60KryLaWOxv5urkMB+Sz4yXpgIYA==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       oxlint: ~1.89.0
       oxlint-tsgolint: 7.0.2005
       typescript: '>=5.0.0'
@@ -2614,32 +2614,32 @@ packages:
   '@systemfsoftware/oxlint-plugin-cell-architecture@7.0.1':
     resolution: {integrity: sha512-330XtWlg06ax3s5bUIGY9ULYOPvQ2g8XtC+rinqp3/qn8qRjxuoeU7rix08e1x4Pf/XqxnUVM8ABaWp0BK5pNw==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-plugin-dmmf-workflow@7.1.4':
     resolution: {integrity: sha512-cfXsklE3ZC3ENm6Iy80toGJndSd6YL+BsdgHW65eNcY7JdZiS1JH5pZdctNDiaXrPGJ8foXT7Dxgnlvh6H5bQA==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-plugin-effect-platform@2.1.4':
     resolution: {integrity: sha512-Fi0rTQ1qSX7AdBRCK8QAAQ4I3aYBO2vRqdXzhAGcFdTYN0WLaEDxAX8Tli4go9dFUGcnP71KnyrtL3Sg2Y6Vwg==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-plugin-effect-schema@6.0.5':
     resolution: {integrity: sha512-nsg2/wLAhMXMq5zts3D9fL81KpzGkz7T3bojAsS4TEtZbP+AW+9i162V2knRx0IJNOPfJp6air91anyLT01XpQ==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: '>=5.0.0'
 
   '@systemfsoftware/oxlint-plugin-test-discipline@6.1.3':
     resolution: {integrity: sha512-CaZWhw8yaZmpTC6C/Qm0U4UmmvI357Elhe1JOZJloqc8O/9kM9NSLCG1cmvFhWn9Xkt9R6kIfzLpurg/sAFbMg==}
     hasBin: true
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: '>=5.0.0'
 
   '@systemfsoftware/stryker-framework-interface@0.0.2':
@@ -2683,7 +2683,7 @@ packages:
     resolution: {integrity: sha512-iH5R5QMc73JWQgN/ygRma4tGxwHBQwvT2gMHj0F37VmZ+WqFmAZNLMMzWCiOiyLPnyZEjUf794kTYp+wdgaoPA==}
     engines: {node: '>=24.13.1'}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@systemfsoftware/tsconfig@2.1.0':
     resolution: {integrity: sha512-9ZtHTV75lB8cTPAZPdbL1bMuspk3sTG3xgAbrz9QKDuWNXFFszhK38vFSlBVsVis+VQQ0ixLvwXZznAjNs7hLQ==}
@@ -2691,7 +2691,7 @@ packages:
   '@systemfsoftware/vitest@4.1.1':
     resolution: {integrity: sha512-+9fWXSmrTP7kEG7+6aEewoSFbuEiZ6iwdvOUmlH8M2uI6iuvKBwnstGpEMWb33ccBqM62QEk5I7JR4YWtJV+uA==}
     peerDependencies:
-      effect: 4.1.2
+      effect: 4.1.5
       vitest: ^5.1.0
 
   '@systemfsoftware/xstate@6.0.0-beta.65':
@@ -3058,8 +3058,8 @@ packages:
     peerDependencies:
       '@alchemy.run/frontend-frameworks': 2.0.0-beta.85
       '@effect/platform-bun': ^4.1.0
-      '@effect/platform-node': 4.1.2
-      effect: 4.1.2
+      '@effect/platform-node': 4.1.5
+      effect: 4.1.5
       vite: ^7.0.0 || ^8.0.0
       ws: ^8.21.0
     peerDependenciesMeta:
@@ -3240,8 +3240,8 @@ packages:
     resolution: {integrity: sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw==}
     engines: {node: '>=0.3.1'}
 
-  effect@4.1.2:
-    resolution: {integrity: sha512-d3Oah1WyKxFLFh19yWheS5IXIVaITzxZ71JkE1rkUozq/6EcJSU5nPk5bF2QrSygZ3SQoiNQB8TsxFriyMeMaQ==}
+  effect@4.1.5:
+    resolution: {integrity: sha512-xyR20KhQI0vg2gD8ILUSQRTTESEYJ0JKdP+QD8J37xbwPTqXRxFM/l0+vUVD9fuSvoYruoTqyt33C4FZv1s4TQ==}
 
   electron-to-chromium@1.5.478:
     resolution: {integrity: sha512-pftG+ma5Lm8O6/p45bhYT6StBN5ziQymaRzmCZwFl8DwWHKPPD93FdOmP1aqftcepolQYvrcyTLa17kE8Yf+jg==}
@@ -4182,8 +4182,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.22.2:
-    resolution: {integrity: sha512-/rEZ2ejown2N5gxVTHUu9bVVC7ttu0/Tgzf5hbTOixR3Fs7mbbXgn2DbdbcKgJOmpQMtrIUWivtYuVMnp/W/yA==}
+  ws@8.23.0:
+    resolution: {integrity: sha512-wCkmX8QMOrKjgO8HW2WyDbTSGeqkocxgDzS9iR79rEAexty6/2qzilx3Ag8Tqf9ykop3irLKle0MtVn5qjVnoQ==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -4249,20 +4249,20 @@ packages:
 
 snapshots:
 
-  '@alchemy.run/acme@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)':
+  '@alchemy.run/acme@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/acme': 1.0.0-rc.18(effect@4.1.2)
-      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2)
-      effect: 4.1.2
+      '@distilled.cloud/acme': 1.0.0-rc.18(effect@4.1.5)
+      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0)
+      effect: 4.1.5
 
-  '@alchemy.run/cloudflare-runtime@2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(effect@4.1.2)(rolldown@1.2.13)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))':
+  '@alchemy.run/cloudflare-runtime@2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.5))(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(effect@4.1.5)(rolldown@1.2.13)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
       '@alchemy.run/node-utils': 2.0.0-beta.85
       '@cloudflare/unenv-preset': 2.16.2(unenv@2.0.0-rc.24)(workerd@1.20261005.1)
-      '@distilled.cloud/cloudflare': 1.0.0-rc.18(effect@4.1.2)
+      '@distilled.cloud/cloudflare': 1.0.0-rc.18(effect@4.1.5)
       '@puppeteer/browsers': 3.2.6(yauzl@3.4.0)
       capnp-es: 0.0.16(typescript@7.0.2)
-      effect: 4.1.2
+      effect: 4.1.5
       magic-string: 0.30.21
       mime: 4.1.2
       sharp: 0.35.5(@types/node@24.19.1)
@@ -4270,7 +4270,7 @@ snapshots:
       workerd: 1.20261005.1
       yauzl: 3.4.0
     optionalDependencies:
-      '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))
+      '@effect/platform-node': 4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))
       rolldown: 1.2.13
       vite: 8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)
     transitivePeerDependencies:
@@ -4278,26 +4278,26 @@ snapshots:
       - proxy-agent
       - typescript
 
-  '@alchemy.run/cloudflare@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))':
+  '@alchemy.run/cloudflare@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
-      '@alchemy.run/acme': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)
-      '@alchemy.run/cloudflare-runtime': 2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.2))(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(effect@4.1.2)(rolldown@1.2.13)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
-      '@alchemy.run/docker': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)
-      '@alchemy.run/sql': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)
-      '@distilled.cloud/aws': 1.0.0-rc.18(effect@4.1.2)
-      '@distilled.cloud/aws4signer': 1.0.0-rc.18(effect@4.1.2)
-      '@distilled.cloud/cloudflare': 1.0.0-rc.18(effect@4.1.2)
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      '@distilled.cloud/iceberg': 1.0.0-rc.18(effect@4.1.2)
-      '@effect/sql-d1': 4.1.4(effect@4.1.2)
-      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2)
-      effect: 4.1.2
+      '@alchemy.run/acme': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)
+      '@alchemy.run/cloudflare-runtime': 2.0.0-beta.85(@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.5))(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/node@24.19.1)(effect@4.1.5)(rolldown@1.2.13)(typescript@7.0.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
+      '@alchemy.run/docker': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)
+      '@alchemy.run/sql': 2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)
+      '@distilled.cloud/aws': 1.0.0-rc.18(effect@4.1.5)
+      '@distilled.cloud/aws4signer': 1.0.0-rc.18(effect@4.1.5)
+      '@distilled.cloud/cloudflare': 1.0.0-rc.18(effect@4.1.5)
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      '@distilled.cloud/iceberg': 1.0.0-rc.18(effect@4.1.5)
+      '@effect/sql-d1': 4.1.4(effect@4.1.5)
+      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0)
+      effect: 4.1.5
       pathe: 2.0.3
       picomatch: 4.0.7
       rolldown: 1.2.13
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))
+      '@effect/platform-node': 4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))
       vite: 8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)
     transitivePeerDependencies:
       - '@effect/sql-libsql'
@@ -4309,18 +4309,18 @@ snapshots:
       - proxy-agent
       - typescript
 
-  '@alchemy.run/docker@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)':
+  '@alchemy.run/docker@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)':
     dependencies:
-      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2)
-      effect: 4.1.2
+      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0)
+      effect: 4.1.5
       rolldown: 1.2.13
 
-  '@alchemy.run/github@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)':
+  '@alchemy.run/github@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      '@distilled.cloud/github': 1.0.0-rc.18(effect@4.1.2)
-      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2)
-      effect: 4.1.2
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      '@distilled.cloud/github': 1.0.0-rc.18(effect@4.1.5)
+      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0)
+      effect: 4.1.5
       libsodium-wrappers: 0.8.4
 
   '@alchemy.run/node-utils@2.0.0-beta.85':
@@ -4332,10 +4332,10 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  '@alchemy.run/sql@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2))(effect@4.1.2)':
+  '@alchemy.run/sql@2.0.0-beta.85(alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0))(effect@4.1.5)':
     dependencies:
-      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2)
-      effect: 4.1.2
+      alchemy: 2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0)
+      effect: 4.1.5
 
   '@babel/code-frame@7.29.7':
     dependencies:
@@ -4680,45 +4680,45 @@ snapshots:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
 
-  '@distilled.cloud/acme@1.0.0-rc.18(effect@4.1.2)':
+  '@distilled.cloud/acme@1.0.0-rc.18(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      effect: 4.1.2
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      effect: 4.1.5
 
-  '@distilled.cloud/aws4signer@1.0.0-rc.18(effect@4.1.2)':
+  '@distilled.cloud/aws4signer@1.0.0-rc.18(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      effect: 4.1.2
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      effect: 4.1.5
 
-  '@distilled.cloud/aws@1.0.0-rc.18(effect@4.1.2)':
+  '@distilled.cloud/aws@1.0.0-rc.18(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/aws4signer': 1.0.0-rc.18(effect@4.1.2)
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      effect: 4.1.2
+      '@distilled.cloud/aws4signer': 1.0.0-rc.18(effect@4.1.5)
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      effect: 4.1.5
 
-  '@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.2)':
+  '@distilled.cloud/cloudflare@1.0.0-rc.18(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      effect: 4.1.2
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      effect: 4.1.5
 
-  '@distilled.cloud/core@1.0.0-rc.18(effect@4.1.2)':
+  '@distilled.cloud/core@1.0.0-rc.18(effect@4.1.5)':
     dependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
-  '@distilled.cloud/github@1.0.0-rc.18(effect@4.1.2)':
+  '@distilled.cloud/github@1.0.0-rc.18(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      effect: 4.1.2
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      effect: 4.1.5
 
-  '@distilled.cloud/iceberg@1.0.0-rc.18(effect@4.1.2)':
+  '@distilled.cloud/iceberg@1.0.0-rc.18(effect@4.1.5)':
     dependencies:
-      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.2)
-      effect: 4.1.2
+      '@distilled.cloud/core': 1.0.0-rc.18(effect@4.1.5)
+      effect: 4.1.5
 
-  '@effect/opentelemetry@4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)':
+  '@effect/opentelemetry@4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)':
     dependencies:
       '@opentelemetry/semantic-conventions': 1.45.0
-      effect: 4.1.2
+      effect: 4.1.5
     optionalDependencies:
       '@opentelemetry/api': 1.10.0
       '@opentelemetry/api-logs': 0.222.0
@@ -4728,20 +4728,20 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-node': 2.11.0(@opentelemetry/api@1.9.1)
 
-  '@effect/opentelemetry@4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)':
+  '@effect/opentelemetry@4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)':
     dependencies:
       '@opentelemetry/semantic-conventions': 1.45.0
-      effect: 4.1.2
+      effect: 4.1.5
     optionalDependencies:
       '@opentelemetry/api': 1.10.0
       '@opentelemetry/api-logs': 0.222.0
       '@opentelemetry/sdk-metrics': 2.12.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
 
-  '@effect/opentelemetry@4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)':
+  '@effect/opentelemetry@4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)':
     dependencies:
       '@opentelemetry/semantic-conventions': 1.45.0
-      effect: 4.1.2
+      effect: 4.1.5
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/api-logs': 0.222.0
@@ -4751,70 +4751,70 @@ snapshots:
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-node': 2.11.0(@opentelemetry/api@1.9.1)
 
-  '@effect/platform-node-shared@4.1.2(effect@4.1.2)':
+  '@effect/platform-node-shared@4.1.5(effect@4.1.5)':
     dependencies:
       '@types/ws': 8.18.2
-      effect: 4.1.2
-      ws: 8.22.2
+      effect: 4.1.5
+      ws: 8.23.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))':
+  '@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))':
     dependencies:
-      '@effect/platform-node-shared': 4.1.2(effect@4.1.2)
-      effect: 4.1.2
+      '@effect/platform-node-shared': 4.1.5(effect@4.1.5)
+      effect: 4.1.5
       redis: 6.3.1(@opentelemetry/api@1.10.0)
       undici: 8.12.4
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))':
+  '@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))':
     dependencies:
-      '@effect/platform-node-shared': 4.1.2(effect@4.1.2)
-      effect: 4.1.2
+      '@effect/platform-node-shared': 4.1.5(effect@4.1.5)
+      effect: 4.1.5
       redis: 6.3.1(@opentelemetry/api@1.9.1)
       undici: 8.12.4
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/sql-d1@4.1.4(effect@4.1.2)':
+  '@effect/sql-d1@4.1.4(effect@4.1.5)':
     dependencies:
       '@cloudflare/workers-types': 5.20261108.1
-      effect: 4.1.2
+      effect: 4.1.5
 
-  '@effect/tsgo-darwin-arm64@0.64.1':
+  '@effect/tsgo-darwin-arm64@0.73.2':
     optional: true
 
-  '@effect/tsgo-darwin-x64@0.64.1':
+  '@effect/tsgo-darwin-x64@0.73.2':
     optional: true
 
-  '@effect/tsgo-linux-arm64@0.64.1':
+  '@effect/tsgo-linux-arm64@0.73.2':
     optional: true
 
-  '@effect/tsgo-linux-arm@0.64.1':
+  '@effect/tsgo-linux-arm@0.73.2':
     optional: true
 
-  '@effect/tsgo-linux-x64@0.64.1':
+  '@effect/tsgo-linux-x64@0.73.2':
     optional: true
 
-  '@effect/tsgo-win32-arm64@0.64.1':
+  '@effect/tsgo-win32-arm64@0.73.2':
     optional: true
 
-  '@effect/tsgo-win32-x64@0.64.1':
+  '@effect/tsgo-win32-x64@0.73.2':
     optional: true
 
-  '@effect/tsgo@0.64.1':
+  '@effect/tsgo@0.73.2':
     optionalDependencies:
-      '@effect/tsgo-darwin-arm64': 0.64.1
-      '@effect/tsgo-darwin-x64': 0.64.1
-      '@effect/tsgo-linux-arm': 0.64.1
-      '@effect/tsgo-linux-arm64': 0.64.1
-      '@effect/tsgo-linux-x64': 0.64.1
-      '@effect/tsgo-win32-arm64': 0.64.1
-      '@effect/tsgo-win32-x64': 0.64.1
+      '@effect/tsgo-darwin-arm64': 0.73.2
+      '@effect/tsgo-darwin-x64': 0.73.2
+      '@effect/tsgo-linux-arm': 0.73.2
+      '@effect/tsgo-linux-arm64': 0.73.2
+      '@effect/tsgo-linux-x64': 0.73.2
+      '@effect/tsgo-win32-arm64': 0.73.2
+      '@effect/tsgo-win32-x64': 0.73.2
 
   '@emnapi/runtime@1.11.3':
     dependencies:
@@ -6211,57 +6211,57 @@ snapshots:
 
   '@speed-highlight/core@1.2.24': {}
 
-  '@systemfsoftware/effect-cell-types@12.1.4(effect@4.1.2)':
+  '@systemfsoftware/effect-cell-types@12.1.4(effect@4.1.5)':
     dependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
-  '@systemfsoftware/effect-gherkin-spec@8.1.4(@systemfsoftware/vitest@4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/effect-gherkin-spec@8.1.4(@systemfsoftware/vitest@4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.5)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@systemfsoftware/effect-spec-runtime': 1.1.5(@systemfsoftware/vitest@4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
-      '@systemfsoftware/vitest': 4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
-      effect: 4.1.2
+      '@systemfsoftware/effect-spec-runtime': 1.1.5(@systemfsoftware/vitest@4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.5)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+      '@systemfsoftware/vitest': 4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+      effect: 4.1.5
       vitest: 5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
 
-  '@systemfsoftware/effect-sim-kernel@2.0.5(effect@4.1.2)':
+  '@systemfsoftware/effect-sim-kernel@2.0.5(effect@4.1.5)':
     dependencies:
-      effect: 4.1.2
+      effect: 4.1.5
 
-  '@systemfsoftware/effect-spec-runtime@1.1.5(@systemfsoftware/vitest@4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/effect-spec-runtime@1.1.5(@systemfsoftware/vitest@4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))))(effect@4.1.5)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@systemfsoftware/effect-sim-kernel': 2.0.5(effect@4.1.2)
-      '@systemfsoftware/vitest': 4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
-      effect: 4.1.2
+      '@systemfsoftware/effect-sim-kernel': 2.0.5(effect@4.1.5)
+      '@systemfsoftware/vitest': 4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))
+      effect: 4.1.5
       vitest: 5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
 
-  '@systemfsoftware/oxlint-config-cell-architecture@6.0.1(effect@4.1.2)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-config-cell-architecture@6.0.1(effect@4.1.5)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)':
     dependencies:
       '@systemfsoftware/oxlint-config-rule-authoring': 3.0.1(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
-      '@systemfsoftware/oxlint-plugin-cell-architecture': 7.0.1(effect@4.1.2)(typescript@7.0.2)
-      effect: 4.1.2
+      '@systemfsoftware/oxlint-plugin-cell-architecture': 7.0.1(effect@4.1.5)(typescript@7.0.2)
+      effect: 4.1.5
       oxlint: 1.90.0(oxlint-tsgolint@7.0.2005)
       typescript: 7.0.2
 
-  '@systemfsoftware/oxlint-config-dmmf@4.0.1(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-config-dmmf@4.0.1(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)':
     dependencies:
       '@systemfsoftware/oxlint-config-rule-authoring': 3.0.1(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
-      '@systemfsoftware/oxlint-plugin-dmmf-workflow': 7.1.4(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)
-      '@systemfsoftware/oxlint-plugin-effect-schema': 6.0.5(effect@4.1.2)(typescript@7.0.2)
-      effect: 4.1.2
+      '@systemfsoftware/oxlint-plugin-dmmf-workflow': 7.1.4(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)
+      '@systemfsoftware/oxlint-plugin-effect-schema': 6.0.5(effect@4.1.5)(typescript@7.0.2)
+      effect: 4.1.5
       oxlint: 1.90.0(oxlint-tsgolint@7.0.2005)
       oxlint-tsgolint: 7.0.2005
       typescript: 7.0.2
     transitivePeerDependencies:
       - vite-plus
 
-  '@systemfsoftware/oxlint-config-recommended@6.0.1(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-config-recommended@6.0.1(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)':
     dependencies:
-      '@effect/tsgo': 0.64.1
-      '@systemfsoftware/oxlint-config-cell-architecture': 6.0.1(effect@4.1.2)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
-      '@systemfsoftware/oxlint-config-dmmf': 4.0.1(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
+      '@effect/tsgo': 0.73.2
+      '@systemfsoftware/oxlint-config-cell-architecture': 6.0.1(effect@4.1.5)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
+      '@systemfsoftware/oxlint-config-dmmf': 4.0.1(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
       '@systemfsoftware/oxlint-config-rule-authoring': 3.0.1(oxlint@1.90.0(oxlint-tsgolint@7.0.2005))(typescript@7.0.2)
-      '@systemfsoftware/oxlint-plugin-effect-platform': 2.1.4(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)
-      '@systemfsoftware/oxlint-plugin-test-discipline': 6.1.3(effect@4.1.2)(typescript@7.0.2)
-      effect: 4.1.2
+      '@systemfsoftware/oxlint-plugin-effect-platform': 2.1.4(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)
+      '@systemfsoftware/oxlint-plugin-test-discipline': 6.1.3(effect@4.1.5)(typescript@7.0.2)
+      effect: 4.1.5
       oxlint: 1.90.0(oxlint-tsgolint@7.0.2005)
       oxlint-tsgolint: 7.0.2005
       typescript: 7.0.2
@@ -6273,36 +6273,36 @@ snapshots:
       oxlint: 1.90.0(oxlint-tsgolint@7.0.2005)
       typescript: 7.0.2
 
-  '@systemfsoftware/oxlint-plugin-cell-architecture@7.0.1(effect@4.1.2)(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-plugin-cell-architecture@7.0.1(effect@4.1.5)(typescript@7.0.2)':
     dependencies:
       '@oxc-project/types': 0.155.0
       '@oxlint/plugins': 1.89.0
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: 7.0.2
 
-  '@systemfsoftware/oxlint-plugin-dmmf-workflow@7.1.4(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-plugin-dmmf-workflow@7.1.4(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)':
     dependencies:
       '@oxc-project/types': 0.155.0
       '@oxlint/plugins': 1.89.0
-      effect: 4.1.2
+      effect: 4.1.5
       oxlint: 1.89.0(oxlint-tsgolint@7.0.2005)
       typescript: 7.0.2
     transitivePeerDependencies:
       - oxlint-tsgolint
       - vite-plus
 
-  '@systemfsoftware/oxlint-plugin-effect-platform@2.1.4(effect@4.1.2)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-plugin-effect-platform@2.1.4(effect@4.1.5)(oxlint-tsgolint@7.0.2005)(typescript@7.0.2)':
     dependencies:
       '@oxc-project/types': 0.155.0
       '@oxlint/plugins': 1.89.0
-      effect: 4.1.2
+      effect: 4.1.5
       oxlint: 1.89.0(oxlint-tsgolint@7.0.2005)
       typescript: 7.0.2
     transitivePeerDependencies:
       - oxlint-tsgolint
       - vite-plus
 
-  '@systemfsoftware/oxlint-plugin-effect-schema@6.0.5(effect@4.1.2)(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-plugin-effect-schema@6.0.5(effect@4.1.5)(typescript@7.0.2)':
     dependencies:
       '@oxc-project/types': 0.155.0
       '@oxlint/plugins': 1.89.0
@@ -6310,14 +6310,14 @@ snapshots:
       '@pnpm/workspace.projects-reader': 1101.1.6(@pnpm/logger@1100.0.0)
       '@pnpm/workspace.root-finder': 1100.1.6
       '@pnpm/workspace.workspace-manifest-reader': 1100.3.2
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: 7.0.2
 
-  '@systemfsoftware/oxlint-plugin-test-discipline@6.1.3(effect@4.1.2)(typescript@7.0.2)':
+  '@systemfsoftware/oxlint-plugin-test-discipline@6.1.3(effect@4.1.5)(typescript@7.0.2)':
     dependencies:
       '@oxc-project/types': 0.155.0
       '@oxlint/plugins': 1.89.0
-      effect: 4.1.2
+      effect: 4.1.5
       oxc-parser: 0.155.0
       typescript: 7.0.2
 
@@ -6346,18 +6346,18 @@ snapshots:
   '@systemfsoftware/stryker-js-cli-contract@2.0.0':
     dependencies:
       '@systemfsoftware/stryker-js-plugin-interface': 18.0.0
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@systemfsoftware/stryker-js-instrumenter@15.0.0(rolldown@1.2.13)':
     dependencies:
       '@eslint-community/regexpp': 4.12.3
       '@noble/hashes': 2.4.0
       '@oxc-project/types': 0.150.0
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
       '@systemfsoftware/stryker-framework-interface': 0.0.2
       '@systemfsoftware/stryker-js-cli-contract': 2.0.0
       '@systemfsoftware/stryker-js-plugin-interface': 18.0.0
-      effect: 4.1.2
+      effect: 4.1.5
       oxc-parser: 0.150.0
       oxc-walker: 1.1.1(@oxc-project/types@0.150.0)(oxc-parser@0.150.0)(rolldown@1.2.13)
     transitivePeerDependencies:
@@ -6366,29 +6366,29 @@ snapshots:
   '@systemfsoftware/stryker-js-plugin-interface@18.0.0':
     dependencies:
       '@systemfsoftware/stryker-ignorer-interface': 0.1.3
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@systemfsoftware/stryker-js-plugin-runtime@8.0.1':
     dependencies:
       '@opentelemetry/api': 1.10.0
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
       '@systemfsoftware/stryker-js-cli-contract': 2.0.0
       '@systemfsoftware/stryker-js-plugin-interface': 18.0.0
-      effect: 4.1.2
+      effect: 4.1.5
 
   '@systemfsoftware/stryker-js-typescript-checker@9.0.1(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(rolldown@1.2.13)(supports-color@10.2.2)':
     dependencies:
-      '@effect/opentelemetry': 4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)
+      '@effect/opentelemetry': 4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)
       '@noble/hashes': 2.4.0
       '@opentelemetry/exporter-trace-otlp-http': 0.222.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-node': 0.222.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
       '@systemfsoftware/stryker-js-cli-contract': 2.0.0
       '@systemfsoftware/stryker-js-instrumenter': 15.0.0(rolldown@1.2.13)
       '@systemfsoftware/stryker-js-plugin-interface': 18.0.0
       '@systemfsoftware/stryker-js-plugin-runtime': 8.0.1
-      effect: 4.1.2
+      effect: 4.1.5
       typescript: 7.0.2
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -6402,13 +6402,13 @@ snapshots:
       - rolldown
       - supports-color
 
-  '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@effect/opentelemetry': 4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)
+      '@effect/opentelemetry': 4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)
       '@opentelemetry/exporter-trace-otlp-http': 0.222.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-node': 0.222.0(@opentelemetry/api@1.10.0)(supports-color@10.2.2)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
       vitest: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -6422,13 +6422,13 @@ snapshots:
       - effect
       - supports-color
 
-  '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@effect/opentelemetry': 4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)
+      '@effect/opentelemetry': 4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)
       '@opentelemetry/exporter-trace-otlp-http': 0.222.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-node': 0.222.0(@opentelemetry/api@1.10.0)(supports-color@10.2.2)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
       vitest: 5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -6442,13 +6442,13 @@ snapshots:
       - effect
       - supports-color
 
-  '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@effect/opentelemetry': 4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)
+      '@effect/opentelemetry': 4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.9.1)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)
       '@opentelemetry/exporter-trace-otlp-http': 0.222.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-node': 0.222.0(@opentelemetry/api@1.9.1)(supports-color@10.2.2)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.9.1)
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
       vitest: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -6462,20 +6462,20 @@ snapshots:
       - effect
       - supports-color
 
-  '@systemfsoftware/stryker-js@22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/stryker-js@22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@effect/opentelemetry': 4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)
-      '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))
-      '@effect/platform-node-shared': 4.1.2(effect@4.1.2)
+      '@effect/opentelemetry': 4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)
+      '@effect/platform-node': 4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))
+      '@effect/platform-node-shared': 4.1.5(effect@4.1.5)
       '@noble/hashes': 2.4.0
       '@opentelemetry/api': 1.10.0
       '@opentelemetry/exporter-metrics-otlp-http': 0.222.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/exporter-trace-otlp-http': 0.222.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-metrics': 2.12.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
-      '@systemfsoftware/stryker-js-vm-runner': '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))'
-      effect: 4.1.2
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
+      '@systemfsoftware/stryker-js-vm-runner': '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/resources@2.12.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-logs@0.222.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-node@2.11.0(@opentelemetry/api@1.9.1))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))'
+      effect: 4.1.5
       yaml: 2.9.1
     transitivePeerDependencies:
       - '@opentelemetry/api-logs'
@@ -6490,20 +6490,20 @@ snapshots:
       - utf-8-validate
       - vitest
 
-  '@systemfsoftware/stryker-js@22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/stryker-js@22.0.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@effect/opentelemetry': 4.1.2(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)
-      '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))
-      '@effect/platform-node-shared': 4.1.2(effect@4.1.2)
+      '@effect/opentelemetry': 4.1.5(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)
+      '@effect/platform-node': 4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))
+      '@effect/platform-node-shared': 4.1.5(effect@4.1.5)
       '@noble/hashes': 2.4.0
       '@opentelemetry/api': 1.10.0
       '@opentelemetry/exporter-metrics-otlp-http': 0.222.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/exporter-trace-otlp-http': 0.222.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-metrics': 2.12.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-trace-base': 2.12.0(@opentelemetry/api@1.10.0)
-      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.2)
-      '@systemfsoftware/stryker-js-vm-runner': '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.2)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))'
-      effect: 4.1.2
+      '@systemfsoftware/effect-cell-types': 12.1.4(effect@4.1.5)
+      '@systemfsoftware/stryker-js-vm-runner': '@systemfsoftware/stryker-js-vitest-runner@10.1.0(@opentelemetry/api-logs@0.222.0)(@opentelemetry/api@1.10.0)(@opentelemetry/sdk-metrics@2.12.0(@opentelemetry/api@1.10.0))(@opentelemetry/semantic-conventions@1.45.0)(effect@4.1.5)(supports-color@10.2.2)(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))'
+      effect: 4.1.5
       yaml: 2.9.1
     transitivePeerDependencies:
       - '@opentelemetry/api-logs'
@@ -6520,20 +6520,20 @@ snapshots:
 
   '@systemfsoftware/tsconfig@2.1.0': {}
 
-  '@systemfsoftware/vitest@4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/vitest@4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))(vitest@5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.10.0))
-      effect: 4.1.2
+      '@effect/platform-node': 4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.10.0))
+      effect: 4.1.5
       vitest: 5.0.3(@opentelemetry/api@1.10.0)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - bufferutil
       - redis
       - utf-8-validate
 
-  '@systemfsoftware/vitest@4.1.1(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
+  '@systemfsoftware/vitest@4.1.1(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))(vitest@5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)))':
     dependencies:
-      '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))
-      effect: 4.1.2
+      '@effect/platform-node': 4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))
+      effect: 4.1.5
       vitest: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.1)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - bufferutil
@@ -6903,12 +6903,12 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  alchemy@2.0.0-beta.85(@effect/platform-node@4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.2)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.22.2):
+  alchemy@2.0.0-beta.85(@effect/platform-node@4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1)))(@types/react@19.3.0)(effect@4.1.5)(vite@8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1))(ws@8.23.0):
     dependencies:
       '@alchemy.run/node-utils': 2.0.0-beta.85
       '@alchemy.run/sigil': 0.1.0-alpha.1(@types/react@19.3.0)
       capnweb: 0.12.0
-      effect: 4.1.2
+      effect: 4.1.5
       fflate: 0.8.3
       pathe: 2.0.3
       picomatch: 4.0.7
@@ -6916,9 +6916,9 @@ snapshots:
       tinyglobby: 0.2.17
       yaml: 2.9.1
     optionalDependencies:
-      '@effect/platform-node': 4.1.2(effect@4.1.2)(redis@6.3.1(@opentelemetry/api@1.9.1))
+      '@effect/platform-node': 4.1.5(effect@4.1.5)(redis@6.3.1(@opentelemetry/api@1.9.1))
       vite: 8.3.2(@types/node@24.19.1)(esbuild@0.28.1)(jiti@2.7.0)(yaml@2.9.1)
-      ws: 8.22.2
+      ws: 8.23.0
     transitivePeerDependencies:
       - '@types/react'
       - react-devtools-core
@@ -7061,7 +7061,7 @@ snapshots:
 
   diff@8.0.4: {}
 
-  effect@4.1.2: {}
+  effect@4.1.5: {}
 
   electron-to-chromium@1.5.478: {}
 
@@ -7979,7 +7979,7 @@ snapshots:
 
   ws@8.21.0: {}
 
-  ws@8.22.2: {}
+  ws@8.23.0: {}
 
   xmlbuilder2@4.0.3:
     dependencies:
