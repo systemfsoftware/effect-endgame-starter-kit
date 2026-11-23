@@ -30,7 +30,7 @@ catalog:
   "@types/react": 19.3.0
   "@types/react-dom": 19.3.0
   "@vitejs/plugin-react": 6.1.2
-  alchemy: 2.0.0-beta.85
+  alchemy: 2.0.0-beta.87
   astro: 7.4.5
   babel-plugin-react-compiler: 1.0.0
   effect: 4.1.2
