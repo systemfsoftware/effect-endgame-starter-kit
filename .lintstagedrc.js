@@ -38,7 +38,7 @@ export default {
     }
     for (const [packageRoot, files] of byPackage) {
       commands.push(
-        `cd ${packageRoot} && oxlint --fix ${TOLERATE_A_ZERO_FILE_SET} --type-aware --type-check --quiet ${
+        `cd ${packageRoot} && effect-tsgo oxlint --fix ${TOLERATE_A_ZERO_FILE_SET} --type-aware --type-check --quiet ${
           files.join(' ')
         }`,
       )

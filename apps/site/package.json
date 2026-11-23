@@ -45,7 +45,7 @@
     "dev": "pnpm --filter @endgame/web build && alchemy dev",
     "generate": "tsr generate",
     "preview": "vite preview",
-    "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; oxlint . --format=${f:-default}",
+    "lint": "f=${OXLINT_FORMAT:-${AGENT:+agent}}; effect-tsgo oxlint . --format=${f:-default}",
     "mutation": "stryker run",
     "test": "vitest run",
     "typecheck": "tsr generate && tsc --noEmit --incremental && tsc -p tsconfig.node.json --noEmit"

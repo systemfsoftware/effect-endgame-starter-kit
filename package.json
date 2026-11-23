@@ -23,7 +23,7 @@
   "private": true,
   "scripts": {
     "attw": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} attw",
-    "bootstrap": "sandbox -- pnpm install && sandbox -- pnpm rebuild --config.ignore-scripts=false && sandbox -- pnpm run prepare",
+    "bootstrap": "sandbox -- pnpm install && sandbox -- pnpm rebuild --config.ignore-scripts=false",
     "build": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} build",
     "dev": "sandbox --publish 1337:1337 -- pnpm --filter @endgame/site dev",
     "journeys": "sandbox --listen 1337 --pass-env PLAYWRIGHT_BROWSERS_PATH -- ./bin/journeys",
@@ -40,7 +40,6 @@
     "lint": "sandbox --allow-host plugins.dprint.dev -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} lint lint:suppressions",
     "lint:suppressions": "git ls-files -z -- '*.ts' '*.tsx' '*.mts' '*.cts' '*.js' '*.jsx' '*.mjs' '*.cjs' ':(exclude)repos' | xargs -0 -r ./bin/sandboxed -- no-inline-suppression",
     "precommit": "pnpm exec lint-staged --no-revert --config .lintstagedrc.js",
-    "prepare": "effect-tsgo patch --oxlint --no-typescript --skip-missing",
     "test": "sandbox --allow-host jsr.io -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} test test:scripts && pnpm test:sandbox",
     "test:sandbox": "nix run .#sandbox-proofs && deno test --config=scripts/deno.json --allow-run=git,sandbox,sh --allow-env --allow-read --allow-write sandbox-proofs/",
     "typecheck": "sandbox -- turbo --concurrency=${TURBO_CONCURRENCY:-50%} --continue typecheck typecheck:node",
