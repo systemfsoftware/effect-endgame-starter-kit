@@ -6,6 +6,10 @@
   // alternative. Drop this when @systemfsoftware/tsconfig carries the same opt-in.
   "extends": "@systemfsoftware/tsconfig/bundler/dom",
   "compilerOptions": {
-    "plugins": [{ "name": "@effect/language-service", "allowedUnstableApis": ["effect/http", "effect/rpc"] }]
+    "plugins": [{
+      "name": "@effect/language-service",
+      "allowedUnstableApis": ["effect/http", "effect/rpc"],
+      "allowedExperimentalApis": ["effect/ai"]
+    }]
   }
 }

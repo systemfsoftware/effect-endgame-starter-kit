@@ -1,6 +1,9 @@
 {
   "author": "TODO <todo@example.com>",
   "description": "The one Worker: the starter's TanStack Start site",
+  "exports": {
+    "./todo": "./src/features/todo/index.ts"
+  },
   "dependencies": {
     "@systemfsoftware/effect-cell-types": "^12.1.4",
     "@systemfsoftware/xstate": "^6.0.0-beta.65",
